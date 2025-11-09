@@ -25,37 +25,39 @@ app.register(fastifyJwt, {
   sign: { expiresIn: '1d' },
 })
 
-app.register(fastifySwagger, {
-  openapi: {
-    info: {
-      title: 'My albums',
-      description: 'API for music review',
-      version: '1.0.0',
-    },
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
+if (env.PROFILE === 'development') {
+  app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'My albums',
+        description: 'API for music review',
+        version: '1.0.0',
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
         },
       },
+      servers: [],
+      tags: [
+        {
+          name: tags.healthCheck,
+        },
+      ],
     },
-    servers: [],
-    tags: [
-      {
-        name: tags.healthCheck,
-      },
-    ],
-  },
-  transform: jsonSchemaTransform,
-})
+    transform: jsonSchemaTransform,
+  })
 
-app.register(fastifySwaggerUI, {
-  routePrefix: '/docs',
-  uiConfig: {
-    deepLinking: false,
-  },
-})
+  app.register(fastifySwaggerUI, {
+    routePrefix: '/docs',
+    uiConfig: {
+      deepLinking: false,
+    },
+  })
+}
 
 app.register(routes, { prefix: '/api' })

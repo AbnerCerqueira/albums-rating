@@ -7,7 +7,7 @@ async function main() {
   await startServer()
 
   const port = env.PORT
-  app.listen({ port })
+  app.listen({ port, host: '0.0.0.0' })
   logger.info('server is running', { port })
 }
 
