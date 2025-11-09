@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "style": {
+        "useConsistentMemberAccessibility": {
+          "level": "warn",
+          "options": {
+            "accessibility": "explicit"
+          }
+        },
+        "noParameterProperties": "off",
+        "useConsistentTypeDefinitions": "off",
+        "noNamespace": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded",
+      "quoteStyle": "single"
+    }
+  },
+  "extends": ["ultracite/core"]
+}
