@@ -1,8 +1,8 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import { userRoutes } from '../user/routes'
 import { HttpStatus } from './http-status'
 import { tags } from './tags'
+import { userRoutes } from './user/routes'
 
 export const routes: FastifyPluginCallbackZod = (app) => {
   app.get(

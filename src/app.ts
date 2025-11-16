@@ -10,8 +10,8 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 import { env } from './infra/config/envs'
-import { routes } from './presentation/http/routes'
-import { tags } from './presentation/http/tags'
+import { routes } from './presentation/routes'
+import { tags } from './presentation/tags'
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
