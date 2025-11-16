@@ -1,0 +1,14 @@
+import { AuthUseUseCase } from '@/contexts/user/application/use-cases/auth-user-use-case'
+import { CreateUserUseCase } from '@/contexts/user/application/use-cases/create-user-use-case'
+import { bcryptPasswordEncoder } from '@/infra/lib/hash/bcrypt'
+import { mongooseUserRepository } from './repositories'
+
+export const createUserUseCase = new CreateUserUseCase(
+  mongooseUserRepository,
+  bcryptPasswordEncoder
+)
+
+export const authUserUseCase = new AuthUseUseCase(
+  mongooseUserRepository,
+  bcryptPasswordEncoder
+)

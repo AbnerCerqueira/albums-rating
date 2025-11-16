@@ -8,7 +8,8 @@
     "start": "node --env-file=.env.production dist/main.js",
     "dev": "tsx watch --env-file=.env.development src/main.ts",
     "lint": "ultracite fix",
-    "test": "vitest run"
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration"
   },
   "author": "Abner Bispo Cerqueira",
   "license": "ISC",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.4",
     "@types/node": "^24.10.0",
+    "mongodb-memory-server": "^10.3.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
@@ -28,6 +30,7 @@
     "@fastify/jwt": "^10.0.0",
     "@fastify/swagger": "^9.6.0",
     "@fastify/swagger-ui": "^5.2.3",
+    "bcryptjs": "^3.0.3",
     "fastify": "^5.6.2",
     "fastify-type-provider-zod": "^6.1.0",
     "mongodb": "^7.0.0",

@@ -1,3 +1,5 @@
+import z from 'zod'
+
 export const HttpStatus = {
   OK: 200,
   CREATED: 201,
@@ -5,5 +7,8 @@ export const HttpStatus = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500,
 } as const
+
+export const errorResponse = z.object({ message: z.string() })
