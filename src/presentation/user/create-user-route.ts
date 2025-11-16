@@ -2,8 +2,8 @@ import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
 import { DomainError } from '@/contexts/common/domain-error'
 import { createUserUseCase } from '@/infra/!ioc/user/use-cases'
-import { errorResponse, HttpStatus } from '../http/http-status'
-import { tags } from '../http/tags'
+import { errorResponse, HttpStatus } from '../http-status'
+import { tags } from '../tags'
 import { userResponse } from './schemas'
 
 export const createUserRoute: FastifyPluginCallbackZod = (app) => {
