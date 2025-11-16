@@ -1,5 +1,6 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
+import { userRoutes } from '../user/routes'
 import { HttpStatus } from './http-status'
 import { tags } from './tags'
 
@@ -16,4 +17,5 @@ export const routes: FastifyPluginCallbackZod = (app) => {
       message: 'OK',
     })
   )
+  app.register(userRoutes, { prefix: '/user' })
 }

@@ -16,6 +16,14 @@ export default defineConfig({
           include: ['test/unit/**/*.test.ts'],
         },
       },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          include: ['test/integration/**/*.test.ts'],
+          environment: 'test/database.ts',
+        },
+      },
     ],
   },
 })

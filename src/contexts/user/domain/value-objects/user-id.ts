@@ -30,6 +30,10 @@ export class UserId {
     return ok(new UserId(username))
   }
 
+  public static unsafeCreate(username: string): UserId {
+    return new UserId(username)
+  }
+
   public get username(): string {
     return this._username
   }

@@ -47,6 +47,9 @@ if (env.PROFILE === 'development') {
         {
           name: tags.healthCheck,
         },
+        {
+          name: tags.user,
+        },
       ],
     },
     transform: jsonSchemaTransform,
