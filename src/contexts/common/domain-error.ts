@@ -3,6 +3,6 @@ abstract class ErrorAsValue {
 }
 
 export namespace DomainError {
-  export class Conflict extends ErrorAsValue {}
   export class InvalidArgument extends ErrorAsValue {}
+  export class Conflict extends ErrorAsValue {}
 }

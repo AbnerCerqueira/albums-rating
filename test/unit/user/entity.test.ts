@@ -1,21 +1,27 @@
+import { Email } from '@/contexts/user/domain/value-objects/email'
 import { Password } from '@/contexts/user/domain/value-objects/password'
-import { UserId } from '@/contexts/user/domain/value-objects/user-id'
+import { Username } from '@/contexts/user/domain/value-objects/username'
 
 describe('User Entity', () => {
-  describe('UserId', () => {
-    it('should create a UserId with valid username', () => {
-      const validUsername = 'validUser'
-      expect(UserId.create(validUsername).isOk).toBeTruthy()
+  describe('Email', () => {
+    it('should create a Email', () => {
+      const validEmail = 'email@email.com'
+      expect(Email.create(validEmail).isOk).toBeTruthy()
     })
+    it('should return error for invalid email', () => {
+      const invalidEmail = 'invalid-email'
+      expect(Email.create(invalidEmail).isOk).toBeFalsy()
+    })
+  })
 
+  describe('Username', () => {
     it('should return error for username shorter than 3 characters', () => {
       const shortUsername = 'ab'
-      expect(UserId.create(shortUsername).isOk).toBeFalsy()
+      expect(Username.create(shortUsername).isOk).toBeFalsy()
     })
-
     it('should return error for username longer than 100 characters', () => {
       const longUsername = 'a'.repeat(101)
-      expect(UserId.create(longUsername).isOk).toBeFalsy()
+      expect(Username.create(longUsername).isOk).toBeFalsy()
     })
   })
 

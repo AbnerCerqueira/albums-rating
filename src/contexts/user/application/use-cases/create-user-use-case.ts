@@ -1,12 +1,19 @@
-import { DomainError } from '@/contexts/common/domain-error'
-import { ApplicationException } from '@/contexts/common/exceptions'
-import { err, ok, type Result } from '@/contexts/common/result'
+import type { DomainError } from '@/contexts/common/domain-error'
+import { err, ok, type Result, unwrap } from '@/contexts/common/result'
+import type { DomainService } from '../../domain/services/is-unique-user'
 import { User } from '../../domain/user'
 import type { UserRepository } from '../../domain/user-repository'
+import { Email } from '../../domain/value-objects/email'
 import { Password } from '../../domain/value-objects/password'
-import { UserId } from '../../domain/value-objects/user-id'
-import type { PasswordEncoder } from '../password-encoder'
+import { Username } from '../../domain/value-objects/username'
+import type { ApplicationService } from '../password-encoder'
 import { type UserDTO, UserDTOMapper } from '../user-dto'
+
+export type CreateUserUseCaseInput = {
+  email: string
+  username: string
+  password: string
+}
 
 export type CreateUserUseCaseResponse = Promise<
   Result<UserDTO, DomainError.InvalidArgument | DomainError.Conflict>
@@ -14,50 +21,39 @@ export type CreateUserUseCaseResponse = Promise<
 
 export class CreateUserUseCase {
   public constructor(
-    private readonly repository: UserRepository,
-    private readonly passwordEncoder: PasswordEncoder
+    private readonly isUniqueUserService: DomainService.IsUniqueUser,
+    private readonly passwordEncoder: ApplicationService.PasswordEncoder,
+    private readonly repository: UserRepository
   ) {}
 
-  public async execute(data: {
-    username: string
-    password: string
-  }): CreateUserUseCaseResponse {
-    const maybeUserId = UserId.create(data.username)
-
-    if (!maybeUserId.isOk) {
-      return err(maybeUserId.error)
+  public async execute(
+    data: CreateUserUseCaseInput
+  ): CreateUserUseCaseResponse {
+    const [email, emailErr] = unwrap(Email.create(data.email))
+    if (emailErr) {
+      return err(emailErr)
     }
 
-    const userId = maybeUserId.value
-    const existingUser = await this.repository.findById(userId)
-    if (existingUser) {
-      return err(new DomainError.Conflict('Usuário já existe'))
+    const isUniqueUser = await this.isUniqueUserService.execute(email)
+    if (!isUniqueUser.isOk) {
+      return err(isUniqueUser.error)
     }
 
-    const maybePassword = Password.create(data.password)
-    if (!maybePassword.isOk) {
-      return err(maybePassword.error)
+    const [username, usernameErr] = unwrap(Username.create(data.username))
+    if (usernameErr) {
+      return err(usernameErr)
     }
 
-    const plainPassword = maybePassword.value.value
-    const hashedPassword = await this.passwordEncoder.encode(plainPassword)
-    await this.repository.create(
-      new User(userId, Password.unsafeCreate(hashedPassword))
+    const [plainPassword, passwordErr] = unwrap(Password.create(data.password))
+    if (passwordErr) {
+      return err(passwordErr)
+    }
+
+    const hash = await this.passwordEncoder.encode(plainPassword.value)
+
+    const newUser = await this.repository.create(
+      new User({ email, username, password: Password.unsafeCreate(hash) })
     )
-
-    const newUser = await this.repository.findById(userId)
-    if (!newUser) {
-      throw new ApplicationException.UnexpectedError({
-        options: {
-          origin: {
-            component: this.constructor.name,
-            operation: this.execute.name,
-            file: __dirname,
-          },
-          metadata: { message: 'user not found after create', maybeUserId },
-        },
-      })
-    }
 
     return ok(UserDTOMapper.toDTO(newUser))
   }
