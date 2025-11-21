@@ -1,7 +1,7 @@
 import type { User } from './user'
-import type { UserId } from './value-objects/user-id'
+import type { Email } from './value-objects/email'
 
 export interface UserRepository {
-  create(user: User): Promise<void>
-  findById(id: UserId): Promise<User | null>
+  create(user: User): Promise<User>
+  findByEmail(email: Email): Promise<User | null>
 }

@@ -2,11 +2,7 @@ import { DomainError } from '@/contexts/common/domain-error'
 import { err, ok, type Result } from '@/contexts/common/result'
 
 export class Password {
-  private readonly _value: string
-
-  private constructor(value: string) {
-    this._value = value
-  }
+  private constructor(public readonly value: string) {}
 
   public static create(
     value: string
@@ -32,9 +28,5 @@ export class Password {
 
   public static unsafeCreate(value: string): Password {
     return new Password(value)
-  }
-
-  public get value(): string {
-    return this._value
   }
 }

@@ -1,16 +1,12 @@
 import { DomainError } from '@/contexts/common/domain-error'
 import { err, ok, type Result } from '@/contexts/common/result'
 
-export class UserId {
-  private readonly _username: string
-
-  private constructor(username: string) {
-    this._username = username
-  }
+export class Username {
+  private constructor(public readonly value: string) {}
 
   public static create(
     username: string
-  ): Result<UserId, DomainError.InvalidArgument> {
+  ): Result<Username, DomainError.InvalidArgument> {
     if (username.length < 3) {
       return err(
         new DomainError.InvalidArgument(
@@ -27,14 +23,10 @@ export class UserId {
       )
     }
 
-    return ok(new UserId(username))
+    return ok(new Username(username))
   }
 
-  public static unsafeCreate(username: string): UserId {
-    return new UserId(username)
-  }
-
-  public get username(): string {
-    return this._username
+  public static unsafeCreate(username: string): Username {
+    return new Username(username)
   }
 }

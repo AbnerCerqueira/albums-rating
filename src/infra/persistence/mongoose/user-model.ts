@@ -1,16 +1,27 @@
 import { model, Schema } from 'mongoose'
 
 export type UserData = {
+  publicId: string
+  email: string
   username: string
   password: string
 }
 
 const userSchema = new Schema<UserData>(
   {
-    username: {
+    publicId: {
       type: String,
       required: true,
       unique: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    username: {
+      type: String,
+      required: true,
     },
     password: {
       type: String,

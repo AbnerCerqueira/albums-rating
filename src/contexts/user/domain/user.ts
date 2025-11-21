@@ -1,21 +1,21 @@
+import { PublicId } from '@/contexts/common/public-id'
+import type { Email } from './value-objects/email'
 import type { Password } from './value-objects/password'
-import type { UserId } from './value-objects/user-id'
+import type { Username } from './value-objects/username'
+
+export type UserProps = {
+  username: Username
+  email: Email
+  password: Password
+}
 
 export class User {
-  private readonly _id: UserId
+  public id: PublicId
 
-  private readonly _password: Password
+  public props: UserProps
 
-  public constructor(id: UserId, password: Password) {
-    this._id = id
-    this._password = password
-  }
-
-  public get id(): UserId {
-    return this._id
-  }
-
-  public get password(): Password {
-    return this._password
+  public constructor(props: UserProps, id?: PublicId) {
+    this.id = id ?? new PublicId()
+    this.props = props
   }
 }

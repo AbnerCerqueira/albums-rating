@@ -1,19 +1,34 @@
-import { User } from '@/contexts/user/domain/user'
-import { Password } from '@/contexts/user/domain/value-objects/password'
-import { UserId } from '@/contexts/user/domain/value-objects/user-id'
+import { PublicId } from '@/contexts/common/public-id'
+import { asyncTryCatch } from '@/contexts/common/try-catch-wrapper'
 import { mongooseUserRepository } from '@/infra/!ioc/user/repositories'
+import { UserFactory } from '../../factories/user-factory'
 
 describe('UserRepository', () => {
-  it('should create and find user by id', async () => {
-    const user = new User(
-      UserId.unsafeCreate('validUsername'),
-      Password.unsafeCreate('validPassword')
-    )
+  it('unique constraints', async () => {
+    const [user] = UserFactory.generate(1, new PublicId())
 
     await mongooseUserRepository.create(user)
+    const { exception } = await asyncTryCatch(
+      mongooseUserRepository.create(user)
+    )
 
-    const newUser = await mongooseUserRepository.findById(user.id)
+    expect(exception).not.toBeNull()
+  })
+
+  it('create', async () => {
+    const [user] = UserFactory.generate()
+
+    const newUser = await mongooseUserRepository.create(user)
 
     expect(newUser).toMatchObject(user)
+  })
+
+  it('findByEmail', async () => {
+    const [user] = UserFactory.generate()
+
+    await mongooseUserRepository.create(user)
+    const foundUser = await mongooseUserRepository.findByEmail(user.props.email)
+
+    expect(foundUser).toMatchObject(user)
   })
 })
