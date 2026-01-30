@@ -46,7 +46,7 @@ export class CreateAlbumsUseCase {
 
     const album = new Album(albumId, albumProps)
 
-    const isUniqueAlbum = await this.isUniqueAlbumsService.execute(album)
+    const isUniqueAlbum = await this.isUniqueAlbumsService.execute(album.id)
     if (!isUniqueAlbum.isOk) {
       return err(isUniqueAlbum.error)
     }

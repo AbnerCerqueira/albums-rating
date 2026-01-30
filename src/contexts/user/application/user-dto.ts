@@ -7,10 +7,12 @@ export type UserDTO = {
 }
 
 function toDTO(user: User): UserDTO {
+  const { id, publicId } = user
+  const { email, username } = id
   return {
-    publicId: user.id.toString(),
-    email: user.props.email.value,
-    username: user.props.username.value,
+    email: email.value,
+    username: username.value,
+    publicId: publicId.toString(),
   }
 }
 

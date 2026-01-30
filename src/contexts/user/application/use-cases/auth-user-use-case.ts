@@ -40,7 +40,6 @@ export class AuthUseUseCase {
       foundUser.props.password.value
     )
 
-    console.log(isPasswordCorrect)
     if (!isPasswordCorrect) {
       return err(invalidCredentialsError)
     }

@@ -1,27 +1,26 @@
 import { model, Schema } from 'mongoose'
 
-export type UserData = {
-  publicId: string
+export type UserDataDomainId = {
   email: string
   username: string
+}
+
+export type UserData = {
+  domainId: UserDataDomainId
+  publicId: string
   password: string
 }
 
 const userSchema = new Schema<UserData>(
   {
+    domainId: {
+      email: String,
+      username: String,
+    },
     publicId: {
       type: String,
       required: true,
       unique: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    username: {
-      type: String,
-      required: true,
     },
     password: {
       type: String,
@@ -40,6 +39,11 @@ const userSchema = new Schema<UserData>(
       },
     },
   }
+)
+
+userSchema.index(
+  { 'domainId.email': 1, 'domainId.username': 1, publicId: 1 },
+  { unique: true }
 )
 
 export const UserModel = model('users', userSchema)

@@ -4,7 +4,7 @@ import { mongooseUserRepository } from '@/infra/!ioc/user/repositories'
 import { UserFactory } from '../../factories/user-factory'
 
 describe('UserRepository', () => {
-  it('unique constraints', async () => {
+  it('verify unique fields', async () => {
     const [user] = UserFactory.generate(1, new PublicId())
 
     await mongooseUserRepository.create(user)
@@ -15,7 +15,7 @@ describe('UserRepository', () => {
     expect(exception).not.toBeNull()
   })
 
-  it('create', async () => {
+  it('should create', async () => {
     const [user] = UserFactory.generate()
 
     const newUser = await mongooseUserRepository.create(user)
@@ -23,11 +23,11 @@ describe('UserRepository', () => {
     expect(newUser).toMatchObject(user)
   })
 
-  it('findByEmail', async () => {
+  it('should find by id', async () => {
     const [user] = UserFactory.generate()
 
     await mongooseUserRepository.create(user)
-    const foundUser = await mongooseUserRepository.findByEmail(user.props.email)
+    const foundUser = await mongooseUserRepository.findById(user.id)
 
     expect(foundUser).toMatchObject(user)
   })

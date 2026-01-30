@@ -1,30 +1,38 @@
-import type { Types } from 'mongoose'
 import { PublicId } from '@/contexts/common/public-id'
 import { User } from '@/contexts/user/domain/user'
 import { Email } from '@/contexts/user/domain/value-objects/email'
 import { Password } from '@/contexts/user/domain/value-objects/password'
+import { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import { Username } from '@/contexts/user/domain/value-objects/username'
 import type { UserData } from './user-model'
 
 function toPersistence(user: User): UserData {
   const { id, props } = user
-  const { email, username, password } = props
+  const { email, username } = id
+  const { password } = props
   return {
-    publicId: id.toString(),
-    email: email.value,
-    username: username.value,
+    domainId: {
+      email: email.value,
+      username: username.value,
+    },
+    publicId: user.publicId.toString(),
     password: password.value,
   }
 }
 
-function toDomain(userData: UserData & { _id: Types.ObjectId }): User {
-  const username = Username.unsafeCreate(userData.username)
-  const password = Password.unsafeCreate(userData.password)
-  const email = Email.unsafeCreate(userData.email)
+function toDomain(data: UserData): User {
+  const { domainId, password, publicId } = data
+  const { email, username } = domainId
+
+  const id = new UserId(
+    Email.unsafeCreate(email),
+    Username.unsafeCreate(username)
+  )
 
   return new User(
-    { username, email, password },
-    new PublicId(userData.publicId)
+    id,
+    { password: Password.unsafeCreate(password) },
+    new PublicId(publicId)
   )
 }
 

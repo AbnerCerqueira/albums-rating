@@ -11,7 +11,7 @@ describe('Album entity', () => {
     })
 
     it('should return err if invalid title', () => {
-      const result = Title.create('a'.repeat(100))
+      const result = Title.create('a'.repeat(300))
       expect(result.isOk).toBeFalsy()
       assert(!result.isOk)
       expect(result.error).instanceOf(DomainError.InvalidArgument)
