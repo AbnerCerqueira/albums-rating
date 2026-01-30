@@ -1,5 +1,6 @@
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { Pagination } from '@/contexts/!common/pagination'
+import type { PublicId } from '@/contexts/!common/public-id'
 import type { Album } from '@/contexts/catalog/domain/album'
 import type { AlbumRepository } from '@/contexts/catalog/domain/album-repository'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
@@ -32,6 +33,14 @@ export class MongooseAlbumRepository implements AlbumRepository {
     const docs = await query.exec()
 
     return docs.map((doc) => AlbumMapper.toDomain(doc))
+  }
+
+  public async findByPublicId(publicId: PublicId): Promise<Album | null> {
+    const doc = await this.model
+      .findOne({ publicId: publicId.toString() })
+      .lean()
+
+    return doc ? AlbumMapper.toDomain(doc) : null
   }
 
   private getFlattenObjOfDomainId(id: AlbumId) {
