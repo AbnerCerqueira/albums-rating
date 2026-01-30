@@ -4,7 +4,7 @@ import { zodCreateUserUseCaseRequest } from '@/contexts/user/application/use-cas
 import { createUserUseCase } from '@/contexts/user/infra/!ioc/use-cases'
 import { errorResponse, HttpStatus } from '@/infra/http/http-status'
 import { tags } from '@/infra/http/tags'
-import { userResponse } from './schemas'
+import { zodUserDTO } from '../../application/user-dto'
 
 export const createUserRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
@@ -14,7 +14,7 @@ export const createUserRoute: FastifyPluginCallbackZod = (app) => {
         tags: [tags.user],
         body: zodCreateUserUseCaseRequest,
         response: {
-          [HttpStatus.CREATED]: userResponse,
+          [HttpStatus.CREATED]: zodUserDTO,
           [HttpStatus.CONFLICT]: errorResponse,
           [HttpStatus.BAD_REQUEST]: errorResponse,
         },

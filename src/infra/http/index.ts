@@ -1,6 +1,6 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import { userRoutes } from '@/contexts/user/infra/http/routes'
+import { userRoutes } from '@/contexts/user/infra/http'
 import { HttpStatus } from './http-status'
 import { tags } from './tags'
 

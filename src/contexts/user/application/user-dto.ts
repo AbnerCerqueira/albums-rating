@@ -1,10 +1,13 @@
+import z from 'zod'
 import type { User } from '../domain/user'
 
-export type UserDTO = {
-  publicId: string
-  email: string
-  username: string
-}
+export const zodUserDTO = z.object({
+  email: z.email(),
+  username: z.string(),
+  publicId: z.uuidv7(),
+})
+
+export type UserDTO = z.infer<typeof zodUserDTO>
 
 function toDTO(user: User): UserDTO {
   const { id, publicId } = user

@@ -1,14 +1,9 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import type { AuthUserUseCaseInput } from '@/contexts/user/application/use-cases/auth-user-use-case'
 import { authUserUseCase } from '@/contexts/user/infra/!ioc/use-cases'
 import { errorResponse, HttpStatus } from '@/infra/http/http-status'
 import { tags } from '@/infra/http/tags'
-
-const body = z.object({
-  email: z.email(),
-  password: z.string(),
-}) satisfies z.ZodType<AuthUserUseCaseInput>
+import { zodAuthUserUseCaseRequest } from '../../application/use-cases/auth-user-use-case'
 
 export const authUserRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
@@ -16,7 +11,7 @@ export const authUserRoute: FastifyPluginCallbackZod = (app) => {
     {
       schema: {
         tags: [tags.user],
-        body,
+        body: zodAuthUserUseCaseRequest,
         response: {
           [HttpStatus.OK]: z.object({ token: z.string() }),
           [HttpStatus.BAD_REQUEST]: errorResponse,
