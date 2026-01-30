@@ -1,5 +1,5 @@
-import { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result } from '@/contexts/common/result'
+import { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result } from '@/contexts/!common/result'
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 

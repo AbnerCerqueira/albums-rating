@@ -1,4 +1,4 @@
-import { PublicId } from '@/contexts/common/public-id'
+import { PublicId } from '@/contexts/!common/public-id'
 import type { Password } from './value-objects/password'
 import type { UserId } from './value-objects/user-id'
 

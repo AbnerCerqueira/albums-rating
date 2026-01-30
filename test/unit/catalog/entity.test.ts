@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
+import { DomainError } from '@/contexts/!common/domain-error'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
-import { DomainError } from '@/contexts/common/domain-error'
 
 describe('Album entity', () => {
   describe('Title', () => {

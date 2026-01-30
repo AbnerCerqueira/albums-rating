@@ -1,7 +1,7 @@
+import { PublicId } from '@/contexts/!common/public-id'
 import { Album, type AlbumProps } from '@/contexts/catalog/domain/album'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
-import { PublicId } from '@/contexts/common/public-id'
 import type { AlbumData } from './album-model'
 
 function toPersistence(album: Album): AlbumData {

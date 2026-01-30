@@ -1,6 +1,6 @@
 import z from 'zod'
-import type { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/common/result'
+import type { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
 import type { DomainService } from '../../domain/services/is-unique-user'
 import { User } from '../../domain/user'
 import type { UserRepository } from '../../domain/user-repository'

@@ -1,9 +1,9 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
 import type { AuthUserUseCaseInput } from '@/contexts/user/application/use-cases/auth-user-use-case'
-import { authUserUseCase } from '@/infra/!ioc/user/use-cases'
-import { errorResponse, HttpStatus } from '../http-status'
-import { tags } from '../tags'
+import { authUserUseCase } from '@/contexts/user/infra/!ioc/use-cases'
+import { errorResponse, HttpStatus } from '@/infra/http/http-status'
+import { tags } from '@/infra/http/tags'
 
 const body = z.object({
   email: z.email(),

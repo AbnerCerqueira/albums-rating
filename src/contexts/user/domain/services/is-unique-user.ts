@@ -1,5 +1,5 @@
-import { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result } from '@/contexts/common/result'
+import { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result } from '@/contexts/!common/result'
 import type { UserRepository } from '../user-repository'
 import type { UserId } from '../value-objects/user-id'
 

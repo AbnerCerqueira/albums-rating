@@ -1,5 +1,5 @@
-import { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/common/result'
+import { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
 import type { UserRepository } from '../../domain/user-repository'
 import { Email } from '../../domain/value-objects/email'
 import type { ApplicationService } from '../password-encoder'

@@ -1,5 +1,5 @@
-import { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result } from '@/contexts/common/result'
+import { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result } from '@/contexts/!common/result'
 import type { AlbumRepository } from '../album-repository'
 import type { AlbumId } from '../value-objects/album-id'
 

@@ -1,6 +1,6 @@
 import z from 'zod'
-import type { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/common/result'
+import type { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
 import { Album, type AlbumProps, FORMATS } from '../domain/album'
 import type { AlbumRepository } from '../domain/album-repository'
 import type { DomainService } from '../domain/services/is-unique-album'

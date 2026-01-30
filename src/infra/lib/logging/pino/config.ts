@@ -1,5 +1,5 @@
 import pino from 'pino'
-import { BaseException } from '@/contexts/common/exceptions'
+import { BaseException } from '@/contexts/!common/exceptions'
 
 export const serializers = {
   err: (err: Error) => {

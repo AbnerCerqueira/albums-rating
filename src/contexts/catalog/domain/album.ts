@@ -1,4 +1,4 @@
-import { PublicId } from '@/contexts/common/public-id'
+import { PublicId } from '@/contexts/!common/public-id'
 import type { AlbumId } from './value-objects/album-id'
 
 export const FORMATS = ['LP', 'EP', 'Single', 'Compilation', 'Live'] as const

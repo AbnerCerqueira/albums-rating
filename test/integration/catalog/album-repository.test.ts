@@ -1,4 +1,4 @@
-import { albumRepository } from '@/infra/!ioc/catalog/repositories'
+import { albumRepository } from '@/contexts/catalog/infra/!ioc/repositories'
 import { AlbumFactory } from '../../factories/album-factory'
 
 describe('AlbumRepository', () => {
