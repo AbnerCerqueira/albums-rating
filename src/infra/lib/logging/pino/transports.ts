@@ -2,16 +2,17 @@ import pino from 'pino'
 import type { LogContext, LogSeverity, Transport } from '../logger'
 import { pinoBaseConfig } from './config'
 
-export class ConsoleTransport implements Transport {
-  private readonly pino = pino({
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-      },
+export const pinoPrettyConfig = {
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
     },
-    ...pinoBaseConfig,
-  })
+  },
+}
+
+export class ConsoleTransport implements Transport {
+  private readonly pino = pino({ ...pinoPrettyConfig, ...pinoBaseConfig })
 
   public log(
     severity: LogSeverity,
