@@ -1,4 +1,5 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
+import { albumSearchRoute } from './album-search-route'
 import { createAlbumRoute } from './create-album-route'
 import { genreSearchRoute } from './genre-search-routes'
 import { getAlbumByPublicIdRoute } from './get-album-by-public-id'
@@ -8,5 +9,6 @@ export const catalogRoutes: FastifyPluginCallbackZod = (app) => {
   app.register(createAlbumRoute)
   app.register(getAlbumsRoute)
   app.register(getAlbumByPublicIdRoute)
+  app.register(albumSearchRoute)
   app.register(genreSearchRoute)
 }

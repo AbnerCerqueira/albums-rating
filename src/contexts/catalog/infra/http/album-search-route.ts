@@ -1,26 +1,43 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
 import { unwrap } from '@/contexts/!common/result'
-import { defaultSearchStringOptions } from '@/contexts/!common/search-options'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
+import { AlbumDTOMapper, zodAlbumDTO } from '../../application/album-dto'
+import { FORMATS, type Format } from '../../domain/album'
 import { albumRepository } from '../!ioc/repositories'
 
 const okResponse = z.object({
-  genres: z.string().array(),
+  albums: zodAlbumDTO.array(),
   ...InfraSchemaUtils.paginatedRoutesResponse.shape,
 })
 
+export const zodFormatSchema = z.enum(FORMATS)
+
+function normalizeFormatQuery(val: unknown): Format[] | undefined {
+  if (val === undefined || val === '') {
+    return
+  }
+  if (Array.isArray(val)) {
+    return val as Format[]
+  }
+  return [val] as Format[]
+}
+
 const querystring = z.object({
+  title: z.string().optional(),
+  artist: z.string().optional(),
   genre: z.string().optional(),
-  ...InfraSchemaUtils.searchStringOptionsQuerystring.omit({ combineWith: true })
-    .shape,
+  format: z
+    .preprocess(normalizeFormatQuery, zodFormatSchema.array())
+    .optional(),
+  ...InfraSchemaUtils.searchStringOptionsQuerystring.shape,
 })
 
-export const genreSearchRoute: FastifyPluginCallbackZod = (app) => {
+export const albumSearchRoute: FastifyPluginCallbackZod = (app) => {
   app.get(
-    '/search/available-genres',
+    '/search',
     {
       schema: {
         tags: [tags.catalog],
@@ -43,15 +60,15 @@ export const genreSearchRoute: FastifyPluginCallbackZod = (app) => {
       }
 
       const albums = await albumRepository.searchString(
-        { genre: query.genre },
+        query,
         pagination,
-        { ...defaultSearchStringOptions, ...query }
+        query
       )
 
       return reply.status(HttpStatus.OK).send({
         currentPage: pagination?.page,
         size: pagination?.size,
-        genres: albums.map((a) => a.props.genre),
+        albums: albums.map((a) => AlbumDTOMapper.toDTO(a)),
       })
     }
   )

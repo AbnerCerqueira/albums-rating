@@ -1,13 +1,14 @@
 import type { Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
 import type { SearchStringOptions } from '@/contexts/!common/search-options'
-import type { Album } from './album'
+import type { Album, Format } from './album'
 import type { AlbumId } from './value-objects/album-id'
 
 export type AlbumSearchStringParams = {
   title?: string
   artist?: string
   genre?: string
+  format?: Format[]
 }
 
 export interface AlbumRepository {

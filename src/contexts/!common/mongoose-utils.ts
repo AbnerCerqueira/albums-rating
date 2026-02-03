@@ -1,15 +1,21 @@
 import { escapeRegExp } from 'lodash'
 import type { Aggregate, PipelineStage, Query } from 'mongoose'
 import type { Pagination } from './pagination'
-import { defaultSearchStringOptions, type SearchStringOptions } from './search-options'
+import {
+  defaultSearchStringOptions,
+  type SearchStringOptions,
+} from './search-options'
 
 function buildSearchStringPipeline(
-  fields: Record<string, string>,
+  fields: Record<string, string | string[]>,
   options: SearchStringOptions = defaultSearchStringOptions
 ): PipelineStage[] {
-  const validEntries = Object.entries(fields).filter(([, value]) =>
-    value?.trim()
-  )
+  const validEntries = Object.entries(fields).flatMap(([key, value]) => {
+    const values = Array.isArray(value) ? value : [value]
+    return values
+      .filter((v): v is string => typeof v === 'string' && Boolean(v?.trim()))
+      .map((v) => [key, v.trim()] as [string, string])
+  })
 
   if (!validEntries.length) {
     return []

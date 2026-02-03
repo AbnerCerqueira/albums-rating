@@ -56,9 +56,9 @@ export class MongooseAlbumRepository implements AlbumRepository {
     pagination?: Pagination,
     options?: SearchStringOptions
   ): Promise<Album[]> {
-    const { artist, genre, title } = params
+    const { artist, genre, title, format } = params
 
-    const fieldsToSearch: Record<string, string> = {}
+    const fieldsToSearch: Record<string, string | string[]> = {}
 
     if (artist) {
       fieldsToSearch['domainId.artist'] = artist
@@ -70,6 +70,10 @@ export class MongooseAlbumRepository implements AlbumRepository {
 
     if (title) {
       fieldsToSearch['domainId.title'] = title
+    }
+
+    if (format?.length) {
+      fieldsToSearch.format = format
     }
 
     const match = MongooseUtils.buildSearchStringPipeline(
