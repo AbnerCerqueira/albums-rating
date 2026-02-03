@@ -5,11 +5,14 @@
   "main": "src/main.ts",
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "start": "node --env-file=.env.production dist/main.js",
-    "dev": "tsx watch --env-file=.env.development src/main.ts",
+    "start": "PROFILE=production node --env-file=.env.production dist/main.js",
+    "dev": "PROFILE=development tsx watch --env-file=.env.development src/main.ts",
     "lint": "ultracite fix",
-    "test:unit": "vitest run --project unit",
-    "test:integration": "vitest run --project integration"
+    "test": "PROFILE=test vitest run",
+    "test:unit": "PROFILE=test vitest run --project unit",
+    "test:integration": "PROFILE=test vitest run --project integration",
+    "test:e2e": "PROFILE=test vitest run --project e2e",
+    "coverage": "PROFILE=test vitest run --coverage"
   },
   "author": "Abner Bispo Cerqueira",
   "license": "ISC",
@@ -19,6 +22,7 @@
     "@faker-js/faker": "^10.1.0",
     "@types/lodash": "^4.17.23",
     "@types/node": "^24.10.0",
+    "@vitest/coverage-v8": "^4.0.8",
     "mongodb-memory-server": "^10.3.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
