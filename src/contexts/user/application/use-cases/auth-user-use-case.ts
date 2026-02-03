@@ -1,14 +1,17 @@
-import { DomainError } from '@/contexts/common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/common/result'
+import z from 'zod'
+import { DomainError } from '@/contexts/!common/domain-error'
+import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
 import type { UserRepository } from '../../domain/user-repository'
 import { Email } from '../../domain/value-objects/email'
 import type { ApplicationService } from '../password-encoder'
 import { type UserDTO, UserDTOMapper } from '../user-dto'
 
-export type AuthUserUseCaseInput = {
-  email: string
-  password: string
-}
+export const zodAuthUserUseCaseRequest = z.object({
+  email: z.email(),
+  password: z.string(),
+})
+
+export type AuthUserUseCaseRequest = z.infer<typeof zodAuthUserUseCaseRequest>
 
 export type AuthUserUseCase = Promise<
   Result<UserDTO, DomainError.InvalidArgument>
@@ -24,7 +27,7 @@ export class AuthUseUseCase {
     private readonly passwordEncoder: ApplicationService.PasswordEncoder
   ) {}
 
-  public async execute(data: AuthUserUseCaseInput): AuthUserUseCase {
+  public async execute(data: AuthUserUseCaseRequest): AuthUserUseCase {
     const [email, emailErr] = unwrap(Email.create(data.email))
     if (emailErr) {
       return err(emailErr)
@@ -40,7 +43,6 @@ export class AuthUseUseCase {
       foundUser.props.password.value
     )
 
-    console.log(isPasswordCorrect)
     if (!isPasswordCorrect) {
       return err(invalidCredentialsError)
     }

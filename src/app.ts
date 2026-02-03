@@ -4,16 +4,58 @@ import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import fastify from 'fastify'
 import {
+  hasZodFastifySchemaValidationErrors,
+  isResponseSerializationError,
   jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
+import { BaseException } from './contexts/!common/exceptions'
 import { env } from './infra/config/envs'
-import { routes } from './presentation/routes'
-import { tags } from './presentation/tags'
+import { routes } from './infra/http'
+import { HttpStatus } from './infra/http/http-status'
+import { tags } from './infra/http/tags'
+import { logger } from './infra/lib/logging/logger'
 
-export const app = fastify().withTypeProvider<ZodTypeProvider>()
+export const app = fastify({
+  logger: env.PROFILE !== 'production',
+}).withTypeProvider<ZodTypeProvider>()
+
+app.setErrorHandler((error, request, reply) => {
+  const context = {
+    http: {
+      path: request.url,
+      method: request.method,
+      request: {
+        id: request.id,
+        queryParams: request.query,
+        pathParams: request.params,
+      },
+    },
+  }
+
+  if (hasZodFastifySchemaValidationErrors(error)) {
+    const message =
+      error.validation
+        ?.map((v) => `${v.instancePath}: ${v.message}`)
+        .join('; ') ?? "Request doesn't match the schema"
+    return reply.status(HttpStatus.BAD_REQUEST).send({ message })
+  }
+
+  if (isResponseSerializationError(error)) {
+    logger.error(error as Error, context)
+    return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+      message: "Response doesn't match the schema",
+    })
+  }
+
+  const message =
+    error instanceof BaseException ? error.message : 'Internal server error'
+
+  logger.error(error as Error, context)
+  reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message })
+})
 
 app.register(fastifyCors)
 
