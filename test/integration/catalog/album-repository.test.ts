@@ -4,14 +4,14 @@ import { AlbumFactory } from '../../factories/album-factory'
 
 describe('AlbumRepository', () => {
   it('should create an album', async () => {
-    const [album] = AlbumFactory.generate()
+    const [album] = AlbumFactory.UNIT_OR_INTEGRATION.create()
     const newAlbum = await albumRepository.create(album)
 
     expect(newAlbum).toMatchObject(album)
   })
 
   it('should find album by id', async () => {
-    const [album] = AlbumFactory.generate()
+    const [album] = AlbumFactory.UNIT_OR_INTEGRATION.create()
     await albumRepository.create(album)
     const foundAlbum = await albumRepository.findById(album.id)
 
@@ -21,7 +21,7 @@ describe('AlbumRepository', () => {
   it('should find albums paginated', async () => {
     const albumsQty = 2
 
-    const albums = AlbumFactory.generate(albumsQty)
+    const albums = AlbumFactory.UNIT_OR_INTEGRATION.create(albumsQty)
     for (const album of albums) {
       await albumRepository.create(album)
     }
