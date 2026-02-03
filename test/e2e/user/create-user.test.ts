@@ -18,18 +18,19 @@ describe('POST /api/user', () => {
   })
 
   it('should return 409 when duplicate user', async () => {
-    const [payload] = UserFactory.E2E.createPayload()
+    const [payload1, payload2] = UserFactory.E2E.createPayload(2)
 
     await app.inject({
       method: 'POST',
       url: UserRoutes.POST.CREATE_USER,
-      payload,
+      payload: payload1,
     })
 
+    payload2.email = payload1.email
     const res = await app.inject({
       method: 'POST',
       url: UserRoutes.POST.CREATE_USER,
-      payload,
+      payload: payload2,
     })
 
     expect(res.statusCode).toBe(HttpStatus.CONFLICT)
