@@ -14,13 +14,22 @@ export type UserData = {
 const userSchema = new Schema<UserData>(
   {
     domainId: {
-      email: String,
-      username: String,
+      email: {
+        type: String,
+        unique: true,
+        required: true,
+      },
+      username: {
+        type: String,
+        unique: true,
+        required: true,
+      },
     },
     publicId: {
       type: String,
       required: true,
       unique: true,
+      index: true,
     },
     password: {
       type: String,
@@ -41,9 +50,6 @@ const userSchema = new Schema<UserData>(
   }
 )
 
-userSchema.index(
-  { 'domainId.email': 1, 'domainId.username': 1, publicId: 1 },
-  { unique: true }
-)
+userSchema.index({ 'domainId.email': 1, 'domainId.username': 1 })
 
 export const UserModel = model('users', userSchema)
