@@ -1,7 +1,7 @@
 import z from 'zod'
 import type { DomainError } from '@/contexts/!common/domain-error'
 import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
-import type { DomainService } from '../../domain/services/is-unique-user'
+import type { DomainService } from '../../domain/services/is-unique-email'
 import { User } from '../../domain/user'
 import type { UserRepository } from '../../domain/user-repository'
 import { Email } from '../../domain/value-objects/email'
@@ -27,7 +27,7 @@ export type CreateUserUseCaseResponse = Promise<
 
 export class CreateUserUseCase {
   public constructor(
-    private readonly isUniqueUserService: DomainService.IsUniqueUser,
+    private readonly isUniqueEmailService: DomainService.IsUniqueEmail,
     private readonly passwordEncoder: ApplicationService.PasswordEncoder,
     private readonly repository: UserRepository
   ) {}
@@ -39,17 +39,18 @@ export class CreateUserUseCase {
     if (emailErr) {
       return err(emailErr)
     }
+
+    const isUniqueUser = await this.isUniqueEmailService.execute(email)
+    if (!isUniqueUser.isOk) {
+      return err(isUniqueUser.error)
+    }
+
     const [username, usernameErr] = unwrap(Username.create(data.username))
     if (usernameErr) {
       return err(usernameErr)
     }
 
     const userId = new UserId(email, username)
-
-    const isUniqueUser = await this.isUniqueUserService.execute(userId)
-    if (!isUniqueUser.isOk) {
-      return err(isUniqueUser.error)
-    }
 
     const [plainPassword, passwordErr] = unwrap(Password.create(data.password))
     if (passwordErr) {

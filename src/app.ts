@@ -19,7 +19,7 @@ import { tags } from './infra/http/tags'
 import { logger } from './infra/lib/logging/logger'
 
 export const app = fastify({
-  logger: env.PROFILE !== 'production',
+  logger: env.PROFILE === 'development',
 }).withTypeProvider<ZodTypeProvider>()
 
 app.setErrorHandler((error, request, reply) => {
@@ -91,6 +91,9 @@ if (env.PROFILE === 'development') {
         },
         {
           name: tags.user,
+        },
+        {
+          name: tags.catalog,
         },
       ],
     },

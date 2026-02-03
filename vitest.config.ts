@@ -8,6 +8,11 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
+    coverage: {
+      include: ['src/contexts/**'],
+      exclude: ['src/contexts/!common'],
+      provider: 'v8',
+    },
     projects: [
       {
         extends: true,
@@ -21,7 +26,17 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: ['test/integration/**/*.test.ts'],
-          environment: 'test/database.ts',
+          globalSetup: 'test/global-setup.ts',
+          setupFiles: ['test/setup-files/database.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'e2e',
+          include: ['test/e2e/**/*.test.ts'],
+          globalSetup: 'test/global-setup.ts',
+          setupFiles: ['test/setup-files/database.ts'],
         },
       },
     ],

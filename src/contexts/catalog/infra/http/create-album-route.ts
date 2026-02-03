@@ -7,18 +7,19 @@ import { zodAlbumDTO } from '../../application/album-dto'
 import { zodCreateAlbumUseCaseRequest } from '../../application/create-albums-use-case'
 import { createAlbumUseCase } from '../!ioc/use-cases'
 
-// TODO: adicionar middleware para autenticação
 export const createAlbumRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
     '',
     {
       schema: {
         tags: [tags.catalog],
+        security: [{ bearerAuth: [] }],
         body: zodCreateAlbumUseCaseRequest,
         response: {
           [HttpStatus.CONFLICT]: InfraSchemaUtils.errorResponse,
           [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
           [HttpStatus.INTERNAL_SERVER_ERROR]: InfraSchemaUtils.errorResponse,
+          [HttpStatus.UNAUTHORIZED]: InfraSchemaUtils.errorResponse,
           [HttpStatus.OK]: zodAlbumDTO,
         },
       },

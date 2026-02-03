@@ -5,7 +5,7 @@ import { env } from '@/infra/config/envs'
 export class BcryptPasswordEncoder
   implements ApplicationService.PasswordEncoder
 {
-  private readonly salt = env.PROFILE !== 'test' ? 12 : 1
+  private readonly salt = env.PROFILE !== 'test' ? 12 : 0
 
   public encode(password: string): Promise<string> {
     return bcrypt.hash(password, this.salt)

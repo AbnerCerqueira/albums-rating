@@ -26,7 +26,7 @@ const albumSchema = new Schema<AlbumData>(
       required: true,
     },
     genre: { type: String, required: true },
-    publicId: { type: String, required: true },
+    publicId: { type: String, required: true, unique: true, index: true },
     releaseDate: {
       type: Date,
       required: true,
@@ -47,11 +47,7 @@ const albumSchema = new Schema<AlbumData>(
 )
 
 albumSchema.index(
-  {
-    'domainId.title': 1,
-    'domainId.artist': 1,
-    publicId: 1,
-  },
+  { 'domainId.title': 1, 'domainId.artist': 1 },
   { unique: true }
 )
 
