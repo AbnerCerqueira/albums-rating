@@ -4,6 +4,8 @@ import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import fastify from 'fastify'
 import {
+  hasZodFastifySchemaValidationErrors,
+  isResponseSerializationError,
   jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
@@ -21,9 +23,6 @@ export const app = fastify({
 }).withTypeProvider<ZodTypeProvider>()
 
 app.setErrorHandler((error, request, reply) => {
-  const message =
-    error instanceof BaseException ? error.message : 'Internal server error'
-
   const context = {
     http: {
       path: request.url,
@@ -35,6 +34,24 @@ app.setErrorHandler((error, request, reply) => {
       },
     },
   }
+
+  if (hasZodFastifySchemaValidationErrors(error)) {
+    const message =
+      error.validation
+        ?.map((v) => `${v.instancePath}: ${v.message}`)
+        .join('; ') ?? "Request doesn't match the schema"
+    return reply.status(HttpStatus.BAD_REQUEST).send({ message })
+  }
+
+  if (isResponseSerializationError(error)) {
+    logger.error(error as Error, context)
+    return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+      message: "Response doesn't match the schema",
+    })
+  }
+
+  const message =
+    error instanceof BaseException ? error.message : 'Internal server error'
 
   logger.error(error as Error, context)
   reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message })
