@@ -4,7 +4,6 @@ import { BaseException } from '@/contexts/!common/exceptions'
 export const serializers = {
   err: (err: Error) => {
     if (err instanceof BaseException) {
-      // biome-ignore lint/correctness/noUnusedVariables: necessário para excluir o message
       const { message, ...cleaned } = err.toObject()
       return cleaned
     }
