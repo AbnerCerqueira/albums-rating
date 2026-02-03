@@ -1,6 +1,7 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import { DomainError } from '@/contexts/!common/domain-error'
-import { errorResponse, HttpStatus } from '@/infra/http/http-status'
+import { HttpStatus } from '@/infra/http/http-status'
+import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { zodAlbumDTO } from '../../application/album-dto'
 import { zodCreateAlbumUseCaseRequest } from '../../application/create-albums-use-case'
@@ -15,9 +16,9 @@ export const createAlbumRoute: FastifyPluginCallbackZod = (app) => {
         tags: [tags.catalog],
         body: zodCreateAlbumUseCaseRequest,
         response: {
-          [HttpStatus.CONFLICT]: errorResponse,
-          [HttpStatus.BAD_REQUEST]: errorResponse,
-          [HttpStatus.INTERNAL_SERVER_ERROR]: errorResponse,
+          [HttpStatus.CONFLICT]: InfraSchemaUtils.errorResponse,
+          [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
+          [HttpStatus.INTERNAL_SERVER_ERROR]: InfraSchemaUtils.errorResponse,
           [HttpStatus.OK]: zodAlbumDTO,
         },
       },

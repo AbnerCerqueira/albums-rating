@@ -1,7 +1,8 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
 import { PublicId } from '@/contexts/!common/public-id'
-import { errorResponse, HttpStatus } from '@/infra/http/http-status'
+import { HttpStatus } from '@/infra/http/http-status'
+import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { AlbumDTOMapper, zodAlbumDTO } from '../../application/album-dto'
 import { albumRepository } from '../!ioc/repositories'
@@ -19,7 +20,7 @@ export const getAlbumByPublicIdRoute: FastifyPluginCallbackZod = (app) => {
         params,
         response: {
           [HttpStatus.OK]: zodAlbumDTO,
-          [HttpStatus.NOT_FOUND]: errorResponse,
+          [HttpStatus.NOT_FOUND]: InfraSchemaUtils.errorResponse,
         },
       },
     },

@@ -1,7 +1,8 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
 import { authUserUseCase } from '@/contexts/user/infra/!ioc/use-cases'
-import { errorResponse, HttpStatus } from '@/infra/http/http-status'
+import { HttpStatus } from '@/infra/http/http-status'
+import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { zodAuthUserUseCaseRequest } from '../../application/use-cases/auth-user-use-case'
 
@@ -14,7 +15,7 @@ export const authUserRoute: FastifyPluginCallbackZod = (app) => {
         body: zodAuthUserUseCaseRequest,
         response: {
           [HttpStatus.OK]: z.object({ token: z.string() }),
-          [HttpStatus.BAD_REQUEST]: errorResponse,
+          [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
         },
       },
     },
