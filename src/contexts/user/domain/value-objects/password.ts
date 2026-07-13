@@ -1,40 +1,36 @@
-import type {
-  EmptyValueError,
-  InvalidFormatError,
-} from '@/contexts/!common/errors'
-import { ok, type Result } from '@/contexts/!common/result'
-import { ValueObject } from '@/contexts/!common/value-object'
+import { InvalidArgumentError } from '@/contexts/!common/errors'
+import { err, ok, type Result } from '@/contexts/!common/result'
 
 const PASSWORD_REGEX =
   /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
 
-export class Password extends ValueObject<string> {
-  static create(
-    password: string
-  ): Result<Password, EmptyValueError | InvalidFormatError> {
-    const normalizedPassword = ValueObject.requireNonEmpty(password, 'Password')
-    if (!normalizedPassword.ok) {
-      return normalizedPassword
-    }
+export class Password {
+  private constructor(readonly value: string) {}
 
-    const isValid = ValueObject.requireMatchesRegex(
-      normalizedPassword.value,
-      PASSWORD_REGEX,
-      'Password',
-      'Pelo menos 1 número\nPelo menos 1 letra maiúcula\nPelo menos 1 caractere especial\nNo mínimo 8 caracteres'
-    )
-    if (!isValid.ok) {
-      return isValid
+  static create(password: string): Result<Password, InvalidArgumentError> {
+    const trimmed = password.trim()
+    if (!trimmed) {
+      return err(new InvalidArgumentError('Password não pode ser vazio'))
     }
-
-    return ok(new Password(normalizedPassword.value))
+    if (!PASSWORD_REGEX.test(trimmed)) {
+      return err(
+        new InvalidArgumentError(
+          'Senha formato inválido. Esperado: Pelo menos 1 número\nPelo menos 1 letra maiúcula\nPelo menos 1 caractere especial\nNo mínimo 8 caracteres'
+        )
+      )
+    }
+    return ok(new Password(trimmed))
   }
 
-  static unsafeCreate(password: string): Password {
-    return new Password(password)
+  static unsafe(password: string): Password {
+    return new Password(password.trim())
   }
 
-  get value(): string {
-    return this._value
+  static fromHash(hash: string): Password {
+    return new Password(hash)
+  }
+
+  equals(other: Password): boolean {
+    return this.value === other.value
   }
 }

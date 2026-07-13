@@ -8,16 +8,10 @@ export function err<E>(error: E): Result<never, E> {
   return { error, ok: false }
 }
 
-export function unwrap<T, E>(result: Result<T, E>) {
-  return result.ok
-    ? ([result.value, null] as const)
-    : ([null, result.error] as const)
-}
-
-export function extract<T, E>(result: Result<T, E>): T {
-  const [value, error] = unwrap(result)
-  if (error) {
-    throw error
+export function unwrap<T, E>(result: Result<T, E>): T {
+  if (!result.ok) {
+    throw result.error
   }
-  return value as T
+
+  return result.value
 }

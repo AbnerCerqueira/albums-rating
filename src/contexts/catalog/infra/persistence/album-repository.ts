@@ -1,31 +1,36 @@
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
-import type { SearchStringOptions } from '@/contexts/!common/search-options'
+import type { SearchOptions } from '@/contexts/!common/search-options'
 import type { Album } from '@/contexts/catalog/domain/album'
 import type {
   AlbumRepository,
-  AlbumSearchStringParams,
+  SearchAlbumParams,
 } from '@/contexts/catalog/domain/album-repository'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { AlbumMapper } from './album-mapper'
-import {
-  type AlbumData,
-  type AlbumDataDomainId,
-  AlbumModel,
-} from './album-model'
+import { type AlbumData, AlbumModel } from './album-model'
 
 export class MongooseAlbumRepository implements AlbumRepository {
   private readonly model = AlbumModel
 
-  public async create(album: Album): Promise<Album> {
+  async save(album: Album): Promise<Album> {
     const data = AlbumMapper.toPersistence(album)
-    const newAlbum = await this.model.create(data)
+    const filter = {
+      'domainId.artist': data.domainId.artist,
+      'domainId.title': data.domainId.title,
+    }
+    const updated = await this.model
+      .findOneAndUpdate(filter, data, {
+        new: true,
+        upsert: true,
+      })
+      .lean()
 
-    return AlbumMapper.toDomain(newAlbum.toObject())
+    return AlbumMapper.toDomain(updated)
   }
 
-  public async findById(id: AlbumId): Promise<Album | null> {
+  async findById(id: AlbumId): Promise<Album | null> {
     const foundAlbum = await this.model
       .findOne(this.getFlattenObjOfDomainId(id))
       .lean()
@@ -33,7 +38,7 @@ export class MongooseAlbumRepository implements AlbumRepository {
     return foundAlbum ? AlbumMapper.toDomain(foundAlbum) : null
   }
 
-  public async find(pagination?: Pagination): Promise<Album[]> {
+  async find(pagination?: Pagination): Promise<Album[]> {
     const query = this.model.find()
 
     MongooseUtils.withPagination(query, pagination)
@@ -43,43 +48,20 @@ export class MongooseAlbumRepository implements AlbumRepository {
     return docs.map((doc) => AlbumMapper.toDomain(doc))
   }
 
-  public async findByPublicId(publicId: PublicId): Promise<Album | null> {
-    const doc = await this.model
-      .findOne({ publicId: publicId.toString() })
-      .lean()
+  async findByPublicId(publicId: PublicId): Promise<Album | null> {
+    const doc = await this.model.findOne({ publicId: publicId.value }).lean()
 
     return doc ? AlbumMapper.toDomain(doc) : null
   }
 
-  public async searchString(
-    params: AlbumSearchStringParams,
+  async search(
+    params: SearchAlbumParams,
     pagination?: Pagination,
-    options?: SearchStringOptions
+    options?: SearchOptions
   ): Promise<Album[]> {
-    const { artist, genre, title, format } = params
+    const fieldsToSearch = AlbumMapper.toPersistenceSearchFields(params)
 
-    const fieldsToSearch: Record<string, string | string[]> = {}
-
-    if (artist) {
-      fieldsToSearch['domainId.artist'] = artist
-    }
-
-    if (genre) {
-      fieldsToSearch.genre = genre
-    }
-
-    if (title) {
-      fieldsToSearch['domainId.title'] = title
-    }
-
-    if (format?.length) {
-      fieldsToSearch.format = format
-    }
-
-    const match = MongooseUtils.buildSearchStringPipeline(
-      fieldsToSearch,
-      options
-    )
+    const match = MongooseUtils.buildSearchPipeline(fieldsToSearch, options)
 
     const docs: AlbumData[] = []
 
@@ -95,14 +77,9 @@ export class MongooseAlbumRepository implements AlbumRepository {
   }
 
   private getFlattenObjOfDomainId(id: AlbumId) {
-    const domainId: AlbumDataDomainId = {
-      artist: id.artist,
-      title: id.title.value,
-    }
-
     return {
-      'domainId.artist': domainId.artist,
-      'domainId.title': domainId.title,
+      'domainId.artist': id.artist.value,
+      'domainId.title': id.title.value,
     }
   }
 }

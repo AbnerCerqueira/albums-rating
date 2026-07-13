@@ -23,7 +23,9 @@ export const authUserRoute: FastifyPluginCallbackZod = (app) => {
       const result = await authUserUseCase.execute(request.body)
 
       if (!result.ok) {
-        return reply.code(HttpStatus.BAD_REQUEST).send(result.error)
+        return reply
+          .code(HttpStatus.BAD_REQUEST)
+          .send({ message: result.error.message })
       }
 
       const token = await reply.jwtSign(

@@ -10,30 +10,6 @@ export abstract class DomainError extends Error {
   }
 }
 
-export class EmptyValueError extends DomainError {
-  readonly code = EC.EMPTY_VALUE
-
-  constructor(field: string) {
-    super(`${field} não pode ser vazio`)
-  }
-}
-
-export class InvalidFormatError extends DomainError {
-  readonly code = EC.INVALID_FORMAT
-
-  constructor(field: string, expected: string) {
-    super(`Formato inválido ${field}. Esperado: ${expected}`)
-  }
-}
-
-export class InvalidDateError extends DomainError {
-  readonly code = EC.INVALID_DATE
-
-  constructor(field: string) {
-    super(`${field} inválido`)
-  }
-}
-
 export class NotFoundError extends DomainError {
   readonly code = EC.NOT_FOUND
 
@@ -46,7 +22,7 @@ export class ConflictError extends DomainError {
   readonly code = EC.CONFLICT_ERROR
 
   constructor(field: string) {
-    super(`${field}     já existe(m)`)
+    super(`${field} já existe(m)`)
   }
 }
 
@@ -58,8 +34,12 @@ export class InvalidCredentialsError extends DomainError {
   }
 }
 
+export class InvalidArgumentError extends DomainError {
+  readonly code = EC.INVALID_ARGUMENT
+}
+
 export class InvalidPaginationError extends DomainError {
-  readonly code = EC.INVALID_PAGINAION
+  readonly code = EC.INVALID_PAGINATION
 
   constructor() {
     super('Paginação inválida. Esperado: page >= 1 e size >= 1')

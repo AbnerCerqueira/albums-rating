@@ -11,7 +11,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
-import { BaseException } from './contexts/!common/exceptions'
+import { DomainError } from './contexts/!common/errors'
 import { env } from './infra/config/envs'
 import { routes } from './infra/http'
 import { HttpStatus } from './infra/http/http-status'
@@ -44,16 +44,16 @@ app.setErrorHandler((error, request, reply) => {
   }
 
   if (isResponseSerializationError(error)) {
-    logger.error(error as Error, context)
+    logger.error(error, context)
     return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
       message: "Response doesn't match the schema",
     })
   }
 
   const message =
-    error instanceof BaseException ? error.message : 'Internal server error'
+    error instanceof DomainError ? error.message : 'Internal server error'
 
-  logger.error(error as Error, context)
+  logger.error(error, context)
   reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message })
 })
 

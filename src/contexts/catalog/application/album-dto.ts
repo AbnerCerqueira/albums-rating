@@ -13,17 +13,13 @@ export const zodAlbumDTO = z.object({
 export type AlbumDTO = z.infer<typeof zodAlbumDTO>
 
 function toDTO(album: Album): AlbumDTO {
-  const { id, props, publicId } = album
-  const { artist, title } = id
-  const { format, genre, releaseDate } = props
-
   return {
-    artist,
-    format,
-    genre,
-    publicId: publicId.toString(),
-    releaseDate: releaseDate.toISOString().split('T')[0],
-    title: title.value,
+    artist: album.id.artist.value,
+    format: album.format,
+    genre: album.genre.value,
+    publicId: album.publicId.value,
+    releaseDate: album.releaseDate.value.toISOString().split('T')[0],
+    title: album.id.title.value,
   }
 }
 

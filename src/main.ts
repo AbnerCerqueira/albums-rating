@@ -12,5 +12,5 @@ async function main() {
 }
 
 main().catch((err) => {
-  logger.error(err)
+  logger.error('internal server error', err)
 })

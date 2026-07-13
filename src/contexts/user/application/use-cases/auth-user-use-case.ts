@@ -2,8 +2,12 @@ import z from 'zod'
 import { InvalidCredentialsError } from '@/contexts/!common/errors'
 import { err, ok, type Result } from '@/contexts/!common/result'
 import type { PasswordEncoderService } from '@/contexts/user/application/services/password-encoder-service'
-import { toDTO, type UserDTO } from '@/contexts/user/application/user-dto'
+import {
+  type UserDTO,
+  UserDTOMapper,
+} from '@/contexts/user/application/user-dto'
 import type { UserRepository } from '@/contexts/user/domain/user-repository'
+import { Email } from '@/contexts/user/domain/value-objects/email'
 
 export const zodAuthUserUseCaseRequest = z.object({
   email: z.email(),
@@ -17,19 +21,15 @@ export type AuthUserUseCaseResponse = Promise<
 >
 
 export class AuthUserUseCase {
-  private readonly userRepository: UserRepository
-  private readonly passwordEncoderService: PasswordEncoderService
-
   constructor(
-    userRepository: UserRepository,
-    passwordEncoderService: PasswordEncoderService
-  ) {
-    this.userRepository = userRepository
-    this.passwordEncoderService = passwordEncoderService
-  }
+    private readonly userRepository: UserRepository,
+    private readonly passwordEncoderService: PasswordEncoderService
+  ) {}
 
   async execute(data: AuthUserUseCaseRequest): AuthUserUseCaseResponse {
-    const foundUser = await this.userRepository.findByEmail(data.email)
+    const email = Email.unsafe(data.email)
+
+    const foundUser = await this.userRepository.findByEmail(email)
     if (!foundUser) {
       return err(new InvalidCredentialsError())
     }
@@ -42,6 +42,6 @@ export class AuthUserUseCase {
       return err(new InvalidCredentialsError())
     }
 
-    return ok(toDTO(foundUser))
+    return ok(UserDTOMapper.toDTO(foundUser))
   }
 }

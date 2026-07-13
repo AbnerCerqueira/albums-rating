@@ -1,22 +1,23 @@
-import { DomainError } from '@/contexts/!common/domain-error'
+import { InvalidArgumentError } from '@/contexts/!common/errors'
 import { err, ok, type Result } from '@/contexts/!common/result'
 
 export class Title {
-  private constructor(public readonly value: string) {}
+  private constructor(readonly value: string) {}
 
-  public static create(
-    value: string
-  ): Result<Title, DomainError.InvalidArgument> {
-    return value.length > 200
-      ? err(
-          new DomainError.InvalidArgument(
-            'Nome excede o limite de caracteres (200)'
-          )
-        )
-      : ok(new Title(value))
+  static create(title: string): Result<Title, InvalidArgumentError> {
+    const trimmed = title.trim()
+    if (!trimmed) {
+      return err(new InvalidArgumentError('Título não pode ser vazio'))
+    }
+
+    return ok(new Title(trimmed))
   }
 
-  public static unsafeCreate(value: string): Title {
-    return new Title(value)
+  static unsafe(title: string) {
+    return new Title(title)
+  }
+
+  equals(other: Title) {
+    return this.value === other.value
   }
 }

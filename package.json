@@ -2,8 +2,8 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/jwt": "^10.0.0",
-    "@fastify/swagger": "^9.6.0",
-    "@fastify/swagger-ui": "^5.2.3",
+    "@fastify/swagger": "^9.8.1",
+    "@fastify/swagger-ui": "^5.2.6",
     "bcryptjs": "^3.0.3",
     "fastify": "^5.6.2",
     "fastify-type-provider-zod": "^6.1.0",
@@ -17,7 +17,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.1",
+    "@biomejs/biome": "2.5.1",
     "@faker-js/faker": "^10.1.0",
     "@types/lodash": "^4.17.23",
     "@types/node": "^24.10.0",
@@ -38,8 +38,8 @@
     "lint": "ultracite fix",
     "test": "PROFILE=test vitest run",
     "test:unit": "PROFILE=test vitest run --project unit",
-    "test:integration": "PROFILE=test vitest run --project integration",
     "test:e2e": "PROFILE=test vitest run --project e2e",
+    "typecheck": "tsc --noEmit",
     "coverage": "PROFILE=test vitest run --coverage",
     "check": "ultracite check",
     "fix": "ultracite fix"
@@ -49,5 +49,5 @@
   "description": "API for music reviews",
   "main": "src/main.ts",
   "author": "Abner Bispo Cerqueira",
-  "license": "ISC"
+  "license": "MIT"
 }

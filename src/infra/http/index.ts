@@ -7,7 +7,7 @@ import { tags } from './tags'
 
 export const routes: FastifyPluginCallbackZod = (app) => {
   app.get(
-    '/',
+    '/health-check',
     {
       schema: {
         response: { [HttpStatus.OK]: z.object({ message: z.string() }) },

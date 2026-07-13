@@ -21,15 +21,7 @@ export default defineConfig({
           name: 'unit',
         },
       },
-      {
-        extends: true,
-        test: {
-          globalSetup: 'test/global-setup.ts',
-          include: ['test/**/integration/**/*.test.ts'],
-          name: 'integration',
-          setupFiles: ['test/setup-files/database.ts'],
-        },
-      },
+
       {
         extends: true,
         test: {

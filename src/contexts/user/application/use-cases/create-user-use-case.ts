@@ -1,18 +1,21 @@
 import z from 'zod'
 import type {
   ConflictError,
-  EmptyValueError,
-  InvalidFormatError,
+  InvalidArgumentError,
 } from '@/contexts/!common/errors'
 import { ok, type Result } from '@/contexts/!common/result'
 import type { PasswordEncoderService } from '@/contexts/user/application/services/password-encoder-service'
-import { toDTO, type UserDTO } from '@/contexts/user/application/user-dto'
-import type { IsUniqueEmailService } from '@/contexts/user/domain/services/is-unique-email'
-import type { IsUniqueUserService } from '@/contexts/user/domain/services/is-unique-user'
+import {
+  type UserDTO,
+  UserDTOMapper,
+} from '@/contexts/user/application/user-dto'
+import type { DomainUserServices } from '@/contexts/user/domain/services/domain-user-services'
 import { User } from '@/contexts/user/domain/user'
 import type { UserRepository } from '@/contexts/user/domain/user-repository'
+import { Email } from '@/contexts/user/domain/value-objects/email'
 import { Password } from '@/contexts/user/domain/value-objects/password'
 import { UserId } from '@/contexts/user/domain/value-objects/user-id'
+import { Username } from '@/contexts/user/domain/value-objects/username'
 
 export const zodCreateUserUseCaseRequest = z.object({
   email: z.email(),
@@ -25,41 +28,44 @@ export type CreateUserUseCaseRequest = z.infer<
 >
 
 export type CreateUserUseCaseResponse = Promise<
-  Result<UserDTO, EmptyValueError | InvalidFormatError | ConflictError>
+  Result<UserDTO, InvalidArgumentError | ConflictError>
 >
 
 export class CreateUserUseCase {
-  private readonly isUniqueEmailService: IsUniqueEmailService
-  private readonly isUniqueUserService: IsUniqueUserService
-  private readonly passwordEncoder: PasswordEncoderService
-  private readonly repository: UserRepository
-
   constructor(
-    isUniqueEmailService: IsUniqueEmailService,
-    isUniqueUserService: IsUniqueUserService,
-    passwordEncoder: PasswordEncoderService,
-    repository: UserRepository
-  ) {
-    this.isUniqueEmailService = isUniqueEmailService
-    this.isUniqueUserService = isUniqueUserService
-    this.passwordEncoder = passwordEncoder
-    this.repository = repository
-  }
+    private readonly domainServices: DomainUserServices,
+    private readonly passwordEncoder: PasswordEncoderService,
+    private readonly repository: UserRepository
+  ) {}
 
   async execute(data: CreateUserUseCaseRequest): CreateUserUseCaseResponse {
-    const isUniqueEmail = await this.isUniqueEmailService.execute(data.email)
-    if (!isUniqueEmail.ok) {
-      return isUniqueEmail
+    const email = Email.create(data.email)
+    if (!email.ok) {
+      return email
     }
 
-    const id = UserId.create({ email: data.email, username: data.username })
-    if (!id.ok) {
-      return id
+    const username = Username.create(data.username)
+    if (!username.ok) {
+      return username
     }
 
-    const isUnique = await this.isUniqueUserService.execute(id.value)
-    if (!isUnique.ok) {
-      return isUnique
+    const isEmailUnique = await this.domainServices.isEmailUnique(email.value)
+    if (!isEmailUnique.ok) {
+      return isEmailUnique
+    }
+
+    const isUsernameUnique = await this.domainServices.isUsernameUnique(
+      username.value
+    )
+    if (!isUsernameUnique.ok) {
+      return isUsernameUnique
+    }
+
+    const id = UserId.create({ email: email.value, username: username.value })
+
+    const isUserUnique = await this.domainServices.isUserUnique(id)
+    if (!isUserUnique.ok) {
+      return isUserUnique
     }
 
     const plainPassword = Password.create(data.password)
@@ -72,11 +78,11 @@ export class CreateUserUseCase {
     )
 
     const user = User.create({
-      id: id.value,
-      password: Password.unsafeCreate(hashedPassword),
+      id,
+      password: Password.fromHash(hashedPassword),
     })
 
     const newUser = await this.repository.save(user)
-    return ok(toDTO(newUser))
+    return ok(UserDTOMapper.toDTO(newUser))
   }
 }
