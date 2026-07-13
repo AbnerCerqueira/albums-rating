@@ -13,8 +13,8 @@ export type AlbumSearchStringParams = {
 
 export interface AlbumRepository {
   create(album: Album): Promise<Album>
-  findById(id: AlbumId): Promise<Album | null>
   find(pagination?: Pagination): Promise<Album[]>
+  findById(id: AlbumId): Promise<Album | null>
   findByPublicId(publicId: PublicId): Promise<Album | null>
   searchString(
     params: AlbumSearchStringParams,

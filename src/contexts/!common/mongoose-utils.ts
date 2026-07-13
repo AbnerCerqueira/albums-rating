@@ -30,7 +30,7 @@ function buildSearchStringPipeline(
   const buildValueByMatchType = (value: string) =>
     matchType === 'perfect'
       ? value
-      : { $regex: `^${escapeRegExp(value)}`, $options: 'i' }
+      : { $options: 'i', $regex: `^${escapeRegExp(value)}` }
 
   if (combineWith === 'or') {
     matchStage.$match = { $or: [] }
@@ -62,6 +62,6 @@ function withPagination(
 }
 
 export const MongooseUtils = {
-  withPagination,
   buildSearchStringPipeline,
+  withPagination,
 }

@@ -1,10 +1,9 @@
 import z from 'zod'
-import { DomainError } from '@/contexts/!common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
-import type { UserRepository } from '../../domain/user-repository'
-import { Email } from '../../domain/value-objects/email'
-import type { ApplicationService } from '../password-encoder'
-import { type UserDTO, UserDTOMapper } from '../user-dto'
+import { InvalidCredentialsError } from '@/contexts/!common/errors'
+import { err, ok, type Result } from '@/contexts/!common/result'
+import type { PasswordEncoderService } from '@/contexts/user/application/services/password-encoder-service'
+import { toDTO, type UserDTO } from '@/contexts/user/application/user-dto'
+import type { UserRepository } from '@/contexts/user/domain/user-repository'
 
 export const zodAuthUserUseCaseRequest = z.object({
   email: z.email(),
@@ -13,40 +12,36 @@ export const zodAuthUserUseCaseRequest = z.object({
 
 export type AuthUserUseCaseRequest = z.infer<typeof zodAuthUserUseCaseRequest>
 
-export type AuthUserUseCase = Promise<
-  Result<UserDTO, DomainError.InvalidArgument>
+export type AuthUserUseCaseResponse = Promise<
+  Result<UserDTO, InvalidCredentialsError>
 >
 
-const invalidCredentialsError = new DomainError.InvalidArgument(
-  'Credenciais inválidas'
-)
+export class AuthUserUseCase {
+  private readonly userRepository: UserRepository
+  private readonly passwordEncoderService: PasswordEncoderService
 
-export class AuthUseUseCase {
-  public constructor(
-    private readonly repository: UserRepository,
-    private readonly passwordEncoder: ApplicationService.PasswordEncoder
-  ) {}
+  constructor(
+    userRepository: UserRepository,
+    passwordEncoderService: PasswordEncoderService
+  ) {
+    this.userRepository = userRepository
+    this.passwordEncoderService = passwordEncoderService
+  }
 
-  public async execute(data: AuthUserUseCaseRequest): AuthUserUseCase {
-    const [email, emailErr] = unwrap(Email.create(data.email))
-    if (emailErr) {
-      return err(emailErr)
-    }
-
-    const foundUser = await this.repository.findByEmail(email)
+  async execute(data: AuthUserUseCaseRequest): AuthUserUseCaseResponse {
+    const foundUser = await this.userRepository.findByEmail(data.email)
     if (!foundUser) {
-      return err(invalidCredentialsError)
+      return err(new InvalidCredentialsError())
     }
 
-    const isPasswordCorrect = await this.passwordEncoder.match(
+    const matchPassword = await this.passwordEncoderService.match(
       data.password,
-      foundUser.props.password.value
+      foundUser.password.value
     )
-
-    if (!isPasswordCorrect) {
-      return err(invalidCredentialsError)
+    if (!matchPassword) {
+      return err(new InvalidCredentialsError())
     }
 
-    return ok(UserDTOMapper.toDTO(foundUser))
+    return ok(toDTO(foundUser))
   }
 }

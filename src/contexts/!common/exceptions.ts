@@ -41,13 +41,13 @@ export abstract class BaseException extends Error {
 
   public toObject() {
     return {
-      type: this.type,
-      message: this.message,
-      origin: this.origin,
-      metadata: this.metadata,
       cause: this.cause ? this.serializeCause(this.cause) : undefined,
+      message: this.message,
+      metadata: this.metadata,
+      origin: this.origin,
       rootCause: this.getRootCause(),
       stack: this.stack,
+      type: this.type,
     }
   }
 
@@ -57,13 +57,13 @@ export abstract class BaseException extends Error {
     }
 
     return {
-      // biome-ignore lint/style/noNonNullAssertion: se for instancia da BaseException sempre terá type
-      type: error instanceof BaseException ? error.type! : error.name,
-      message: error.message,
       cause:
         error.cause instanceof Error
           ? this.serializeCause(error.cause, maxDepth - 1)
           : undefined,
+      message: error.message,
+      // biome-ignore lint/style/noNonNullAssertion: se for instancia da BaseException sempre terá type
+      type: error instanceof BaseException ? error.type! : error.name,
     }
   }
 
@@ -75,8 +75,8 @@ export abstract class BaseException extends Error {
     }
 
     return {
-      type: current instanceof BaseException ? current.type : current.name,
       message: current.message,
+      type: current instanceof BaseException ? current.type : current.name,
     }
   }
 }

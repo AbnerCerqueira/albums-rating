@@ -8,10 +8,10 @@ export async function asyncTryCatch<T, E = Error>(
 ): Promise<TryCatchResult<T, E>> {
   try {
     const result = await promise
-    return { result, exception: null }
+    return { exception: null, result }
   } catch (e) {
     const error = e as E
-    return { result: null, exception: error }
+    return { exception: error, result: null }
   } finally {
     if (finallyFn) {
       await finallyFn()
@@ -25,10 +25,10 @@ export function tryCatch<T, E = Error>(
 ): TryCatchResult<T, E> {
   try {
     const result = fn()
-    return { result, exception: null }
+    return { exception: null, result }
   } catch (e) {
     const error = e as E
-    return { result: null, exception: error }
+    return { exception: error, result: null }
   } finally {
     if (finallyFn) {
       finallyFn()

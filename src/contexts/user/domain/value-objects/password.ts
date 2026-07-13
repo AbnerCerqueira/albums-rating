@@ -1,32 +1,40 @@
-import { DomainError } from '@/contexts/!common/domain-error'
-import { err, ok, type Result } from '@/contexts/!common/result'
+import type {
+  EmptyValueError,
+  InvalidFormatError,
+} from '@/contexts/!common/errors'
+import { ok, type Result } from '@/contexts/!common/result'
+import { ValueObject } from '@/contexts/!common/value-object'
 
-export class Password {
-  private constructor(public readonly value: string) {}
+const PASSWORD_REGEX =
+  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
 
-  public static create(
-    value: string
-  ): Result<Password, DomainError.InvalidArgument> {
-    if (value.length < 6) {
-      return err(
-        new DomainError.InvalidArgument(
-          'Senha deve ter pelo menos 6 caracteres'
-        )
-      )
+export class Password extends ValueObject<string> {
+  static create(
+    password: string
+  ): Result<Password, EmptyValueError | InvalidFormatError> {
+    const normalizedPassword = ValueObject.requireNonEmpty(password, 'Password')
+    if (!normalizedPassword.ok) {
+      return normalizedPassword
     }
 
-    if (value.length > 100) {
-      return err(
-        new DomainError.InvalidArgument(
-          'Senha deve ter no máximo 100 caracteres'
-        )
-      )
+    const isValid = ValueObject.requireMatchesRegex(
+      normalizedPassword.value,
+      PASSWORD_REGEX,
+      'Password',
+      'Pelo menos 1 número\nPelo menos 1 letra maiúcula\nPelo menos 1 caractere especial\nNo mínimo 8 caracteres'
+    )
+    if (!isValid.ok) {
+      return isValid
     }
 
-    return ok(new Password(value))
+    return ok(new Password(normalizedPassword.value))
   }
 
-  public static unsafeCreate(value: string): Password {
-    return new Password(value)
+  static unsafeCreate(password: string): Password {
+    return new Password(password)
+  }
+
+  get value(): string {
+    return this._value
   }
 }

@@ -17,13 +17,13 @@ export const getAlbumsRoute: FastifyPluginCallbackZod = (app) => {
     '',
     {
       schema: {
-        tags: [tags.catalog],
         querystring: InfraSchemaUtils.paginationQuerystring,
         response: {
           [HttpStatus.OK]: okResponse,
           [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
           [HttpStatus.INTERNAL_SERVER_ERROR]: InfraSchemaUtils.errorResponse,
         },
+        tags: [tags.catalog],
       },
     },
     async (request, reply) => {

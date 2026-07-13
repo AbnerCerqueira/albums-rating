@@ -9,47 +9,39 @@ export type UserData = {
   domainId: UserDataDomainId
   publicId: string
   password: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 const userSchema = new Schema<UserData>(
   {
     domainId: {
       email: {
+        required: true,
         type: String,
         unique: true,
-        required: true,
       },
       username: {
+        required: true,
         type: String,
         unique: true,
-        required: true,
       },
     },
-    publicId: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
     password: {
-      type: String,
       required: true,
+      type: String,
+    },
+    publicId: {
+      index: true,
+      required: true,
+      type: String,
+      unique: true,
     },
   },
   {
     timestamps: true,
     versionKey: false,
-    toObject: {
-      // biome-ignore lint/suspicious/noExplicitAny: faz sentido
-      transform(_, ret: any) {
-        const obj = ret
-        obj.id = obj._id.toString()
-        return obj
-      },
-    },
   }
 )
-
-userSchema.index({ 'domainId.email': 1, 'domainId.username': 1 })
 
 export const UserModel = model('users', userSchema)

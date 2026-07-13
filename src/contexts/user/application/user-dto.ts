@@ -1,22 +1,18 @@
 import z from 'zod'
-import type { User } from '../domain/user'
+import type { User } from '@/contexts/user/domain/user'
 
 export const zodUserDTO = z.object({
   email: z.email(),
-  username: z.string(),
   publicId: z.uuidv7(),
+  username: z.string(),
 })
 
 export type UserDTO = z.infer<typeof zodUserDTO>
 
-function toDTO(user: User): UserDTO {
-  const { id, publicId } = user
-  const { email, username } = id
+export function toDTO(user: User): UserDTO {
   return {
-    email: email.value,
-    username: username.value,
-    publicId: publicId.toString(),
+    email: user.id.email,
+    publicId: user.publicId.value,
+    username: user.id.username,
   }
 }
-
-export const UserDTOMapper = { toDTO }

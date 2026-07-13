@@ -1,46 +1,47 @@
 import type { User } from '@/contexts/user/domain/user'
 import type { UserRepository } from '@/contexts/user/domain/user-repository'
-import type { Email } from '@/contexts/user/domain/value-objects/email'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
-import { MongooseUserMapper } from './user-mapper'
-import { type UserDataDomainId, UserModel } from './user-model'
+import type { UserDataDomainId } from '@/contexts/user/infra/persistence/user-model'
+import { UserModel } from '@/contexts/user/infra/persistence/user-model'
+import { toDomain, toPersistence } from './user-mapper'
 
 export class MongooseUserRepository implements UserRepository {
   private readonly model = UserModel
 
-  public async create(user: User): Promise<User> {
-    const userData = MongooseUserMapper.toPersistence(user)
+  async save(user: User): Promise<User> {
+    const userData = toPersistence(user)
+    const filter = {
+      'domainId.email': userData.domainId.email,
+      'domainId.username': userData.domainId.username,
+    }
+    const updated = await this.model
+      .findOneAndUpdate(filter, userData, {
+        new: true,
+        upsert: true,
+      })
+      .lean()
 
-    const newUser = (await this.model.create(userData)).toObject()
-
-    return MongooseUserMapper.toDomain(newUser)
+    return toDomain(updated)
   }
 
-  public async findById(id: UserId): Promise<User | null> {
+  async findById(id: UserId): Promise<User | null> {
     const foundUser = await this.model
       .findOne(this.getFlattenObjOfDomainId(id))
       .lean()
 
-    return foundUser ? MongooseUserMapper.toDomain(foundUser) : null
+    return foundUser ? toDomain(foundUser) : null
   }
 
-  public async findByEmail(email: Email): Promise<User | null> {
-    const doc = await this.model
-      .findOne({ 'domainId.email': email.value })
-      .lean()
+  async findByEmail(email: string): Promise<User | null> {
+    const doc = await this.model.findOne({ 'domainId.email': email }).lean()
 
-    return doc ? MongooseUserMapper.toDomain(doc) : null
+    return doc ? toDomain(doc) : null
   }
 
-  private getFlattenObjOfDomainId(id: UserId) {
-    const domainId: UserDataDomainId = {
-      email: id.email.value,
-      username: id.username.value,
-    }
-
+  private getFlattenObjOfDomainId(id: UserId): UserDataDomainId {
     return {
-      'domainId.email': domainId.email,
-      'domainId.username': domainId.username,
+      email: id.email,
+      username: id.username,
     }
   }
 }

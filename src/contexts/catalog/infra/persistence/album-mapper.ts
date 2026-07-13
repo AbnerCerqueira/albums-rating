@@ -32,4 +32,4 @@ function toDomain(data: AlbumData): Album {
   return new Album(albumId, albumProps, new PublicId(publicId))
 }
 
-export const AlbumMapper = { toPersistence, toDomain }
+export const AlbumMapper = { toDomain, toPersistence }

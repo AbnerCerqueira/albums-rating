@@ -10,8 +10,8 @@ export const routes: FastifyPluginCallbackZod = (app) => {
     '/',
     {
       schema: {
-        tags: [tags.healthCheck],
         response: { [HttpStatus.OK]: z.object({ message: z.string() }) },
+        tags: [tags.healthCheck],
       },
     },
     () => ({

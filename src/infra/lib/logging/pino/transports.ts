@@ -4,10 +4,10 @@ import { pinoBaseConfig } from './config'
 
 export const pinoPrettyConfig = {
   transport: {
-    target: 'pino-pretty',
     options: {
       colorize: true,
     },
+    target: 'pino-pretty',
   },
 }
 

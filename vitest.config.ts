@@ -7,35 +7,35 @@ loadEnvFile('.env.test')
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
-    globals: true,
     coverage: {
-      include: ['src/contexts/**'],
       exclude: ['src/contexts/!common'],
+      include: ['src/contexts/**'],
       provider: 'v8',
     },
+    globals: true,
     projects: [
       {
         extends: true,
         test: {
+          include: ['test/**/unit/**/*.test.ts'],
           name: 'unit',
-          include: ['test/unit/**/*.test.ts'],
         },
       },
       {
         extends: true,
         test: {
-          name: 'integration',
-          include: ['test/integration/**/*.test.ts'],
           globalSetup: 'test/global-setup.ts',
+          include: ['test/**/integration/**/*.test.ts'],
+          name: 'integration',
           setupFiles: ['test/setup-files/database.ts'],
         },
       },
       {
         extends: true,
         test: {
-          name: 'e2e',
-          include: ['test/e2e/**/*.test.ts'],
           globalSetup: 'test/global-setup.ts',
+          include: ['test/**/e2e/**/*.test.ts'],
+          name: 'e2e',
           setupFiles: ['test/setup-files/database.ts'],
         },
       },
