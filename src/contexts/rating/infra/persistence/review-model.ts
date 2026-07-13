@@ -13,57 +13,50 @@ export type ReviewData = {
   isFavorite: boolean
   isEdited: boolean
   rating: number
+  reviewText?: string
   reviewedAt: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
-const reviewSchema = new Schema<ReviewData>(
-  {
-    domainId: {
-      albumArtist: String,
-      albumTitle: String,
-      userEmail: String,
-      username: String,
-    },
-    isEdited: {
-      default: false,
-      required: true,
-      type: Boolean,
-    },
-    isFavorite: {
-      default: false,
-      required: true,
-      type: Boolean,
-    },
-    publicId: {
-      index: true,
-      required: true,
-      type: String,
-      unique: true,
-    },
-    rating: {
-      max: 10,
-      min: 1,
-      required: true,
-      type: Number,
-    },
-    reviewedAt: {
-      required: true,
-      type: Date,
-    },
+const reviewSchema = new Schema<ReviewData>({
+  domainId: {
+    albumArtist: String,
+    albumTitle: String,
+    userEmail: String,
+    username: String,
   },
-  {
-    timestamps: true,
-    toObject: {
-      // biome-ignore lint/suspicious/noExplicitAny: faz sentido
-      transform(_, ret: any) {
-        const obj = ret
-        obj.id = obj._id.toString()
-        return obj
-      },
-    },
-    versionKey: false,
-  }
-)
+  isEdited: {
+    default: false,
+    required: true,
+    type: Boolean,
+  },
+  isFavorite: {
+    default: false,
+    required: true,
+    type: Boolean,
+  },
+  publicId: {
+    index: true,
+    required: true,
+    type: String,
+    unique: true,
+  },
+  rating: {
+    max: 5,
+    min: 0,
+    required: true,
+    type: Number,
+  },
+  reviewedAt: {
+    required: true,
+    type: Date,
+  },
+  reviewText: {
+    required: false,
+    type: String,
+  },
+})
 
 reviewSchema.index(
   {

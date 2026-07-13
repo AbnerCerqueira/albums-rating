@@ -6,12 +6,11 @@ import type { Review } from './review'
 import type { ReviewId } from './value-objects/review-id'
 
 export interface ReviewRepository {
-  create(review: Review): Promise<Review>
-  delete(id: ReviewId): Promise<boolean>
-  findByAlbum(albumId: AlbumId, pagination?: Pagination): Promise<Review[]>
-  findById(id: ReviewId): Promise<Review | null>
-  findByPublicId(publicId: PublicId): Promise<Review | null>
-  findByUser(userId: UserId, pagination?: Pagination): Promise<Review[]>
-  findRecent(pagination?: Pagination): Promise<Review[]>
-  update(review: Review): Promise<Review | null>
+  delete: (id: ReviewId) => Promise<boolean>
+  findByAlbum: (albumId: AlbumId, pagination?: Pagination) => Promise<Review[]>
+  findById: (id: ReviewId) => Promise<Review | null>
+  findByPublicId: (publicId: PublicId) => Promise<Review | null>
+  findByUser: (userId: UserId, pagination?: Pagination) => Promise<Review[]>
+  findRecent: (pagination?: Pagination) => Promise<Review[]>
+  save: (review: Review) => Promise<Review>
 }

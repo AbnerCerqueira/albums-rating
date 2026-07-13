@@ -12,14 +12,20 @@ import { type ReviewDataDomainId, ReviewModel } from './review-model'
 export class MongooseReviewRepository implements ReviewRepository {
   private readonly model = ReviewModel
 
-  public async create(review: Review): Promise<Review> {
+  async save(review: Review): Promise<Review> {
     const data = ReviewMapper.toPersistence(review)
-    const newReview = await this.model.create(data)
+    const filter = this.getFlattenObjOfDomainId(review.id)
+    const updated = await this.model
+      .findOneAndUpdate(filter, data, {
+        new: true,
+        upsert: true,
+      })
+      .lean()
 
-    return ReviewMapper.toDomain(newReview.toObject())
+    return ReviewMapper.toDomain(updated)
   }
 
-  public async findById(id: ReviewId): Promise<Review | null> {
+  async findById(id: ReviewId): Promise<Review | null> {
     const foundReview = await this.model
       .findOne(this.getFlattenObjOfDomainId(id))
       .lean()
@@ -27,18 +33,13 @@ export class MongooseReviewRepository implements ReviewRepository {
     return foundReview ? ReviewMapper.toDomain(foundReview) : null
   }
 
-  public async findByPublicId(publicId: PublicId): Promise<Review | null> {
-    const doc = await this.model
-      .findOne({ publicId: publicId.toString() })
-      .lean()
+  async findByPublicId(publicId: PublicId): Promise<Review | null> {
+    const doc = await this.model.findOne({ publicId: publicId.value }).lean()
 
     return doc ? ReviewMapper.toDomain(doc) : null
   }
 
-  public async findByUser(
-    userId: UserId,
-    pagination?: Pagination
-  ): Promise<Review[]> {
+  async findByUser(userId: UserId, pagination?: Pagination): Promise<Review[]> {
     const query = this.model.find({
       'domainId.userEmail': userId.email.value,
       'domainId.username': userId.username.value,
@@ -51,12 +52,12 @@ export class MongooseReviewRepository implements ReviewRepository {
     return docs.map((doc) => ReviewMapper.toDomain(doc))
   }
 
-  public async findByAlbum(
+  async findByAlbum(
     albumId: AlbumId,
     pagination?: Pagination
   ): Promise<Review[]> {
     const query = this.model.find({
-      'domainId.albumArtist': albumId.artist,
+      'domainId.albumArtist': albumId.artist.value,
       'domainId.albumTitle': albumId.title.value,
     })
 
@@ -67,7 +68,7 @@ export class MongooseReviewRepository implements ReviewRepository {
     return docs.map((doc) => ReviewMapper.toDomain(doc))
   }
 
-  public async findRecent(pagination?: Pagination): Promise<Review[]> {
+  async findRecent(pagination?: Pagination): Promise<Review[]> {
     const query = this.model.find().sort({ reviewedAt: -1 })
 
     MongooseUtils.withPagination(query, pagination)
@@ -77,37 +78,17 @@ export class MongooseReviewRepository implements ReviewRepository {
     return docs.map((doc) => ReviewMapper.toDomain(doc))
   }
 
-  public async update(review: Review): Promise<Review | null> {
-    const data = ReviewMapper.toPersistence(review)
-    const updatedReview = await this.model
-      .findOneAndUpdate(
-        this.getFlattenObjOfDomainId(review.id),
-        { $set: data },
-        { new: true }
-      )
-      .lean()
-
-    return updatedReview ? ReviewMapper.toDomain(updatedReview) : null
-  }
-
-  public async delete(id: ReviewId): Promise<boolean> {
+  async delete(id: ReviewId): Promise<boolean> {
     const result = await this.model.deleteOne(this.getFlattenObjOfDomainId(id))
     return result.deletedCount > 0
   }
 
-  private getFlattenObjOfDomainId(id: ReviewId) {
-    const domainId: ReviewDataDomainId = {
-      albumArtist: id.albumId.artist,
+  private getFlattenObjOfDomainId(id: ReviewId): ReviewDataDomainId {
+    return {
+      albumArtist: id.albumId.artist.value,
       albumTitle: id.albumId.title.value,
       userEmail: id.userId.email.value,
       username: id.userId.username.value,
-    }
-
-    return {
-      'domainId.albumArtist': domainId.albumArtist,
-      'domainId.albumTitle': domainId.albumTitle,
-      'domainId.userEmail': domainId.userEmail,
-      'domainId.username': domainId.username,
     }
   }
 }

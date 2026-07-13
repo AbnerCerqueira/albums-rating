@@ -1,30 +1,30 @@
-import { DomainError } from './domain-error'
+import { InvalidPaginationError } from './errors'
 import { err, ok, type Result } from './result'
 
 export class Pagination {
-  public readonly page: number
+  readonly page: number
 
-  public readonly size: number
+  readonly size: number
 
   private constructor(page: number, size: number) {
     this.page = page
     this.size = size
   }
 
-  public static create(
-    page: number,
-    size: number
-  ): Result<Pagination, DomainError.InvalidArgument> {
+  static create(
+    page?: number,
+    size?: number
+  ): Result<Pagination | undefined, InvalidPaginationError> {
+    if (!(page && size)) {
+      return ok(undefined)
+    }
+
     return page > 0 && size > 0
       ? ok(new Pagination(page, size))
-      : err(
-          new DomainError.InvalidArgument(
-            'Página e tamanho devem ser de no mínimo 1'
-          )
-        )
+      : err(new InvalidPaginationError())
   }
 
-  public static unsafeCreate(page: number, size: number): Pagination {
+  static unsafeCreate(page: number, size: number): Pagination {
     return new Pagination(page, size)
   }
 }

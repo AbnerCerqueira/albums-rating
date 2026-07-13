@@ -1,10 +1,16 @@
 import z from 'zod'
-import type { DomainError } from '@/contexts/!common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
-import { Album, type AlbumProps, FORMATS } from '../domain/album'
+import type {
+  ConflictError,
+  InvalidArgumentError,
+} from '@/contexts/!common/errors'
+import { ok, type Result } from '@/contexts/!common/result'
+import { Album, FORMATS } from '../domain/album'
 import type { AlbumRepository } from '../domain/album-repository'
-import type { DomainService } from '../domain/services/is-unique-album'
+import type { DomainAlbumServices } from '../domain/services/is-unique-album'
 import { AlbumId } from '../domain/value-objects/album-id'
+import { Artist } from '../domain/value-objects/artist'
+import { Genre } from '../domain/value-objects/genre'
+import { ReleaseDate } from '../domain/value-objects/release-date'
 import { Title } from '../domain/value-objects/title'
 import { type AlbumDTO, AlbumDTOMapper } from './album-dto'
 
@@ -20,38 +26,51 @@ export type CreateAlbumUserCaseRequest = z.infer<
   typeof zodCreateAlbumUseCaseRequest
 >
 export type CreateAlbumUserCaseResponse = Promise<
-  Result<AlbumDTO, DomainError.InvalidArgument | DomainError.Conflict>
+  Result<AlbumDTO, InvalidArgumentError | ConflictError>
 >
 
 export class CreateAlbumsUseCase {
-  public constructor(
-    private readonly isUniqueAlbumsService: DomainService.IsUniqueAlbum,
+  constructor(
+    private readonly domainServices: DomainAlbumServices,
     private readonly repository: AlbumRepository
   ) {}
 
-  public async execute(
-    data: CreateAlbumUserCaseRequest
-  ): CreateAlbumUserCaseResponse {
-    const [title, titleErr] = unwrap(Title.create(data.title))
-    if (titleErr) {
-      return err(titleErr)
+  async execute(data: CreateAlbumUserCaseRequest): CreateAlbumUserCaseResponse {
+    const title = Title.create(data.title)
+    if (!title.ok) {
+      return title
     }
 
-    const albumId = new AlbumId(title, data.artist)
-    const albumProps: AlbumProps = {
+    const artist = Artist.create(data.artist)
+    if (!artist.ok) {
+      return artist
+    }
+
+    const genre = Genre.create(data.genre)
+    if (!genre.ok) {
+      return genre
+    }
+
+    const releaseDate = ReleaseDate.create(new Date(data.releaseDate))
+    if (!releaseDate.ok) {
+      return releaseDate
+    }
+
+    const id = AlbumId.create({ artist: artist.value, title: title.value })
+
+    const album = Album.create({
       format: data.format,
-      genre: data.genre,
-      releaseDate: new Date(data.releaseDate),
+      genre: genre.value,
+      id,
+      releaseDate: releaseDate.value,
+    })
+
+    const isUnique = await this.domainServices.isUnique(album.id)
+    if (!isUnique.ok) {
+      return isUnique
     }
 
-    const album = new Album(albumId, albumProps)
-
-    const isUniqueAlbum = await this.isUniqueAlbumsService.execute(album.id)
-    if (!isUniqueAlbum.isOk) {
-      return err(isUniqueAlbum.error)
-    }
-
-    const newAlbum = await this.repository.create(album)
+    const newAlbum = await this.repository.save(album)
 
     return ok(AlbumDTOMapper.toDTO(newAlbum))
   }

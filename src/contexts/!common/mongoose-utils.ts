@@ -1,14 +1,11 @@
 import { escapeRegExp } from 'lodash'
 import type { Aggregate, PipelineStage, Query } from 'mongoose'
 import type { Pagination } from './pagination'
-import {
-  defaultSearchStringOptions,
-  type SearchStringOptions,
-} from './search-options'
+import { defaultSearchOptions, type SearchOptions } from './search-options'
 
-function buildSearchStringPipeline(
+function buildSearchPipeline(
   fields: Record<string, string | string[]>,
-  options: SearchStringOptions = defaultSearchStringOptions
+  options: SearchOptions = defaultSearchOptions
 ): PipelineStage[] {
   const validEntries = Object.entries(fields).flatMap(([key, value]) => {
     const values = Array.isArray(value) ? value : [value]
@@ -62,6 +59,6 @@ function withPagination(
 }
 
 export const MongooseUtils = {
-  buildSearchStringPipeline,
+  buildSearchPipeline,
   withPagination,
 }

@@ -5,7 +5,7 @@ import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { AlbumDTOMapper, zodAlbumDTO } from '../../application/album-dto'
-import { albumRepository } from '../!ioc/repositories'
+import { albumRepository } from '../compose'
 
 const params = z.object({
   publicId: z.uuidv7(),
@@ -26,7 +26,7 @@ export const getAlbumByPublicIdRoute: FastifyPluginCallbackZod = (app) => {
     },
     async (request, reply) => {
       const foundAlbum = await albumRepository.findByPublicId(
-        new PublicId(request.params.publicId)
+        PublicId.unsafe(request.params.publicId)
       )
 
       return foundAlbum

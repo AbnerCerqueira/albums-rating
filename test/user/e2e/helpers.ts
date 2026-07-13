@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { faker } from '@faker-js/faker'
 import { app } from '@/app'
 import { UserRoutes } from './routes'
@@ -11,10 +12,13 @@ export type Payload = {
 }
 
 export function createPayload(overrides?: Partial<Payload>): Payload {
+  const suffix = randomUUID().slice(0, 12)
   return {
-    email: overrides?.email ?? faker.internet.email(),
+    email:
+      overrides?.email ??
+      `${faker.internet.email().split('@')[0]}+${suffix}@${faker.internet.domainName()}`,
     password: overrides?.password ?? DEFAULT_PASSWORD,
-    username: overrides?.username ?? faker.person.firstName(),
+    username: overrides?.username ?? `${faker.person.firstName()}-${suffix}`,
   }
 }
 

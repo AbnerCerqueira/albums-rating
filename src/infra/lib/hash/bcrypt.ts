@@ -5,11 +5,11 @@ import { env } from '@/infra/config/envs'
 export class BcryptPasswordEncoder implements PasswordEncoderService {
   private readonly salt = env.PROFILE === 'test' ? 0 : 12
 
-  public encode(password: string): Promise<string> {
+  encode(password: string): Promise<string> {
     return bcrypt.hash(password, this.salt)
   }
 
-  public match(password: string, hashedPassword: string): Promise<boolean> {
+  match(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword)
   }
 }

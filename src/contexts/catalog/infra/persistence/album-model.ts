@@ -12,39 +12,27 @@ export type AlbumData = {
   releaseDate: Date
   genre: string
   format: Format
+  createdAt: Date
+  updatedAt: Date
 }
 
-const albumSchema = new Schema<AlbumData>(
-  {
-    domainId: {
-      artist: String,
-      title: String,
-    },
-    format: {
-      enum: FORMATS,
-      required: true,
-      type: String,
-    },
-    genre: { required: true, type: String },
-    publicId: { index: true, required: true, type: String, unique: true },
-    releaseDate: {
-      required: true,
-      type: Date,
-    },
+const albumSchema = new Schema<AlbumData>({
+  domainId: {
+    artist: String,
+    title: String,
   },
-  {
-    timestamps: true,
-    toObject: {
-      // biome-ignore lint/suspicious/noExplicitAny: faz sentido
-      transform(_, ret: any) {
-        const obj = ret
-        obj.id = obj._id.toString()
-        return obj
-      },
-    },
-    versionKey: false,
-  }
-)
+  format: {
+    enum: FORMATS,
+    required: true,
+    type: String,
+  },
+  genre: { required: true, type: String },
+  publicId: { index: true, required: true, type: String, unique: true },
+  releaseDate: {
+    required: true,
+    type: Date,
+  },
+})
 
 albumSchema.index(
   { 'domainId.artist': 1, 'domainId.title': 1 },

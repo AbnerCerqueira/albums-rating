@@ -44,4 +44,9 @@ const userSchema = new Schema<UserData>(
   }
 )
 
+userSchema.index(
+  { 'domainId.email': 1, 'domainId.username': 1 },
+  { unique: true }
+)
+
 export const UserModel = model('users', userSchema)

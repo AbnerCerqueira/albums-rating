@@ -1,10 +1,10 @@
 import type { Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
-import type { SearchStringOptions } from '@/contexts/!common/search-options'
+import type { SearchOptions } from '@/contexts/!common/search-options'
 import type { Album, Format } from './album'
 import type { AlbumId } from './value-objects/album-id'
 
-export type AlbumSearchStringParams = {
+export type SearchAlbumParams = {
   title?: string
   artist?: string
   genre?: string
@@ -12,13 +12,13 @@ export type AlbumSearchStringParams = {
 }
 
 export interface AlbumRepository {
-  create(album: Album): Promise<Album>
-  find(pagination?: Pagination): Promise<Album[]>
-  findById(id: AlbumId): Promise<Album | null>
-  findByPublicId(publicId: PublicId): Promise<Album | null>
-  searchString(
-    params: AlbumSearchStringParams,
+  find: (pagination?: Pagination) => Promise<Album[]>
+  findById: (id: AlbumId) => Promise<Album | null>
+  findByPublicId: (publicId: PublicId) => Promise<Album | null>
+  save: (album: Album) => Promise<Album>
+  search: (
+    params: SearchAlbumParams,
     pagination?: Pagination,
-    options?: SearchStringOptions
-  ): Promise<Album[]>
+    options?: SearchOptions
+  ) => Promise<Album[]>
 }

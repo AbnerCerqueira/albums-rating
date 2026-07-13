@@ -1,11 +1,9 @@
 import z from 'zod'
-import type { InvalidPaginationError } from '@/contexts/!common/errors'
-import { Pagination } from '@/contexts/!common/pagination'
-import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
+import type { Pagination } from '@/contexts/!common/pagination'
 import {
   COMBINE_WITH,
   MATCH_TYPES,
-  type SearchStringOptions,
+  type SearchOptions,
 } from '@/contexts/!common/search-options'
 
 export const errorResponse = z.object({ message: z.string() })
@@ -15,34 +13,20 @@ const paginationQuerystring = z.object({
   size: z.coerce.number().optional(),
 }) satisfies z.ZodType<Partial<Pagination>>
 
-const searchStringOptionsQuerystring = z.object({
+const searchOptionsQuerystring = z.object({
   combineWith: z.enum(COMBINE_WITH).default('and'),
   matchType: z.enum(MATCH_TYPES).default('perfect'),
   ...paginationQuerystring.shape,
-}) satisfies z.ZodType<Partial<Pagination> & SearchStringOptions>
+}) satisfies z.ZodType<Partial<Pagination> & SearchOptions>
 
 const paginatedRoutesResponse = z.object({
   currentPage: z.number().optional(),
   size: z.number().optional(),
 })
 
-function validatePagination(
-  query: z.infer<typeof paginationQuerystring>
-): Result<Pagination | undefined, InvalidPaginationError> {
-  if (!(query.page && query.size)) {
-    return ok(undefined)
-  }
-  const [pagination, paginationErr] = unwrap(
-    Pagination.create(query.page, query.size)
-  )
-
-  return paginationErr ? err(paginationErr) : ok(pagination)
-}
-
 export const InfraSchemaUtils = {
   errorResponse,
   paginatedRoutesResponse,
   paginationQuerystring,
-  searchStringOptionsQuerystring,
-  validatePagination,
+  searchOptionsQuerystring,
 }

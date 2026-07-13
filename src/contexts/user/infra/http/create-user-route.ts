@@ -30,7 +30,7 @@ export const createUserRoute: FastifyPluginCallbackZod = (app) => {
         result.error instanceof ConflictError
           ? HttpStatus.CONFLICT
           : HttpStatus.BAD_REQUEST
-      return reply.code(code).send(result.error)
+      return reply.code(code).send({ message: result.error.message })
     }
   )
 }

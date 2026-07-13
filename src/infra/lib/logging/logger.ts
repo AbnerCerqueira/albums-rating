@@ -1,56 +1,72 @@
-import { ConsoleTransport } from './pino/transports'
+import pino from 'pino'
+import { createFileTransport } from './transports/file'
 
 export type LogSeverity = 'debug' | 'info' | 'warn' | 'error'
 
 export interface Transport {
-  log(severity: LogSeverity, message: string, context?: LogContext): void
+  log: (
+    severity: LogSeverity,
+    message: string,
+    context?: Record<string, unknown>
+  ) => void
 }
 
-export type LogContext = Record<string, unknown>
 export interface Logger {
-  addTransport(transport: Transport): void
-  debug(message: string, context?: LogContext): void
-  error(exception: Error, context?: LogContext): void
-  info(message: string, context?: LogContext): void
-  removeTransport(transport: Transport): void
-  warn(message: string, context?: LogContext): void
+  addTransport: (transport: Transport) => void
+  debug: (message: string, context?: Record<string, unknown>) => void
+  error: (error: unknown, context?: Record<string, unknown>) => void
+  info: (message: string, context?: Record<string, unknown>) => void
+  warn: (message: string, context?: Record<string, unknown>) => void
 }
 
-export class LoggerImpl implements Logger {
+class LoggerImpl implements Logger {
   private readonly transports: Transport[] = []
 
-  public debug(message: string, context?: LogContext): void {
-    for (const transport of this.transports) {
-      transport.log('debug', message, context)
-    }
-  }
-
-  public info(message: string, context?: LogContext): void {
-    for (const transport of this.transports) {
-      transport.log('info', message, context)
-    }
-  }
-
-  public warn(message: string, context?: LogContext): void {
-    for (const transport of this.transports) {
-      transport.log('warn', message, context)
-    }
-  }
-
-  public error(exception: Error, context?: LogContext): void {
-    for (const transport of this.transports) {
-      transport.log('error', exception.message, { context, exception })
-    }
-  }
-
-  public addTransport(transport: Transport): void {
+  addTransport(transport: Transport): void {
     this.transports.push(transport)
   }
 
-  public removeTransport(transport: Transport): void {
-    this.transports.filter((t) => t !== transport)
+  debug(message: string, context?: Record<string, unknown>): void {
+    this.log('debug', message, context)
+  }
+
+  error(error: unknown, context?: Record<string, unknown>): void {
+    const message = error instanceof Error ? error.message : String(error)
+    this.log('error', message, { ...context, err: error })
+  }
+
+  info(message: string, context?: Record<string, unknown>): void {
+    this.log('info', message, context)
+  }
+
+  warn(message: string, context?: Record<string, unknown>): void {
+    this.log('warn', message, context)
+  }
+
+  private log(
+    severity: LogSeverity,
+    message: string,
+    context?: Record<string, unknown>
+  ): void {
+    for (const transport of this.transports) {
+      transport.log(severity, message, context)
+    }
   }
 }
 
 export const logger = new LoggerImpl()
-logger.addTransport(new ConsoleTransport())
+logger.addTransport(createConsoleTransport())
+logger.addTransport(createFileTransport({ filePath: 'logs/app.log' }))
+logger.addTransport(
+  createFileTransport({ filePath: 'logs/errors.log', minLevel: 'error' })
+)
+
+function createConsoleTransport(): Transport {
+  const p = pino({ transport: { target: 'pino-pretty' } })
+
+  return {
+    log(severity, message, context) {
+      p[severity]({ ...context, msg: message })
+    },
+  }
+}

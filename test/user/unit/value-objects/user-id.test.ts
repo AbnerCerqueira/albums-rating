@@ -1,98 +1,44 @@
-import { extract, unwrap } from '@/contexts/!common/result'
+import { Email } from '@/contexts/user/domain/value-objects/email'
 import { UserId } from '@/contexts/user/domain/value-objects/user-id'
+import { Username } from '@/contexts/user/domain/value-objects/username'
 import { EMAIL, USERNAME } from '../fixtures'
 
 describe('UserId', () => {
   describe('create', () => {
     test('creates with valid username and email', () => {
-      const [id, err] = unwrap(
-        UserId.create({ email: EMAIL, username: USERNAME })
-      )
-      expect(err).toBe(null)
-      expect(id?.email).toBe(EMAIL)
-      expect(id?.username).toBe(USERNAME)
-    })
-
-    test('normalizes email to lowercase', () => {
-      const [id, err] = unwrap(
-        UserId.create({ email: EMAIL.toUpperCase(), username: USERNAME })
-      )
-      expect(err).toBe(null)
-      expect(id?.email).not.toBe(EMAIL.toUpperCase())
-      expect(id?.email).toBe(EMAIL.toLocaleLowerCase())
-    })
-
-    test('trims whitespaces', () => {
-      const [id, err] = unwrap(
-        UserId.create({ email: `  ${EMAIL}  `, username: `  ${USERNAME}  ` })
-      )
-      expect(err).toBe(null)
-      expect(id?.email).toBe(EMAIL)
-      expect(id?.username).toBe(USERNAME)
-    })
-
-    test('returns error for empty email', () => {
-      const [id, err] = unwrap(UserId.create({ email: '', username: USERNAME }))
-      expect(id).toBe(null)
-      expect(err?.name).toBe('EmptyValueError')
-    })
-
-    test('returns error for empty username', () => {
-      const [id, err] = unwrap(UserId.create({ email: EMAIL, username: '' }))
-      expect(id).toBe(null)
-      expect(err?.name).toBe('EmptyValueError')
-    })
-
-    test('returns error for invalid email format', () => {
-      const [id, err] = unwrap(
-        UserId.create({ email: 'not-an-email', username: USERNAME })
-      )
-      expect(id).toBe(null)
-      expect(err?.name).toBe('InvalidFormatError')
-    })
-
-    test('returns error for whitespace-only email', () => {
-      const [id, err] = unwrap(
-        UserId.create({ email: '   ', username: USERNAME })
-      )
-      expect(id).toBe(null)
-      expect(err?.name).toBe('EmptyValueError')
-    })
-
-    test('returns error for whitespace-only username', () => {
-      const [id, err] = unwrap(UserId.create({ email: EMAIL, username: '   ' }))
-      expect(id).toBe(null)
-      expect(err?.name).toBe('EmptyValueError')
-    })
-  })
-
-  describe('unsafeCreate', () => {
-    test('creates UserId without validation', () => {
-      const id = UserId.unsafeCreate({ email: 'test', username: 'test' })
-      expect(id.email).toBe('test')
-      expect(id.username).toBe('test')
+      const email = Email.unsafe(EMAIL)
+      const username = Username.unsafe(USERNAME)
+      const id = UserId.create({ email, username })
+      expect(id.email.value).toBe(EMAIL)
+      expect(id.username.value).toBe(USERNAME)
     })
   })
 
   describe('equals', () => {
     test('returns true for same email and username', () => {
-      const id1 = extract(UserId.create({ email: EMAIL, username: USERNAME }))
-      const id2 = extract(UserId.create({ email: EMAIL, username: USERNAME }))
-      expect(id1?.equals(id2)).toBeTruthy()
+      const email = Email.unsafe(EMAIL)
+      const username = Username.unsafe(USERNAME)
+      const id1 = UserId.create({ email, username })
+      const id2 = UserId.create({ email, username })
+      expect(id1.equals(id2)).toBeTruthy()
     })
 
     test('returns false for different email', () => {
-      const id1 = extract(UserId.create({ email: EMAIL, username: USERNAME }))
-      const id2 = extract(
-        UserId.create({ email: 'other@example.com', username: USERNAME })
-      )
-      expect(id1?.equals(id2)).toBeFalsy()
+      const email1 = Email.unsafe(EMAIL)
+      const email2 = Email.unsafe('other@example.com')
+      const username = Username.unsafe(USERNAME)
+      const id1 = UserId.create({ email: email1, username })
+      const id2 = UserId.create({ email: email2, username })
+      expect(id1.equals(id2)).toBeFalsy()
     })
 
     test('returns false for different username', () => {
-      const id1 = extract(UserId.create({ email: EMAIL, username: USERNAME }))
-      const id2 = extract(UserId.create({ email: EMAIL, username: 'other' }))
-      expect(id1?.equals(id2)).toBeFalsy()
+      const email = Email.unsafe(EMAIL)
+      const username1 = Username.unsafe(USERNAME)
+      const username2 = Username.unsafe('other')
+      const id1 = UserId.create({ email, username: username1 })
+      const id2 = UserId.create({ email, username: username2 })
+      expect(id1.equals(id2)).toBeFalsy()
     })
   })
 })

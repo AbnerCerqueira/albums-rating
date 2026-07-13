@@ -25,6 +25,9 @@
           "style": {
             "useConsistentTypeDefinitions": {
               "level": "off"
+            },
+            "noParameterProperties": {
+              "level": "off"
             }
           }
         }

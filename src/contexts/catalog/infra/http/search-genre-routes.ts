@@ -1,11 +1,10 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import { unwrap } from '@/contexts/!common/result'
-import { defaultSearchStringOptions } from '@/contexts/!common/search-options'
+import { Pagination } from '@/contexts/!common/pagination'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
-import { albumRepository } from '../!ioc/repositories'
+import { searchGenresUseCase } from '../compose'
 
 const okResponse = z.object({
   genres: z.string().array(),
@@ -14,11 +13,11 @@ const okResponse = z.object({
 
 const querystring = z.object({
   genre: z.string().optional(),
-  ...InfraSchemaUtils.searchStringOptionsQuerystring.omit({ combineWith: true })
+  ...InfraSchemaUtils.searchOptionsQuerystring.omit({ combineWith: true })
     .shape,
 })
 
-export const genreSearchRoute: FastifyPluginCallbackZod = (app) => {
+export const searchGenreRoute: FastifyPluginCallbackZod = (app) => {
   app.get(
     '/search/available-genres',
     {
@@ -35,24 +34,22 @@ export const genreSearchRoute: FastifyPluginCallbackZod = (app) => {
     async (request, reply) => {
       const { query } = request
 
-      const [pagination, paginationErr] = unwrap(
-        InfraSchemaUtils.validatePagination(query)
-      )
-      if (paginationErr) {
-        return reply.status(HttpStatus.BAD_REQUEST).send(paginationErr)
+      const paginationResult = Pagination.create(query.page, query.size)
+      if (!paginationResult.ok) {
+        return reply
+          .status(HttpStatus.BAD_REQUEST)
+          .send({ message: paginationResult.error.message })
       }
 
-      const albums = await albumRepository.searchString(
-        { genre: query.genre },
-        pagination,
-        { ...defaultSearchStringOptions, ...query }
-      )
+      const pagination = paginationResult.value
 
-      return reply.status(HttpStatus.OK).send({
-        currentPage: pagination?.page,
-        genres: albums.map((a) => a.props.genre),
-        size: pagination?.size,
+      const result = await searchGenresUseCase.execute({
+        genre: query.genre,
+        matchType: query.matchType,
+        pagination,
       })
+
+      return reply.status(HttpStatus.OK).send(result)
     }
   )
 }

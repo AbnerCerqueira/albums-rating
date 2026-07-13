@@ -1,11 +1,11 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
-import { DomainError } from '@/contexts/!common/domain-error'
+import { ConflictError } from '@/contexts/!common/errors'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { zodAlbumDTO } from '../../application/album-dto'
 import { zodCreateAlbumUseCaseRequest } from '../../application/create-albums-use-case'
-import { createAlbumUseCase } from '../!ioc/use-cases'
+import { createAlbumUseCase } from '../compose'
 
 export const createAlbumRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
@@ -29,17 +29,17 @@ export const createAlbumRoute: FastifyPluginCallbackZod = (app) => {
 
       const result = await createAlbumUseCase.execute(body)
 
-      if (result.isOk) {
+      if (result.ok) {
         return reply.send(result.value)
       }
 
       return reply
         .status(
-          result.error instanceof DomainError.Conflict
+          result.error instanceof ConflictError
             ? HttpStatus.CONFLICT
             : HttpStatus.BAD_REQUEST
         )
-        .send(result.error)
+        .send({ message: result.error.message })
     }
   )
 }
