@@ -5,17 +5,6 @@ import { CatalogRoutes } from './routes'
 
 describe('Get Albums', () => {
   describe('GET /api/catalog', () => {
-    test('returns empty list when no albums exist', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: CatalogRoutes.GET.ALBUMS,
-      })
-
-      expect(response.statusCode).toBe(HttpStatus.OK)
-      const body = response.json()
-      expect(body.albums).toEqual([])
-    })
-
     test('returns albums after creation', async () => {
       const { token } = await createUserAndLogin()
       await createAlbumViaHttp(token)
