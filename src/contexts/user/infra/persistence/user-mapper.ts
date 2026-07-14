@@ -1,39 +1,32 @@
-import { PublicId } from '@/contexts/!common/public-id'
 import { User } from '@/contexts/user/domain/user'
-import { Email } from '@/contexts/user/domain/value-objects/email'
 import { Password } from '@/contexts/user/domain/value-objects/password'
 import { UserId } from '@/contexts/user/domain/value-objects/user-id'
-import { Username } from '@/contexts/user/domain/value-objects/username'
-import type { UserData } from './user-model'
+import type { UserData } from '@/contexts/user/infra/persistence/user-model'
 
-function toPersistence(user: User): UserData {
-  const { id, props } = user
-  const { email, username } = id
-  const { password } = props
+export function toPersistence(user: User): UserData {
   return {
+    createdAt: user.createdAt,
     domainId: {
-      email: email.value,
-      username: username.value,
+      email: user.id.email,
+      username: user.id.username,
     },
-    publicId: user.publicId.toString(),
-    password: password.value,
+    password: user.password.value,
+    publicId: user.publicId.value,
+    updatedAt: user.updatedAt,
   }
 }
 
-function toDomain(data: UserData): User {
-  const { domainId, password, publicId } = data
-  const { email, username } = domainId
+export function toDomain(data: UserData): User {
+  const id = UserId.unsafeCreate({
+    email: data.domainId.email,
+    username: data.domainId.username,
+  })
 
-  const id = new UserId(
-    Email.unsafeCreate(email),
-    Username.unsafeCreate(username)
-  )
-
-  return new User(
+  return User.fromPersistence({
+    createdAt: new Date(data.createdAt),
     id,
-    { password: Password.unsafeCreate(password) },
-    new PublicId(publicId)
-  )
+    password: Password.unsafeCreate(data.password),
+    publicId: data.publicId,
+    updatedAt: new Date(data.updatedAt),
+  })
 }
-
-export const MongooseUserMapper = { toPersistence, toDomain }

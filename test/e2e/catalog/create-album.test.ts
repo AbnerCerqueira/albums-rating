@@ -17,8 +17,8 @@ describe('POST /api/catalog', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: CatalogRoutes.POST.CREATE_ALBUM,
       payload,
+      url: CatalogRoutes.POST.CREATE_ALBUM,
     })
 
     expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED)
@@ -29,10 +29,10 @@ describe('POST /api/catalog', () => {
     const [payload] = AlbumFactory.E2E.createPayload()
 
     const res = await app.inject({
-      method: 'POST',
-      url: CatalogRoutes.POST.CREATE_ALBUM,
       headers: { authorization: 'Bearer token-invalido' },
+      method: 'POST',
       payload,
+      url: CatalogRoutes.POST.CREATE_ALBUM,
     })
 
     expect(res.statusCode).toBe(HttpStatus.UNAUTHORIZED)
@@ -43,10 +43,10 @@ describe('POST /api/catalog', () => {
 
     payload.title = payload.title.repeat(500)
     const res = await app.inject({
-      method: 'POST',
-      url: CatalogRoutes.POST.CREATE_ALBUM,
       headers: { authorization: `Bearer ${token}` },
+      method: 'POST',
       payload,
+      url: CatalogRoutes.POST.CREATE_ALBUM,
     })
 
     expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST)
@@ -56,17 +56,17 @@ describe('POST /api/catalog', () => {
     const [payload] = AlbumFactory.E2E.createPayload()
 
     await app.inject({
-      method: 'POST',
-      url: CatalogRoutes.POST.CREATE_ALBUM,
       headers: { authorization: `Bearer ${token}` },
+      method: 'POST',
       payload,
+      url: CatalogRoutes.POST.CREATE_ALBUM,
     })
 
     const res = await app.inject({
-      method: 'POST',
-      url: CatalogRoutes.POST.CREATE_ALBUM,
       headers: { authorization: `Bearer ${token}` },
+      method: 'POST',
       payload,
+      url: CatalogRoutes.POST.CREATE_ALBUM,
     })
 
     expect(res.statusCode).toBe(HttpStatus.CONFLICT)
@@ -76,20 +76,20 @@ describe('POST /api/catalog', () => {
     const [payload] = AlbumFactory.E2E.createPayload()
 
     const res = await app.inject({
-      method: 'POST',
-      url: CatalogRoutes.POST.CREATE_ALBUM,
       headers: { authorization: `Bearer ${token}` },
+      method: 'POST',
       payload,
+      url: CatalogRoutes.POST.CREATE_ALBUM,
     })
 
     expect(res.statusCode).toBe(HttpStatus.OK)
     const body = res.json()
     expect(body).toMatchObject({
-      title: payload.title,
       artist: payload.artist,
-      genre: payload.genre,
       format: payload.format,
+      genre: payload.genre,
       releaseDate: payload.releaseDate,
+      title: payload.title,
     })
     expect(body).toHaveProperty('publicId')
     expect(typeof body.publicId).toBe('string')

@@ -1,20 +1,23 @@
 import z from 'zod'
-import type { DomainError } from '@/contexts/!common/domain-error'
-import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
-import type { DomainService } from '../../domain/services/is-unique-email'
-import { User } from '../../domain/user'
-import type { UserRepository } from '../../domain/user-repository'
-import { Email } from '../../domain/value-objects/email'
-import { Password } from '../../domain/value-objects/password'
-import { UserId } from '../../domain/value-objects/user-id'
-import { Username } from '../../domain/value-objects/username'
-import type { ApplicationService } from '../password-encoder'
-import { type UserDTO, UserDTOMapper } from '../user-dto'
+import type {
+  ConflictError,
+  EmptyValueError,
+  InvalidFormatError,
+} from '@/contexts/!common/errors'
+import { ok, type Result } from '@/contexts/!common/result'
+import type { PasswordEncoderService } from '@/contexts/user/application/services/password-encoder-service'
+import { toDTO, type UserDTO } from '@/contexts/user/application/user-dto'
+import type { IsUniqueEmailService } from '@/contexts/user/domain/services/is-unique-email'
+import type { IsUniqueUserService } from '@/contexts/user/domain/services/is-unique-user'
+import { User } from '@/contexts/user/domain/user'
+import type { UserRepository } from '@/contexts/user/domain/user-repository'
+import { Password } from '@/contexts/user/domain/value-objects/password'
+import { UserId } from '@/contexts/user/domain/value-objects/user-id'
 
 export const zodCreateUserUseCaseRequest = z.object({
   email: z.email(),
-  username: z.string(),
   password: z.string(),
+  username: z.string(),
 })
 
 export type CreateUserUseCaseRequest = z.infer<
@@ -22,47 +25,58 @@ export type CreateUserUseCaseRequest = z.infer<
 >
 
 export type CreateUserUseCaseResponse = Promise<
-  Result<UserDTO, DomainError.InvalidArgument | DomainError.Conflict>
+  Result<UserDTO, EmptyValueError | InvalidFormatError | ConflictError>
 >
 
 export class CreateUserUseCase {
-  public constructor(
-    private readonly isUniqueEmailService: DomainService.IsUniqueEmail,
-    private readonly passwordEncoder: ApplicationService.PasswordEncoder,
-    private readonly repository: UserRepository
-  ) {}
+  private readonly isUniqueEmailService: IsUniqueEmailService
+  private readonly isUniqueUserService: IsUniqueUserService
+  private readonly passwordEncoder: PasswordEncoderService
+  private readonly repository: UserRepository
 
-  public async execute(
-    data: CreateUserUseCaseRequest
-  ): CreateUserUseCaseResponse {
-    const [email, emailErr] = unwrap(Email.create(data.email))
-    if (emailErr) {
-      return err(emailErr)
+  constructor(
+    isUniqueEmailService: IsUniqueEmailService,
+    isUniqueUserService: IsUniqueUserService,
+    passwordEncoder: PasswordEncoderService,
+    repository: UserRepository
+  ) {
+    this.isUniqueEmailService = isUniqueEmailService
+    this.isUniqueUserService = isUniqueUserService
+    this.passwordEncoder = passwordEncoder
+    this.repository = repository
+  }
+
+  async execute(data: CreateUserUseCaseRequest): CreateUserUseCaseResponse {
+    const isUniqueEmail = await this.isUniqueEmailService.execute(data.email)
+    if (!isUniqueEmail.ok) {
+      return isUniqueEmail
     }
 
-    const isUniqueUser = await this.isUniqueEmailService.execute(email)
-    if (!isUniqueUser.isOk) {
-      return err(isUniqueUser.error)
+    const id = UserId.create({ email: data.email, username: data.username })
+    if (!id.ok) {
+      return id
     }
 
-    const [username, usernameErr] = unwrap(Username.create(data.username))
-    if (usernameErr) {
-      return err(usernameErr)
+    const isUnique = await this.isUniqueUserService.execute(id.value)
+    if (!isUnique.ok) {
+      return isUnique
     }
 
-    const userId = new UserId(email, username)
-
-    const [plainPassword, passwordErr] = unwrap(Password.create(data.password))
-    if (passwordErr) {
-      return err(passwordErr)
+    const plainPassword = Password.create(data.password)
+    if (!plainPassword.ok) {
+      return plainPassword
     }
 
-    const hash = await this.passwordEncoder.encode(plainPassword.value)
-
-    const newUser = await this.repository.create(
-      new User(userId, { password: Password.unsafeCreate(hash) })
+    const hashedPassword = await this.passwordEncoder.encode(
+      plainPassword.value.value
     )
 
-    return ok(UserDTOMapper.toDTO(newUser))
+    const user = User.create({
+      id: id.value,
+      password: Password.unsafeCreate(hashedPassword),
+    })
+
+    const newUser = await this.repository.save(user)
+    return ok(toDTO(newUser))
   }
 }

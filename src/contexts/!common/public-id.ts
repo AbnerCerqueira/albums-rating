@@ -1,13 +1,19 @@
-import { uuidv7 } from 'uuidv7'
+import { randomUUID } from 'node:crypto'
+import { ValueObject } from './value-object'
 
-export class PublicId {
-  private readonly id: string
-
-  public constructor(id?: string) {
-    this.id = id ?? uuidv7()
+export class PublicId extends ValueObject<string> {
+  private constructor(value: string) {
+    super(value)
   }
 
-  public toString(): string {
-    return this.id
+  static create(value?: string): PublicId {
+    if (value) {
+      return new PublicId(value.trim().toLowerCase())
+    }
+    return new PublicId(randomUUID())
+  }
+
+  get value(): string {
+    return this._value
   }
 }

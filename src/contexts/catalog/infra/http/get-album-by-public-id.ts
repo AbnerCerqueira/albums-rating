@@ -16,12 +16,12 @@ export const getAlbumByPublicIdRoute: FastifyPluginCallbackZod = (app) => {
     '/:publicId',
     {
       schema: {
-        tags: [tags.catalog],
         params,
         response: {
           [HttpStatus.OK]: zodAlbumDTO,
           [HttpStatus.NOT_FOUND]: InfraSchemaUtils.errorResponse,
         },
+        tags: [tags.catalog],
       },
     },
     async (request, reply) => {

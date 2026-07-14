@@ -9,11 +9,11 @@ import { Title } from '../domain/value-objects/title'
 import { type AlbumDTO, AlbumDTOMapper } from './album-dto'
 
 export const zodCreateAlbumUseCaseRequest = z.object({
-  title: z.string(),
   artist: z.string(),
-  releaseDate: z.iso.date(),
-  genre: z.string(),
   format: z.enum(FORMATS),
+  genre: z.string(),
+  releaseDate: z.iso.date(),
+  title: z.string(),
 })
 
 export type CreateAlbumUserCaseRequest = z.infer<

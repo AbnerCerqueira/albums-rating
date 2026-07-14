@@ -34,11 +34,11 @@ function createPayload(qty = 1): CreateAlbumUserCaseRequest[] {
     const releaseDate = new Date().toISOString().split('T')[0]
 
     return {
-      title,
       artist,
       format,
       genre,
       releaseDate,
+      title,
     }
   })
 }
@@ -47,4 +47,4 @@ const E2E = {
   createPayload,
 }
 
-export const AlbumFactory = { UNIT_OR_INTEGRATION, E2E }
+export const AlbumFactory = { E2E, UNIT_OR_INTEGRATION }

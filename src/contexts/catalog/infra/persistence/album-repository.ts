@@ -101,8 +101,8 @@ export class MongooseAlbumRepository implements AlbumRepository {
     }
 
     return {
-      'domainId.title': domainId.title,
       'domainId.artist': domainId.artist,
+      'domainId.title': domainId.title,
     }
   }
 }

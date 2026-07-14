@@ -25,12 +25,12 @@ export const app = fastify({
 app.setErrorHandler((error, request, reply) => {
   const context = {
     http: {
-      path: request.url,
       method: request.method,
+      path: request.url,
       request: {
         id: request.id,
-        queryParams: request.query,
         pathParams: request.params,
+        queryParams: request.query,
       },
     },
   }
@@ -70,19 +70,19 @@ app.register(fastifyJwt, {
 if (env.PROFILE === 'development') {
   app.register(fastifySwagger, {
     openapi: {
-      info: {
-        title: 'My albums',
-        description: 'API for music review',
-        version: '1.0.0',
-      },
       components: {
         securitySchemes: {
           bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
             bearerFormat: 'JWT',
+            scheme: 'bearer',
+            type: 'http',
           },
         },
+      },
+      info: {
+        description: 'API for music review',
+        title: 'My albums',
+        version: '1.0.0',
       },
       servers: [],
       tags: [

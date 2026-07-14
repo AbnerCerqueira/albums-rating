@@ -1,5 +1,5 @@
 import z from 'zod'
-import type { DomainError } from '@/contexts/!common/domain-error'
+import type { InvalidPaginationError } from '@/contexts/!common/errors'
 import { Pagination } from '@/contexts/!common/pagination'
 import { err, ok, type Result, unwrap } from '@/contexts/!common/result'
 import {
@@ -28,7 +28,7 @@ const paginatedRoutesResponse = z.object({
 
 function validatePagination(
   query: z.infer<typeof paginationQuerystring>
-): Result<Pagination | undefined, DomainError.InvalidArgument> {
+): Result<Pagination | undefined, InvalidPaginationError> {
   if (!(query.page && query.size)) {
     return ok(undefined)
   }
@@ -40,9 +40,9 @@ function validatePagination(
 }
 
 export const InfraSchemaUtils = {
-  validatePagination,
-  paginatedRoutesResponse,
-  searchStringOptionsQuerystring,
-  paginationQuerystring,
   errorResponse,
+  paginatedRoutesResponse,
+  paginationQuerystring,
+  searchStringOptionsQuerystring,
+  validatePagination,
 }

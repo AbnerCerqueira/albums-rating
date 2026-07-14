@@ -8,12 +8,12 @@ export interface Transport {
 
 export type LogContext = Record<string, unknown>
 export interface Logger {
-  debug(message: string, context?: LogContext): void
-  info(message: string, context?: LogContext): void
-  warn(message: string, context?: LogContext): void
-  error(exception: Error, context?: LogContext): void
   addTransport(transport: Transport): void
+  debug(message: string, context?: LogContext): void
+  error(exception: Error, context?: LogContext): void
+  info(message: string, context?: LogContext): void
   removeTransport(transport: Transport): void
+  warn(message: string, context?: LogContext): void
 }
 
 export class LoggerImpl implements Logger {
@@ -39,7 +39,7 @@ export class LoggerImpl implements Logger {
 
   public error(exception: Error, context?: LogContext): void {
     for (const transport of this.transports) {
-      transport.log('error', exception.message, { exception, context })
+      transport.log('error', exception.message, { context, exception })
     }
   }
 

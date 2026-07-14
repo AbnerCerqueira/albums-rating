@@ -23,13 +23,13 @@ export const genreSearchRoute: FastifyPluginCallbackZod = (app) => {
     '/search/available-genres',
     {
       schema: {
-        tags: [tags.catalog],
         querystring,
         response: {
           [HttpStatus.OK]: okResponse,
           [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
           [HttpStatus.INTERNAL_SERVER_ERROR]: InfraSchemaUtils.errorResponse,
         },
+        tags: [tags.catalog],
       },
     },
     async (request, reply) => {
@@ -50,8 +50,8 @@ export const genreSearchRoute: FastifyPluginCallbackZod = (app) => {
 
       return reply.status(HttpStatus.OK).send({
         currentPage: pagination?.page,
-        size: pagination?.size,
         genres: albums.map((a) => a.props.genre),
+        size: pagination?.size,
       })
     }
   )

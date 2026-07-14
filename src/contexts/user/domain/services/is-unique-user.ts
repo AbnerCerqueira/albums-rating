@@ -1,19 +1,19 @@
-import { DomainError } from '@/contexts/!common/domain-error'
+import { ConflictError } from '@/contexts/!common/errors'
 import { err, ok, type Result } from '@/contexts/!common/result'
-import type { UserRepository } from '../user-repository'
-import type { UserId } from '../value-objects/user-id'
+import type { UserRepository } from '@/contexts/user/domain/user-repository'
+import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 
-export namespace DomainService {
-  export class IsUniqueUser {
-    public constructor(private readonly userRepository: UserRepository) {}
+export class IsUniqueUserService {
+  private readonly userRepository: UserRepository
 
-    public async execute(
-      id: UserId
-    ): Promise<Result<UserId, DomainError.Conflict>> {
-      const existingUser = await this.userRepository.findById(id)
-      return existingUser === null
-        ? ok(id)
-        : err(new DomainError.Conflict('Usuário já existe'))
-    }
+  constructor(userRepository: UserRepository) {
+    this.userRepository = userRepository
+  }
+
+  async execute(id: UserId): Promise<Result<void, ConflictError>> {
+    const existingUser = await this.userRepository.findById(id)
+    return existingUser === null
+      ? ok(undefined)
+      : err(new ConflictError('Email e Username'))
   }
 }

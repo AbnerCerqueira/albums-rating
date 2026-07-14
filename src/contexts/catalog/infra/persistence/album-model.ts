@@ -17,24 +17,23 @@ export type AlbumData = {
 const albumSchema = new Schema<AlbumData>(
   {
     domainId: {
-      title: String,
       artist: String,
+      title: String,
     },
     format: {
-      type: String,
       enum: FORMATS,
       required: true,
+      type: String,
     },
-    genre: { type: String, required: true },
-    publicId: { type: String, required: true, unique: true, index: true },
+    genre: { required: true, type: String },
+    publicId: { index: true, required: true, type: String, unique: true },
     releaseDate: {
-      type: Date,
       required: true,
+      type: Date,
     },
   },
   {
     timestamps: true,
-    versionKey: false,
     toObject: {
       // biome-ignore lint/suspicious/noExplicitAny: faz sentido
       transform(_, ret: any) {
@@ -43,11 +42,12 @@ const albumSchema = new Schema<AlbumData>(
         return obj
       },
     },
+    versionKey: false,
   }
 )
 
 albumSchema.index(
-  { 'domainId.title': 1, 'domainId.artist': 1 },
+  { 'domainId.artist': 1, 'domainId.title': 1 },
   { unique: true }
 )
 

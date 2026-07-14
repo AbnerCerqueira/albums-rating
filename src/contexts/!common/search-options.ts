@@ -10,6 +10,6 @@ export type SearchStringOptions = {
 }
 
 export const defaultSearchStringOptions: SearchStringOptions = {
-  matchType: 'perfect',
   combineWith: 'and',
+  matchType: 'perfect',
 }

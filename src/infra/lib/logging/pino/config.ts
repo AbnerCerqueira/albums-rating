@@ -9,9 +9,9 @@ export const serializers = {
     }
 
     return {
-      type: err.name,
-      stack: err.stack,
       cause: err.cause,
+      stack: err.stack,
+      type: err.name,
     }
   },
 }
@@ -24,13 +24,13 @@ const formatters = {
 
 const pinoKeys = {
   base: null,
-  timestamp: pino.stdTimeFunctions.isoTime,
-  messageKey: 'message',
   errorKey: 'exception',
+  messageKey: 'message',
+  timestamp: pino.stdTimeFunctions.isoTime,
 }
 
 export const pinoBaseConfig = {
-  serializers,
   formatters,
+  serializers,
   ...pinoKeys,
 }

@@ -1,11 +1,9 @@
 import bcrypt from 'bcryptjs'
-import type { ApplicationService } from '@/contexts/user/application/password-encoder'
+import type { PasswordEncoderService } from '@/contexts/user/application/services/password-encoder-service'
 import { env } from '@/infra/config/envs'
 
-export class BcryptPasswordEncoder
-  implements ApplicationService.PasswordEncoder
-{
-  private readonly salt = env.PROFILE !== 'test' ? 12 : 0
+export class BcryptPasswordEncoder implements PasswordEncoderService {
+  private readonly salt = env.PROFILE === 'test' ? 0 : 12
 
   public encode(password: string): Promise<string> {
     return bcrypt.hash(password, this.salt)

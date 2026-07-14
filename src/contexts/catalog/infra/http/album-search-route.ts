@@ -26,12 +26,12 @@ function normalizeFormatQuery(val: unknown): Format[] | undefined {
 }
 
 const querystring = z.object({
-  title: z.string().optional(),
   artist: z.string().optional(),
-  genre: z.string().optional(),
   format: z
     .preprocess(normalizeFormatQuery, zodFormatSchema.array())
     .optional(),
+  genre: z.string().optional(),
+  title: z.string().optional(),
   ...InfraSchemaUtils.searchStringOptionsQuerystring.shape,
 })
 
@@ -40,13 +40,13 @@ export const albumSearchRoute: FastifyPluginCallbackZod = (app) => {
     '/search',
     {
       schema: {
-        tags: [tags.catalog],
         querystring,
         response: {
           [HttpStatus.OK]: okResponse,
           [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
           [HttpStatus.INTERNAL_SERVER_ERROR]: InfraSchemaUtils.errorResponse,
         },
+        tags: [tags.catalog],
       },
     },
     async (request, reply) => {
@@ -66,9 +66,9 @@ export const albumSearchRoute: FastifyPluginCallbackZod = (app) => {
       )
 
       return reply.status(HttpStatus.OK).send({
+        albums: albums.map((a) => AlbumDTOMapper.toDTO(a)),
         currentPage: pagination?.page,
         size: pagination?.size,
-        albums: albums.map((a) => AlbumDTOMapper.toDTO(a)),
       })
     }
   )
