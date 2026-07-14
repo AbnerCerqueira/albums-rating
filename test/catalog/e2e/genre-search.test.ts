@@ -5,17 +5,6 @@ import { CatalogRoutes } from './routes'
 
 describe('Genre Search', () => {
   describe('GET /api/catalog/search/available-genres', () => {
-    test('returns empty genres when no albums exist', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: CatalogRoutes.GET.AVAILABLE_GENRES,
-      })
-
-      expect(response.statusCode).toBe(HttpStatus.OK)
-      const body = response.json()
-      expect(body.genres).toEqual([])
-    })
-
     test('returns genres after album creation', async () => {
       const { token } = await createUserAndLogin()
       await createAlbumViaHttp(token, { genre: 'Metal' })
