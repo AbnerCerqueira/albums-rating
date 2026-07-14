@@ -1,0 +1,9 @@
+export const ErrorCode = {
+  CONFLICT_ERROR: 'CONFLICT_ERROR',
+  INVALID_ARGUMENT: 'INVALID_ARGUMENT',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  INVALID_PAGINATION: 'INVALID_PAGINATION',
+  NOT_FOUND: 'NOT_FOUND',
+} as const
+
+export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode]

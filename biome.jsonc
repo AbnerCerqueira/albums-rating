@@ -1,25 +1,37 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "linter": {
-    "rules": {
-      "style": {
-        "useConsistentMemberAccessibility": {
-          "level": "warn",
-          "options": {
-            "accessibility": "explicit"
-          }
-        },
-        "noParameterProperties": "off",
-        "useConsistentTypeDefinitions": "off",
-        "noNamespace": "off"
-      }
-    }
-  },
+  "extends": ["ultracite/biome/core", "ultracite/biome/vitest"],
   "javascript": {
     "formatter": {
       "semicolons": "asNeeded",
       "quoteStyle": "single"
-    }
+    },
+    "globals": [
+      "describe",
+      "test",
+      "expect",
+      "beforeEach",
+      "afterEach",
+      "beforeAll",
+      "afterAll",
+      "vi"
+    ]
   },
-  "extends": ["ultracite/core"]
+  "overrides": [
+    {
+      "includes": ["**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConsistentTypeDefinitions": {
+              "level": "off"
+            },
+            "noParameterProperties": {
+              "level": "off"
+            }
+          }
+        }
+      }
+    }
+  ]
 }

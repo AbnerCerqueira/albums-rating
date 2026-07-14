@@ -7,10 +7,10 @@ async function main() {
   await startServer()
 
   const port = env.PORT
-  app.listen({ port })
+  app.listen({ host: '0.0.0.0', port })
   logger.info('server is running', { port })
 }
 
 main().catch((err) => {
-  logger.error(err)
+  logger.error('internal server error', err)
 })
