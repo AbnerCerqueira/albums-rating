@@ -34,6 +34,14 @@ export class InvalidCredentialsError extends DomainError {
   }
 }
 
+export class ForbiddenError extends DomainError {
+  readonly code = EC.FORBIDDEN
+
+  constructor(message = 'Acesso negado') {
+    super(message)
+  }
+}
+
 export class InvalidArgumentError extends DomainError {
   readonly code = EC.INVALID_ARGUMENT
 }
