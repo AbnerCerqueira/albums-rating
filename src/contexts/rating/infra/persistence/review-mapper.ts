@@ -26,7 +26,7 @@ function toPersistence(review: Review): ReviewData {
     publicId: review.publicId.value,
     rating: review.rating.value,
     reviewedAt: review.reviewedAt.value,
-    reviewText: review.reviewText?.value,
+    reviewText: review.reviewText ? review.reviewText.value : null,
     updatedAt: review.getUpdateDate(),
   }
 }
@@ -63,7 +63,7 @@ function toDomain(data: ReviewData): Review {
     publicId: PublicId.unsafe(publicId),
     rating: Rating.unsafe(rating),
     reviewedAt: ReviewedAt.unsafe(new Date(reviewedAt)),
-    reviewText: reviewText ? ReviewText.unsafe(reviewText) : undefined,
+    reviewText: reviewText ? ReviewText.unsafe(reviewText) : null,
     updatedAt: new Date(updatedAt),
   })
 }

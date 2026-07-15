@@ -7,14 +7,14 @@ import type { ReviewedAt } from './value-objects/reviewed-at'
 export type ReviewProps = {
   id: ReviewId
   isFavorite: boolean
-  isEdited: boolean
   rating: Rating
-  reviewText?: ReviewText
+  reviewText: ReviewText | null
   reviewedAt: ReviewedAt
 }
 
 export type ReviewPersistenceProps = ReviewProps & {
   publicId: PublicId
+  isEdited: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -25,7 +25,7 @@ export class Review {
     readonly isFavorite: boolean,
     readonly isEdited: boolean,
     readonly rating: Rating,
-    readonly reviewText: ReviewText | undefined,
+    readonly reviewText: ReviewText | null,
     readonly reviewedAt: ReviewedAt,
     readonly publicId: PublicId,
     private readonly createdAt: Date,
@@ -36,12 +36,68 @@ export class Review {
     return new Review(
       props.id,
       props.isFavorite,
-      props.isEdited,
+      false,
       props.rating,
       props.reviewText,
       props.reviewedAt,
       PublicId.create(),
       new Date(),
+      new Date()
+    )
+  }
+
+  edit(newText: ReviewText) {
+    return new Review(
+      this.id,
+      this.isFavorite,
+      true,
+      this.rating,
+      newText,
+      this.reviewedAt,
+      this.publicId,
+      new Date(this.createdAt.getTime()),
+      new Date()
+    )
+  }
+
+  clearText() {
+    return new Review(
+      this.id,
+      this.isFavorite,
+      true,
+      this.rating,
+      null,
+      this.reviewedAt,
+      this.publicId,
+      new Date(this.createdAt.getTime()),
+      new Date()
+    )
+  }
+
+  changeRating(newRating: Rating) {
+    return new Review(
+      this.id,
+      this.isFavorite,
+      this.isEdited,
+      newRating,
+      this.reviewText,
+      this.reviewedAt,
+      this.publicId,
+      new Date(this.createdAt.getTime()),
+      new Date()
+    )
+  }
+
+  toggleFavorite(isFavorite: boolean) {
+    return new Review(
+      this.id,
+      isFavorite,
+      this.isEdited,
+      this.rating,
+      this.reviewText,
+      this.reviewedAt,
+      this.publicId,
+      new Date(this.createdAt.getTime()),
       new Date()
     )
   }

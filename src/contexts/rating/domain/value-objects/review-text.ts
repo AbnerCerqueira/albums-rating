@@ -9,6 +9,13 @@ export class ReviewText {
     if (!trimmed) {
       return err(new InvalidArgumentError('Sua review não pode estar vazia'))
     }
+
+    if (trimmed.length > 5000) {
+      return err(
+        new InvalidArgumentError('Sua review não pode exceder 5000 caracteres')
+      )
+    }
+
     return ok(new ReviewText(trimmed))
   }
 

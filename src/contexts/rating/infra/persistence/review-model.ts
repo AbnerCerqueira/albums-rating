@@ -13,7 +13,7 @@ export type ReviewData = {
   isFavorite: boolean
   isEdited: boolean
   rating: number
-  reviewText?: string
+  reviewText: string | null
   reviewedAt: Date
   createdAt: Date
   updatedAt: Date

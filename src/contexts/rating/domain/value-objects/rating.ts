@@ -12,6 +12,11 @@ export class Rating {
     if (rating > 5) {
       return err(new InvalidArgumentError('A nota máxima de avaliação é 5'))
     }
+
+    if (rating % 0.5 !== 0) {
+      return err(new InvalidArgumentError('A nota deve ser um múltiplo de 0.5'))
+    }
+
     return ok(new Rating(rating))
   }
 

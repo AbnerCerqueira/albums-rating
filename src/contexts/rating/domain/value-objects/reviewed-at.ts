@@ -9,6 +9,12 @@ export class ReviewedAt {
       return err(new InvalidArgumentError('Data inválida'))
     }
 
+    if (reviewedAt.getTime() > Date.now()) {
+      return err(
+        new InvalidArgumentError('A data da review não pode ser futura')
+      )
+    }
+
     return ok(new ReviewedAt(reviewedAt))
   }
 

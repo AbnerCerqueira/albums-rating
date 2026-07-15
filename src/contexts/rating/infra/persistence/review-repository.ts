@@ -7,7 +7,7 @@ import type { ReviewRepository } from '@/contexts/rating/domain/review-repositor
 import type { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import { ReviewMapper } from './review-mapper'
-import { type ReviewDataDomainId, ReviewModel } from './review-model'
+import { ReviewModel } from './review-model'
 
 export class MongooseReviewRepository implements ReviewRepository {
   private readonly model = ReviewModel
@@ -83,12 +83,12 @@ export class MongooseReviewRepository implements ReviewRepository {
     return result.deletedCount > 0
   }
 
-  private getFlattenObjOfDomainId(id: ReviewId): ReviewDataDomainId {
+  private getFlattenObjOfDomainId(id: ReviewId) {
     return {
-      albumArtist: id.albumId.artist.value,
-      albumTitle: id.albumId.title.value,
-      userEmail: id.userId.email.value,
-      username: id.userId.username.value,
+      'domainId.albumArtist': id.albumId.artist.value,
+      'domainId.albumTitle': id.albumId.title.value,
+      'domainId.userEmail': id.userId.email.value,
+      'domainId.username': id.userId.username.value,
     }
   }
 }
