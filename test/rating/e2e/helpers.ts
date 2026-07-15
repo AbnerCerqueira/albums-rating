@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker'
 import { app } from '@/app'
 import { createAlbumViaHttp } from '../../catalog/e2e/helpers'
 import { createAndLogin } from '../../user/e2e/helpers'
@@ -22,7 +21,7 @@ export function createReviewPayload(
     reviewText:
       'reviewText' in (overrides ?? {})
         ? overrides?.reviewText
-        : faker.lorem.sentence(),
+        : 'This is a test review text.',
   }
 }
 

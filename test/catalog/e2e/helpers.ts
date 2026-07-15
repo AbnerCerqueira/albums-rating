@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto'
-import { faker } from '@faker-js/faker'
 import { app } from '@/app'
 import { FORMATS, type Format } from '@/contexts/catalog/domain/album'
 import { createAndLogin } from '../../user/e2e/helpers'
@@ -18,13 +17,12 @@ export function createAlbumPayload(
 ): AlbumPayload {
   const suffix = randomUUID().slice(0, 8)
   return {
-    artist: overrides?.artist ?? `${faker.person.firstName()}-${suffix}`,
+    artist: overrides?.artist ?? `Artist-${suffix}`,
     format:
       overrides?.format ?? FORMATS[Math.floor(Math.random() * FORMATS.length)],
-    genre: overrides?.genre ?? faker.music.genre(),
-    releaseDate:
-      overrides?.releaseDate ?? faker.date.past().toISOString().split('T')[0],
-    title: overrides?.title ?? `${faker.music.songName()}-${suffix}`,
+    genre: overrides?.genre ?? 'Rock',
+    releaseDate: overrides?.releaseDate ?? '2023-01-15',
+    title: overrides?.title ?? `Album-${suffix}`,
   }
 }
 
