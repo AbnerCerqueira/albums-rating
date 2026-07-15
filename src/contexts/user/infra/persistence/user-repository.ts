@@ -1,3 +1,4 @@
+import type { PublicId } from '@/contexts/!common/public-id'
 import type { User } from '@/contexts/user/domain/user'
 import type { UserRepository } from '@/contexts/user/domain/user-repository'
 import type { Email } from '@/contexts/user/domain/value-objects/email'
@@ -46,6 +47,12 @@ export class MongooseUserRepository implements UserRepository {
     const doc = await this.model
       .findOne({ 'domainId.username': username.value })
       .lean()
+
+    return doc ? UserMapper.toDomain(doc) : null
+  }
+
+  async findByPublicId(publicId: PublicId): Promise<User | null> {
+    const doc = await this.model.findOne({ publicId: publicId.value }).lean()
 
     return doc ? UserMapper.toDomain(doc) : null
   }

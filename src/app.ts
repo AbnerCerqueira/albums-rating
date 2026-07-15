@@ -95,6 +95,9 @@ if (env.PROFILE === 'development') {
         {
           name: tags.catalog,
         },
+        {
+          name: tags.rating,
+        },
       ],
     },
     transform: jsonSchemaTransform,

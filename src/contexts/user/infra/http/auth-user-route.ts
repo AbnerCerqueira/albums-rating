@@ -29,8 +29,8 @@ export const authUserRoute: FastifyPluginCallbackZod = (app) => {
       }
 
       const token = await reply.jwtSign(
-        {},
-        { sign: { expiresIn: '1d', sub: result.value.username } }
+        { sub: result.value.publicId },
+        { sign: { expiresIn: '1d' } }
       )
 
       return reply.send({ token })
