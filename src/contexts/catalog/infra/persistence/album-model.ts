@@ -16,23 +16,29 @@ export type AlbumData = {
   updatedAt: Date
 }
 
-const albumSchema = new Schema<AlbumData>({
-  domainId: {
-    artist: String,
-    title: String,
+const albumSchema = new Schema<AlbumData>(
+  {
+    domainId: {
+      artist: String,
+      title: String,
+    },
+    format: {
+      enum: FORMATS,
+      required: true,
+      type: String,
+    },
+    genre: { required: true, type: String },
+    publicId: { index: true, required: true, type: String, unique: true },
+    releaseDate: {
+      required: true,
+      type: Date,
+    },
   },
-  format: {
-    enum: FORMATS,
-    required: true,
-    type: String,
-  },
-  genre: { required: true, type: String },
-  publicId: { index: true, required: true, type: String, unique: true },
-  releaseDate: {
-    required: true,
-    type: Date,
-  },
-})
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+)
 
 albumSchema.index(
   { 'domainId.artist': 1, 'domainId.title': 1 },

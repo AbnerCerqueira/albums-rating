@@ -19,44 +19,50 @@ export type ReviewData = {
   updatedAt: Date
 }
 
-const reviewSchema = new Schema<ReviewData>({
-  domainId: {
-    albumArtist: String,
-    albumTitle: String,
-    userEmail: String,
-    username: String,
+const reviewSchema = new Schema<ReviewData>(
+  {
+    domainId: {
+      albumArtist: String,
+      albumTitle: String,
+      userEmail: String,
+      username: String,
+    },
+    isEdited: {
+      default: false,
+      required: true,
+      type: Boolean,
+    },
+    isFavorite: {
+      default: false,
+      required: true,
+      type: Boolean,
+    },
+    publicId: {
+      index: true,
+      required: true,
+      type: String,
+      unique: true,
+    },
+    rating: {
+      max: 5,
+      min: 0,
+      required: true,
+      type: Number,
+    },
+    reviewedAt: {
+      required: true,
+      type: Date,
+    },
+    reviewText: {
+      required: false,
+      type: String,
+    },
   },
-  isEdited: {
-    default: false,
-    required: true,
-    type: Boolean,
-  },
-  isFavorite: {
-    default: false,
-    required: true,
-    type: Boolean,
-  },
-  publicId: {
-    index: true,
-    required: true,
-    type: String,
-    unique: true,
-  },
-  rating: {
-    max: 5,
-    min: 0,
-    required: true,
-    type: Number,
-  },
-  reviewedAt: {
-    required: true,
-    type: Date,
-  },
-  reviewText: {
-    required: false,
-    type: String,
-  },
-})
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+)
 
 reviewSchema.index(
   {
