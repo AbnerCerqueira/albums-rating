@@ -33,7 +33,7 @@ describe('Create Review', () => {
     test('creates review without reviewText', async () => {
       const { token, albumPublicId } = await setupUserAndAlbum()
       const { response } = await createReviewViaHttp(token, albumPublicId, {
-        reviewText: undefined,
+        reviewText: null,
       })
 
       expect(response.statusCode).toBe(HttpStatus.OK)

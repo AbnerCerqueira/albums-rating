@@ -19,7 +19,7 @@ export const zodCreateReviewUseCaseRequest = z.object({
   albumPublicId: z.string(),
   isFavorite: z.boolean().default(false),
   rating: z.number(),
-  reviewText: z.string().optional(),
+  reviewText: z.string().nullable(),
 })
 
 export type CreateReviewUseCaseRequest = z.infer<
