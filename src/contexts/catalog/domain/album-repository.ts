@@ -1,4 +1,4 @@
-import type { Pagination } from '@/contexts/!common/pagination'
+import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
 import type { SearchOptions } from '@/contexts/!common/search-options'
 import type { Album, Format } from './album'
@@ -12,7 +12,7 @@ export type SearchAlbumParams = {
 }
 
 export interface AlbumRepository {
-  find: (pagination?: Pagination) => Promise<Album[]>
+  find: (pagination?: Pagination) => Promise<PaginatedResult<Album>>
   findById: (id: AlbumId) => Promise<Album | null>
   findByPublicId: (publicId: PublicId) => Promise<Album | null>
   save: (album: Album) => Promise<Album>
@@ -20,5 +20,5 @@ export interface AlbumRepository {
     params: SearchAlbumParams,
     pagination?: Pagination,
     options?: SearchOptions
-  ) => Promise<Album[]>
+  ) => Promise<PaginatedResult<Album>>
 }

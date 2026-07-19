@@ -49,15 +49,17 @@ export const getReviewsByUserRoute: FastifyPluginCallbackZod = (app) => {
           .send({ message: userResult.error.message })
       }
 
-      const reviews = await reviewRepository.findByUser(
+      const result = await reviewRepository.findByUser(
         userResult.value.id,
         paginationResult.value
       )
 
       return reply.status(HttpStatus.OK).send({
-        currentPage: paginationResult.value?.page,
-        reviews: reviews.map((r) => ReviewDTOMapper.toDTO(r)),
-        size: paginationResult.value?.size,
+        currentPage: result.currentPage,
+        reviews: result.items.map((r) => ReviewDTOMapper.toDTO(r)),
+        size: result.size,
+        total: result.total,
+        totalPages: result.totalPages,
       })
     }
   )

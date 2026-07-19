@@ -28,3 +28,25 @@ export class Pagination {
     return new Pagination(page, size)
   }
 }
+
+export type PaginatedResult<T> = {
+  items: T[]
+  total: number
+  currentPage: number
+  size: number
+  totalPages: number
+}
+
+export function toPaginatedResult<T>(
+  items: T[],
+  total: number,
+  pagination: Pagination
+): PaginatedResult<T> {
+  return {
+    currentPage: pagination.page,
+    items,
+    size: pagination.size,
+    total,
+    totalPages: Math.ceil(total / pagination.size),
+  }
+}

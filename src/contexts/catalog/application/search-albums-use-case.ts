@@ -18,6 +18,8 @@ export type SearchAlbumsUseCaseResponse = Promise<{
   albums: AlbumDTO[]
   currentPage?: number
   size?: number
+  total?: number
+  totalPages?: number
 }>
 
 export class SearchAlbumsUseCase {
@@ -27,16 +29,18 @@ export class SearchAlbumsUseCase {
     const { artist, title, genre, format, matchType, combineWith, pagination } =
       data
 
-    const albums = await this.repository.search(
+    const result = await this.repository.search(
       { artist, format, genre, title },
       pagination,
       { combineWith, matchType }
     )
 
     return {
-      albums: albums.map((a) => AlbumDTOMapper.toDTO(a)),
-      currentPage: pagination?.page,
-      size: pagination?.size,
+      albums: result.items.map((a) => AlbumDTOMapper.toDTO(a)),
+      currentPage: result.currentPage,
+      size: result.size,
+      total: result.total,
+      totalPages: result.totalPages,
     }
   }
 }

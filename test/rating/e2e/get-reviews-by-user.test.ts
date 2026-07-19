@@ -20,6 +20,8 @@ describe('Get Reviews By User', () => {
         reviews: Record<string, unknown>[]
         currentPage?: number
         size?: number
+        total?: number
+        totalPages?: number
       }>()
       expect(body.reviews).toBeInstanceOf(Array)
       expect(body.reviews.length).toBeGreaterThanOrEqual(1)
@@ -61,9 +63,13 @@ describe('Get Reviews By User', () => {
         reviews: unknown[]
         currentPage?: number
         size?: number
+        total?: number
+        totalPages?: number
       }>()
       expect(body.currentPage).toBe(1)
       expect(body.size).toBe(10)
+      expect(body.total).toBe(0)
+      expect(body.totalPages).toBe(0)
     })
 
     test('returns 400 for invalid pagination', async () => {

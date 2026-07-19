@@ -1,5 +1,5 @@
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
-import type { Pagination } from '@/contexts/!common/pagination'
+import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
 import type { SearchOptions } from '@/contexts/!common/search-options'
 import type { Album } from '@/contexts/catalog/domain/album'
@@ -38,14 +38,13 @@ export class MongooseAlbumRepository implements AlbumRepository {
     return foundAlbum ? AlbumMapper.toDomain(foundAlbum) : null
   }
 
-  async find(pagination?: Pagination): Promise<Album[]> {
-    const query = this.model.find()
+  async find(pagination?: Pagination): Promise<PaginatedResult<Album>> {
+    const result = await MongooseUtils.paginateFind(this.model, {}, pagination)
 
-    MongooseUtils.withPagination(query, pagination)
-
-    const docs = await query.exec()
-
-    return docs.map((doc) => AlbumMapper.toDomain(doc))
+    return {
+      ...result,
+      items: result.items.map((doc) => AlbumMapper.toDomain(doc)),
+    }
   }
 
   async findByPublicId(publicId: PublicId): Promise<Album | null> {
@@ -58,22 +57,27 @@ export class MongooseAlbumRepository implements AlbumRepository {
     params: SearchAlbumParams,
     pagination?: Pagination,
     options?: SearchOptions
-  ): Promise<Album[]> {
+  ): Promise<PaginatedResult<Album>> {
     const fieldsToSearch = AlbumMapper.toPersistenceSearchFields(params)
 
     const match = MongooseUtils.buildSearchPipeline(fieldsToSearch, options)
 
-    const docs: AlbumData[] = []
+    let result: PaginatedResult<AlbumData>
 
-    const cursor = match.length
-      ? this.model.aggregate<AlbumData>(match)
-      : this.model.find().lean()
+    if (match.length) {
+      result = await MongooseUtils.paginateAggregate(
+        this.model,
+        match,
+        pagination
+      )
+    } else {
+      result = await MongooseUtils.paginateFind(this.model, {}, pagination)
+    }
 
-    MongooseUtils.withPagination(cursor, pagination)
-
-    docs.push(...(await cursor.exec()))
-
-    return docs.map((doc) => AlbumMapper.toDomain(doc))
+    return {
+      ...result,
+      items: result.items.map((doc) => AlbumMapper.toDomain(doc)),
+    }
   }
 
   private getFlattenObjOfDomainId(id: AlbumId) {

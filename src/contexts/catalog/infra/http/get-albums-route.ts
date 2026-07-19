@@ -38,12 +38,14 @@ export const getAlbumsRoute: FastifyPluginCallbackZod = (app) => {
 
       const pagination = paginationResult.value
 
-      const albums = await albumRepository.find(pagination)
+      const result = await albumRepository.find(pagination)
 
       return reply.status(HttpStatus.OK).send({
-        albums: albums.map((a) => AlbumDTOMapper.toDTO(a)),
-        currentPage: pagination?.page,
-        size: pagination?.size,
+        albums: result.items.map((a) => AlbumDTOMapper.toDTO(a)),
+        currentPage: result.currentPage,
+        size: result.size,
+        total: result.total,
+        totalPages: result.totalPages,
       })
     }
   )

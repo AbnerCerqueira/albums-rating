@@ -22,6 +22,8 @@ const searchOptionsQuerystring = z.object({
 const paginatedRoutesResponse = z.object({
   currentPage: z.number().optional(),
   size: z.number().optional(),
+  total: z.number().optional(),
+  totalPages: z.number().optional(),
 })
 
 export const InfraSchemaUtils = {

@@ -50,6 +50,11 @@ describe('Genre Search', () => {
       expect(body.genres.length).toBe(1)
       expect(body.currentPage).toBe(1)
       expect(body.size).toBe(1)
+      expect(body.total).toBeGreaterThanOrEqual(2)
+      expect(body.totalPages).toBeGreaterThanOrEqual(2)
+      expect(body.totalPages).toBe(
+        Math.ceil((body.total as number) / (body.size as number))
+      )
     })
   })
 })

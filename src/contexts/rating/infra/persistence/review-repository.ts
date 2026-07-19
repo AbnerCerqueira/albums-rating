@@ -1,5 +1,5 @@
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
-import type { Pagination } from '@/contexts/!common/pagination'
+import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import type { Review } from '@/contexts/rating/domain/review'
@@ -39,43 +39,62 @@ export class MongooseReviewRepository implements ReviewRepository {
     return doc ? ReviewMapper.toDomain(doc) : null
   }
 
-  async findByUser(userId: UserId, pagination?: Pagination): Promise<Review[]> {
-    const query = this.model.find({
+  async findByUser(
+    userId: UserId,
+    pagination?: Pagination
+  ): Promise<PaginatedResult<Review>> {
+    const filter = {
       'domainId.userEmail': userId.email.value,
       'domainId.username': userId.username.value,
-    })
+    }
 
-    MongooseUtils.withPagination(query, pagination)
+    const result = await MongooseUtils.paginateFind(
+      this.model,
+      filter,
+      pagination,
+      { reviewedAt: -1 }
+    )
 
-    const docs = await query.sort({ reviewedAt: -1 }).lean()
-
-    return docs.map((doc) => ReviewMapper.toDomain(doc))
+    return {
+      ...result,
+      items: result.items.map((doc) => ReviewMapper.toDomain(doc)),
+    }
   }
 
   async findByAlbum(
     albumId: AlbumId,
     pagination?: Pagination
-  ): Promise<Review[]> {
-    const query = this.model.find({
+  ): Promise<PaginatedResult<Review>> {
+    const filter = {
       'domainId.albumArtist': albumId.artist.value,
       'domainId.albumTitle': albumId.title.value,
-    })
+    }
 
-    MongooseUtils.withPagination(query, pagination)
+    const result = await MongooseUtils.paginateFind(
+      this.model,
+      filter,
+      pagination,
+      { reviewedAt: -1 }
+    )
 
-    const docs = await query.sort({ reviewedAt: -1 }).lean()
-
-    return docs.map((doc) => ReviewMapper.toDomain(doc))
+    return {
+      ...result,
+      items: result.items.map((doc) => ReviewMapper.toDomain(doc)),
+    }
   }
 
-  async findRecent(pagination?: Pagination): Promise<Review[]> {
-    const query = this.model.find().sort({ reviewedAt: -1 })
+  async findRecent(pagination?: Pagination): Promise<PaginatedResult<Review>> {
+    const result = await MongooseUtils.paginateFind(
+      this.model,
+      {},
+      pagination,
+      { reviewedAt: -1 }
+    )
 
-    MongooseUtils.withPagination(query, pagination)
-
-    const docs = await query.lean()
-
-    return docs.map((doc) => ReviewMapper.toDomain(doc))
+    return {
+      ...result,
+      items: result.items.map((doc) => ReviewMapper.toDomain(doc)),
+    }
   }
 
   async delete(id: ReviewId): Promise<boolean> {

@@ -1,6 +1,7 @@
 import { escapeRegExp } from 'lodash'
-import type { Aggregate, PipelineStage, Query } from 'mongoose'
-import type { Pagination } from './pagination'
+import type { FilterQuery, Model, PipelineStage } from 'mongoose'
+import type { PaginatedResult, Pagination } from './pagination'
+import { toPaginatedResult } from './pagination'
 import { defaultSearchOptions, type SearchOptions } from './search-options'
 
 function buildSearchPipeline(
@@ -46,19 +47,72 @@ function buildSearchPipeline(
   return [matchStage]
 }
 
-function withPagination(
-  // biome-ignore lint/suspicious/noExplicitAny: necessário
-  aggregate: Aggregate<any> | Query<any, any>,
-  pagination?: Pagination
-): void {
-  if (!pagination) {
-    return
+async function paginateFind<T>(
+  model: Model<T>,
+  filter: FilterQuery<T> = {},
+  pagination?: Pagination,
+  sort?: Record<string, 1 | -1 | 'asc' | 'desc'>
+): Promise<PaginatedResult<T>> {
+  const buildQuery = () => {
+    const q = model.find(filter)
+    return sort ? q.sort(sort) : q
   }
-  const { page, size } = pagination
-  aggregate.skip(size * (page - 1)).limit(size)
+
+  if (!pagination) {
+    const items = (await buildQuery().lean()) as T[]
+    return {
+      currentPage: 1,
+      items,
+      size: items.length,
+      total: items.length,
+      totalPages: 1,
+    }
+  }
+
+  const [items, total] = await Promise.all([
+    buildQuery()
+      .skip(pagination.size * (pagination.page - 1))
+      .limit(pagination.size)
+      .lean() as Promise<T[]>,
+    model.countDocuments(filter),
+  ])
+
+  return toPaginatedResult(items, total, pagination)
+}
+
+async function paginateAggregate<T>(
+  model: Model<T>,
+  pipeline: PipelineStage[] = [],
+  pagination?: Pagination
+): Promise<PaginatedResult<T>> {
+  if (!pagination) {
+    const items = await model.aggregate(pipeline)
+    return {
+      currentPage: 1,
+      items,
+      size: items.length,
+      total: items.length,
+      totalPages: 1,
+    }
+  }
+
+  const [countResult] = await model
+    .aggregate([...pipeline, { $count: 'count' }])
+    .exec()
+
+  const total = countResult?.count ?? 0
+
+  const items = await model
+    .aggregate(pipeline)
+    .skip(pagination.size * (pagination.page - 1))
+    .limit(pagination.size)
+    .exec()
+
+  return toPaginatedResult(items, total, pagination)
 }
 
 export const MongooseUtils = {
   buildSearchPipeline,
-  withPagination,
+  paginateAggregate,
+  paginateFind,
 }

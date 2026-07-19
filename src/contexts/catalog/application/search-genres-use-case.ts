@@ -12,6 +12,8 @@ export type SearchGenresUseCaseResponse = Promise<{
   genres: string[]
   currentPage?: number
   size?: number
+  total?: number
+  totalPages?: number
 }>
 
 export class SearchGenresUseCase {
@@ -20,17 +22,19 @@ export class SearchGenresUseCase {
   async execute(data: SearchGenresUseCaseRequest): SearchGenresUseCaseResponse {
     const { genre, matchType, pagination } = data
 
-    const albums = await this.repository.search({ genre }, pagination, {
+    const result = await this.repository.search({ genre }, pagination, {
       combineWith: 'and',
       matchType,
     })
 
-    const uniqueGenres = [...new Set(albums.map((a) => a.genre.value))]
+    const uniqueGenres = [...new Set(result.items.map((a) => a.genre.value))]
 
     return {
-      currentPage: pagination?.page,
+      currentPage: result.currentPage,
       genres: uniqueGenres,
-      size: pagination?.size,
+      size: result.size,
+      total: result.total,
+      totalPages: result.totalPages,
     }
   }
 }
