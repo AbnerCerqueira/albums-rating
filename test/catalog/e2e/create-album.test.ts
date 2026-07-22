@@ -9,11 +9,11 @@ import {
 
 describe('Create Album', () => {
   describe('POST /api/catalog', () => {
-    test('creates album and returns 200 with dto', async () => {
+    test('creates album and returns 201 with dto', async () => {
       const { token } = await createUserAndLogin()
       const { response } = await createAlbumViaHttp(token)
 
-      expect(response.statusCode).toBe(HttpStatus.OK)
+      expect(response.statusCode).toBe(HttpStatus.CREATED)
       const body = response.json<AlbumPayload>()
       expect(body).toHaveProperty('artist')
       expect(body).toHaveProperty('format')

@@ -18,7 +18,7 @@ export const createAlbumRoute: FastifyPluginCallbackZod = (app) => {
           [HttpStatus.BAD_REQUEST]: InfraSchemaUtils.errorResponse,
           [HttpStatus.INTERNAL_SERVER_ERROR]: InfraSchemaUtils.errorResponse,
           [HttpStatus.UNAUTHORIZED]: InfraSchemaUtils.errorResponse,
-          [HttpStatus.OK]: zodAlbumDTO,
+          [HttpStatus.CREATED]: zodAlbumDTO,
         },
         security: [{ bearerAuth: [] }],
         tags: [tags.catalog],
@@ -30,7 +30,7 @@ export const createAlbumRoute: FastifyPluginCallbackZod = (app) => {
       const result = await createAlbumUseCase.execute(body)
 
       if (result.ok) {
-        return reply.send(result.value)
+        return reply.status(HttpStatus.CREATED).send(result.value)
       }
 
       return reply

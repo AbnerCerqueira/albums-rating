@@ -10,6 +10,12 @@ export class Genre {
       return err(new InvalidArgumentError('Gênero não pode ser vazio'))
     }
 
+    if (trimmed.length > 50) {
+      return err(
+        new InvalidArgumentError('Gênero deve ter no máximo 50 caracteres')
+      )
+    }
+
     return ok(new Genre(trimmed))
   }
 

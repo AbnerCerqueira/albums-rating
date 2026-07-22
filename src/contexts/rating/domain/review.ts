@@ -78,7 +78,7 @@ export class Review {
     return new Review(
       this.id,
       this.isFavorite,
-      this.isEdited,
+      true,
       newRating,
       this.reviewText,
       this.reviewedAt,

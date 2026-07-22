@@ -9,6 +9,13 @@ export class Username {
     if (!trimmed) {
       return err(new InvalidArgumentError('Username não pode ser vazio'))
     }
+
+    if (trimmed.length > 30) {
+      return err(
+        new InvalidArgumentError('Username deve ter no máximo 30 caracteres')
+      )
+    }
+
     return ok(new Username(trimmed))
   }
 

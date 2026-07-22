@@ -10,6 +10,12 @@ export class Artist {
       return err(new InvalidArgumentError('Artista não pode ter nome vazio'))
     }
 
+    if (trimmed.length > 100) {
+      return err(
+        new InvalidArgumentError('Artista deve ter no máximo 100 caracteres')
+      )
+    }
+
     return ok(new Artist(trimmed))
   }
 
