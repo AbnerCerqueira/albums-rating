@@ -1,4 +1,5 @@
 import { PublicId } from '@/contexts/!common/public-id'
+import { slugify } from '@/contexts/!common/slugify'
 import type { AlbumId } from './value-objects/album-id'
 import type { Genre } from './value-objects/genre'
 import type { ReleaseDate } from './value-objects/release-date'
@@ -40,12 +41,13 @@ export class Album {
   }
 
   static create(props: AlbumProps) {
+    const slug = `${slugify(props.id.artist.value)}-${slugify(props.id.title.value)}`
     return new Album(
       props.id,
       props.format,
       props.genre,
       props.releaseDate,
-      PublicId.create(),
+      PublicId.create(slug),
       new Date(),
       new Date()
     )

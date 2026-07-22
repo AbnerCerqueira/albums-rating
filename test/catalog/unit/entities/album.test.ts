@@ -128,10 +128,9 @@ describe('Album', () => {
       expect(album.id.artist.value).toBe(ARTIST)
     })
 
-    test('publicId is unique per album', () => {
-      const album1 = createAlbum()
-      const album2 = createAlbum()
-      expect(album1.publicId.value).not.toBe(album2.publicId.value)
+    test('publicId is a slug based on artist and title', () => {
+      const album = createAlbum()
+      expect(album.publicId.value).toBe('artista-teste-album-teste')
     })
 
     test('getCreationDate returns a copy', () => {

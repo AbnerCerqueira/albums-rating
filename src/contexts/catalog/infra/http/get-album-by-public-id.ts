@@ -8,7 +8,7 @@ import { AlbumDTOMapper, zodAlbumDTO } from '../../application/album-dto'
 import { albumRepository } from '../compose'
 
 const params = z.object({
-  publicId: z.uuidv7(),
+  publicId: z.string(),
 })
 
 export const getAlbumByPublicIdRoute: FastifyPluginCallbackZod = (app) => {

@@ -5,7 +5,7 @@ export const zodAlbumDTO = z.object({
   artist: z.string(),
   format: z.enum(FORMATS),
   genre: z.string(),
-  publicId: z.uuidv7(),
+  publicId: z.string(),
   releaseDate: z.iso.date(),
   title: z.string(),
 })

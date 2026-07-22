@@ -25,9 +25,7 @@ describe('Get Album By PublicId', () => {
     test('returns 404 for non-existent publicId', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: CatalogRoutes.GET.ALBUM_BY_PUBLIC_ID(
-          '019041e1-7000-7000-8000-000000000000'
-        ),
+        url: CatalogRoutes.GET.ALBUM_BY_PUBLIC_ID('nao-existe-album'),
       })
 
       expect(response.statusCode).toBe(HttpStatus.NOT_FOUND)
