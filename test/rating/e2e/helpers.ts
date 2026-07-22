@@ -112,4 +112,16 @@ export async function getReviewsByAlbumViaHttp(
   return { response }
 }
 
+export async function deleteReviewViaHttp(
+  token: string,
+  reviewPublicId: string
+) {
+  const response = await app.inject({
+    headers: { authorization: `Bearer ${token}` },
+    method: 'DELETE',
+    url: RatingRoutes.DELETE.REVIEW(reviewPublicId),
+  })
+  return { response }
+}
+
 export const createUserAndLogin = createAndLogin
