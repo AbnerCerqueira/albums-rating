@@ -27,7 +27,7 @@ describe('Genre Search', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: `${CatalogRoutes.GET.AVAILABLE_GENRES}?genre=M&matchType=startsWith`,
+        url: `${CatalogRoutes.GET.AVAILABLE_GENRES}?genre=M`,
       })
 
       expect(response.statusCode).toBe(HttpStatus.OK)

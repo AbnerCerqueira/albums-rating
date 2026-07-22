@@ -13,8 +13,7 @@ const okResponse = z.object({
 
 const querystring = z.object({
   genre: z.string().optional(),
-  ...InfraSchemaUtils.searchOptionsQuerystring.omit({ combineWith: true })
-    .shape,
+  ...InfraSchemaUtils.paginationQuerystring.shape,
 })
 
 export const searchGenreRoute: FastifyPluginCallbackZod = (app) => {
@@ -45,7 +44,6 @@ export const searchGenreRoute: FastifyPluginCallbackZod = (app) => {
 
       const result = await searchGenresUseCase.execute({
         genre: query.genre,
-        matchType: query.matchType,
         pagination,
       })
 

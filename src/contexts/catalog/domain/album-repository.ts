@@ -1,14 +1,15 @@
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
-import type { SearchOptions } from '@/contexts/!common/search-options'
-import type { Album, Format } from './album'
+import type { Album } from './album'
 import type { AlbumId } from './value-objects/album-id'
 
 export type SearchAlbumParams = {
   title?: string
   artist?: string
+}
+
+export type SearchGenresParams = {
   genre?: string
-  format?: Format[]
 }
 
 export interface AlbumRepository {
@@ -18,7 +19,10 @@ export interface AlbumRepository {
   save: (album: Album) => Promise<Album>
   search: (
     params: SearchAlbumParams,
-    pagination?: Pagination,
-    options?: SearchOptions
+    pagination?: Pagination
   ) => Promise<PaginatedResult<Album>>
+  searchGenres: (
+    params: SearchGenresParams,
+    pagination?: Pagination
+  ) => Promise<PaginatedResult<string>>
 }

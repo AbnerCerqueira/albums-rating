@@ -52,23 +52,15 @@ function toDomain(data: AlbumData): Album {
 
 function toPersistenceSearchFields(
   params: SearchAlbumParams
-): Record<string, string | string[]> {
-  const fields: Record<string, string | string[]> = {}
+): Record<string, string> {
+  const fields: Record<string, string> = {}
 
   if (params.artist) {
     fields['domainId.artist'] = params.artist
   }
 
-  if (params.genre) {
-    fields.genre = params.genre
-  }
-
   if (params.title) {
     fields['domainId.title'] = params.title
-  }
-
-  if (params.format?.length) {
-    fields.format = params.format
   }
 
   return fields

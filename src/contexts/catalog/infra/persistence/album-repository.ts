@@ -1,11 +1,12 @@
+import type { PipelineStage } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
-import type { SearchOptions } from '@/contexts/!common/search-options'
 import type { Album } from '@/contexts/catalog/domain/album'
 import type {
   AlbumRepository,
   SearchAlbumParams,
+  SearchGenresParams,
 } from '@/contexts/catalog/domain/album-repository'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { AlbumMapper } from './album-mapper'
@@ -55,12 +56,14 @@ export class MongooseAlbumRepository implements AlbumRepository {
 
   async search(
     params: SearchAlbumParams,
-    pagination?: Pagination,
-    options?: SearchOptions
+    pagination?: Pagination
   ): Promise<PaginatedResult<Album>> {
     const fieldsToSearch = AlbumMapper.toPersistenceSearchFields(params)
 
-    const match = MongooseUtils.buildSearchPipeline(fieldsToSearch, options)
+    const match = MongooseUtils.buildSearchPipeline(fieldsToSearch, {
+      combineWith: 'or',
+      matchType: 'startsWith',
+    })
 
     let result: PaginatedResult<AlbumData>
 
@@ -77,6 +80,52 @@ export class MongooseAlbumRepository implements AlbumRepository {
     return {
       ...result,
       items: result.items.map((doc) => AlbumMapper.toDomain(doc)),
+    }
+  }
+
+  async searchGenres(
+    params: SearchGenresParams,
+    pagination?: Pagination
+  ): Promise<PaginatedResult<string>> {
+    const fields: Record<string, string> = {}
+    if (params.genre) {
+      fields.genre = params.genre
+    }
+
+    const match = MongooseUtils.buildSearchPipeline(fields, {
+      combineWith: 'and',
+      matchType: 'startsWith',
+    })
+
+    const groupAndSort: PipelineStage[] = [
+      { $group: { _id: '$genre' } },
+      { $sort: { _id: 1 } },
+    ]
+
+    const [countResult] = await this.model.aggregate<{ count: number }>([
+      ...match,
+      ...groupAndSort,
+      { $count: 'count' },
+    ])
+
+    const total = countResult?.count ?? 0
+
+    const dataPipeline: PipelineStage[] = [...match, ...groupAndSort]
+    if (pagination) {
+      dataPipeline.push(
+        { $skip: pagination.size * (pagination.page - 1) },
+        { $limit: pagination.size }
+      )
+    }
+
+    const items = await this.model.aggregate<{ _id: string }>(dataPipeline)
+
+    return {
+      currentPage: pagination?.page ?? 1,
+      items: items.map((r) => r._id),
+      size: pagination?.size ?? items.length,
+      total,
+      totalPages: pagination ? Math.ceil(total / pagination.size) : 1,
     }
   }
 

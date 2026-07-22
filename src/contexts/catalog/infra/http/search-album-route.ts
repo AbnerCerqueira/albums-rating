@@ -5,7 +5,6 @@ import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { zodAlbumDTO } from '../../application/album-dto'
-import { FORMATS, type Format } from '../../domain/album'
 import { searchAlbumsUseCase } from '../compose'
 
 const okResponse = z.object({
@@ -13,26 +12,10 @@ const okResponse = z.object({
   ...InfraSchemaUtils.paginatedRoutesResponse.shape,
 })
 
-export const zodFormatSchema = z.enum(FORMATS)
-
-function normalizeFormatQuery(val: unknown): Format[] | undefined {
-  if (val === undefined || val === '') {
-    return
-  }
-  if (Array.isArray(val)) {
-    return val as Format[]
-  }
-  return [val] as Format[]
-}
-
 const querystring = z.object({
   artist: z.string().optional(),
-  format: z
-    .preprocess(normalizeFormatQuery, zodFormatSchema.array())
-    .optional(),
-  genre: z.string().optional(),
   title: z.string().optional(),
-  ...InfraSchemaUtils.searchOptionsQuerystring.shape,
+  ...InfraSchemaUtils.paginationQuerystring.shape,
 })
 
 export const searchAlbumRoute: FastifyPluginCallbackZod = (app) => {
@@ -61,14 +44,10 @@ export const searchAlbumRoute: FastifyPluginCallbackZod = (app) => {
 
       const pagination = paginationResult.value
 
-      const { artist, genre, title, format, matchType, combineWith } = query
+      const { artist, title } = query
 
       const result = await searchAlbumsUseCase.execute({
         artist,
-        combineWith,
-        format,
-        genre,
-        matchType,
         pagination,
         title,
       })

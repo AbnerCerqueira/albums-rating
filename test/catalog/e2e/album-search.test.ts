@@ -46,43 +46,13 @@ describe('Album Search', () => {
       expect(body.albums[0].artist).toBe(payload.artist)
     })
 
-    test('searches by genre', async () => {
-      const { token } = await createUserAndLogin()
-      const { payload } = await createAlbumViaHttp(token)
-
-      const response = await app.inject({
-        method: 'GET',
-        url: `${CatalogRoutes.GET.SEARCH}?genre=${encodeURIComponent(payload.genre)}`,
-      })
-
-      expect(response.statusCode).toBe(HttpStatus.OK)
-      const body = response.json()
-      expect(body.albums.length).toBeGreaterThanOrEqual(1)
-      expect(body.albums[0].genre).toBe(payload.genre)
-    })
-
-    test('searches by format', async () => {
-      const { token } = await createUserAndLogin()
-      await createAlbumViaHttp(token, { format: 'LP' })
-
-      const response = await app.inject({
-        method: 'GET',
-        url: `${CatalogRoutes.GET.SEARCH}?format=LP`,
-      })
-
-      expect(response.statusCode).toBe(HttpStatus.OK)
-      const body = response.json()
-      expect(body.albums.length).toBeGreaterThanOrEqual(1)
-      expect(body.albums[0].format).toBe('LP')
-    })
-
     test('searches with multiple params', async () => {
       const { token } = await createUserAndLogin()
       const { payload } = await createAlbumViaHttp(token)
 
       const response = await app.inject({
         method: 'GET',
-        url: `${CatalogRoutes.GET.SEARCH}?title=${encodeURIComponent(payload.title)}&artist=${encodeURIComponent(payload.artist)}&format=EP&combineWith=or`,
+        url: `${CatalogRoutes.GET.SEARCH}?title=${encodeURIComponent(payload.title)}&artist=${encodeURIComponent(payload.artist)}`,
       })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
