@@ -91,4 +91,25 @@ export async function getReviewsByUserViaHttp(
   return { response }
 }
 
+export async function getReviewsByAlbumViaHttp(
+  albumPublicId: string,
+  query?: { page?: number; size?: number }
+) {
+  const searchParams = new URLSearchParams()
+  if (query?.page !== undefined) {
+    searchParams.set('page', String(query.page))
+  }
+  if (query?.size !== undefined) {
+    searchParams.set('size', String(query.size))
+  }
+  const qs = searchParams.toString()
+  const url = `${RatingRoutes.GET.REVIEWS_BY_ALBUM(albumPublicId)}${qs ? `?${qs}` : ''}`
+
+  const response = await app.inject({
+    method: 'GET',
+    url,
+  })
+  return { response }
+}
+
 export const createUserAndLogin = createAndLogin

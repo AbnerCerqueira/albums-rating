@@ -10,6 +10,7 @@ export const zodReviewDTO = z.object({
   rating: z.number(),
   reviewedAt: z.iso.date(),
   reviewText: z.string().nullable(),
+  username: z.string(),
 })
 
 export type ReviewDTO = z.infer<typeof zodReviewDTO>
@@ -24,6 +25,7 @@ function toDTO(review: Review): ReviewDTO {
     rating: review.rating.value,
     reviewedAt: review.reviewedAt.value.toISOString().split('T')[0],
     reviewText: review.reviewText ? review.reviewText.value : null,
+    username: review.id.userId.username.value,
   }
 }
 

@@ -31,4 +31,4 @@ export const editReviewUseCase = new EditReviewUseCase(
   domainReviewServices
 )
 
-export { reviewGateway, reviewRepository }
+export { albumRepository, reviewGateway, reviewRepository }

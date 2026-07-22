@@ -2,6 +2,7 @@ import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import { requireAuth } from '@/infra/http/auth-middleware'
 import { createReviewRoute } from './create-review-route'
 import { editReviewRoute } from './edit-review-route'
+import { getReviewsByAlbumRoute } from './get-reviews-by-album-route'
 import { getReviewsByUserRoute } from './get-reviews-by-user-route'
 
 const authRoutes: FastifyPluginCallbackZod = (app) => {
@@ -12,6 +13,7 @@ const authRoutes: FastifyPluginCallbackZod = (app) => {
 }
 
 const publicRoutes: FastifyPluginCallbackZod = (app) => {
+  app.register(getReviewsByAlbumRoute)
   app.register(getReviewsByUserRoute)
 }
 
