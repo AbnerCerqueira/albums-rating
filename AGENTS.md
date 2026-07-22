@@ -1,7 +1,7 @@
 # AGENTS.md
 
 API REST de avaliação de álbuns, praticando DDD com TypeScript + Node.js.
-Prioridade: **legibilidade** e **manutenibilidade a longo prazo**. Siga os padrões já existentes na base — não invente um novo jeito de fazer algo que já tem exemplo.
+Prioridade: **legibilidade** e **manutenibilidade a longo prazo**. Sempre que houver um padrão já estabelecido no projeto, siga esse padrão. Se o problema for novo, implemente a melhor solução sem ficar preso à falta de precedentes. Documente a decisão apenas quando ela não for óbvia.
 
 ## Definição de pronto
 
