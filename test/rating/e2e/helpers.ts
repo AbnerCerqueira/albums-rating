@@ -124,4 +124,41 @@ export async function deleteReviewViaHttp(
   return { response }
 }
 
+export async function getTopAlbumsViaHttp(query?: {
+  page?: number
+  size?: number
+  from?: number
+  to?: number
+  genre?: string
+  format?: string
+}) {
+  const searchParams = new URLSearchParams()
+  if (query?.page !== undefined) {
+    searchParams.set('page', String(query.page))
+  }
+  if (query?.size !== undefined) {
+    searchParams.set('size', String(query.size))
+  }
+  if (query?.from !== undefined) {
+    searchParams.set('from', String(query.from))
+  }
+  if (query?.to !== undefined) {
+    searchParams.set('to', String(query.to))
+  }
+  if (query?.genre !== undefined) {
+    searchParams.set('genre', query.genre)
+  }
+  if (query?.format !== undefined) {
+    searchParams.set('format', query.format)
+  }
+  const qs = searchParams.toString()
+  const url = `${RatingRoutes.GET.TOP_ALBUMS}${qs ? `?${qs}` : ''}`
+
+  const response = await app.inject({
+    method: 'GET',
+    url,
+  })
+  return { response }
+}
+
 export const createUserAndLogin = createAndLogin

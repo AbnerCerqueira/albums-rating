@@ -5,6 +5,7 @@ import { deleteReviewRoute } from './delete-review-route'
 import { editReviewRoute } from './edit-review-route'
 import { getReviewsByAlbumRoute } from './get-reviews-by-album-route'
 import { getReviewsByUserRoute } from './get-reviews-by-user-route'
+import { getTopAlbumsRoute } from './get-top-albums-route'
 
 const authRoutes: FastifyPluginCallbackZod = (app) => {
   app.addHook('onRequest', requireAuth)
@@ -17,6 +18,7 @@ const authRoutes: FastifyPluginCallbackZod = (app) => {
 const publicRoutes: FastifyPluginCallbackZod = (app) => {
   app.register(getReviewsByAlbumRoute)
   app.register(getReviewsByUserRoute)
+  app.register(getTopAlbumsRoute)
 }
 
 export const ratingRoutes: FastifyPluginCallbackZod = (app) => {

@@ -7,6 +7,7 @@ import { DeleteReviewUseCase } from '../application/delete-review-use-case'
 import { EditReviewUseCase } from '../application/edit-review-use-case'
 import { GetReviewsByAlbumUseCase } from '../application/get-reviews-by-album-use-case'
 import { GetReviewsByUserUseCase } from '../application/get-reviews-by-user-use-case'
+import { GetTopAlbumsUseCase } from '../application/get-top-albums-use-case'
 import { DomainReviewServices } from '../domain/services/domain-review-services'
 import { MongooseReviewGateway } from './gateways/mongoose-review-gateway'
 import { MongooseReviewRepository } from './persistence/review-repository'
@@ -50,5 +51,7 @@ export const getReviewsByUserUseCase = new GetReviewsByUserUseCase(
   reviewRepository,
   reviewGateway
 )
+
+export const getTopAlbumsUseCase = new GetTopAlbumsUseCase(reviewRepository)
 
 export { reviewGateway, reviewRepository }
