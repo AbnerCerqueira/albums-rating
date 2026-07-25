@@ -29,7 +29,7 @@ export class DeleteReviewUseCase {
 
     const { review, user } = entitiesResult.value
 
-    const ownershipResult = this.domainServices.ensureOwnership(review, user.id)
+    const ownershipResult = review.ensureOwnership(review, user.id)
     if (!ownershipResult.ok) {
       return ownershipResult
     }
