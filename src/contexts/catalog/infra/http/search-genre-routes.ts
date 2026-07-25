@@ -1,18 +1,19 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
 import { Pagination } from '@/contexts/!common/pagination'
+import { zodGenreDTO } from '@/contexts/catalog/application/genre-dto'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { searchGenresUseCase } from '../compose'
 
 const okResponse = z.object({
-  genres: z.string().array(),
+  genres: z.array(zodGenreDTO),
   ...InfraSchemaUtils.paginatedRoutesResponse.shape,
 })
 
 const querystring = z.object({
-  genre: z.string().optional(),
+  name: z.string().optional(),
   ...InfraSchemaUtils.paginationQuerystring.shape,
 })
 
@@ -43,7 +44,7 @@ export const searchGenreRoute: FastifyPluginCallbackZod = (app) => {
       const pagination = paginationResult.value
 
       const result = await searchGenresUseCase.execute({
-        genre: query.genre,
+        name: query.name,
         pagination,
       })
 

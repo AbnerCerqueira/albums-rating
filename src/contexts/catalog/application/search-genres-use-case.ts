@@ -1,13 +1,14 @@
 import type { Pagination } from '@/contexts/!common/pagination'
-import type { AlbumRepository } from '../domain/album-repository'
+import type { GenreRepository } from '../domain/genre-repository'
+import { type GenreDTO, GenreDTOMapper } from './genre-dto'
 
 export type SearchGenresUseCaseRequest = {
-  genre?: string
+  name?: string
   pagination?: Pagination
 }
 
 export type SearchGenresUseCaseResponse = Promise<{
-  genres: string[]
+  genres: GenreDTO[]
   currentPage?: number
   size?: number
   total?: number
@@ -15,16 +16,16 @@ export type SearchGenresUseCaseResponse = Promise<{
 }>
 
 export class SearchGenresUseCase {
-  constructor(private readonly repository: AlbumRepository) {}
+  constructor(private readonly repository: GenreRepository) {}
 
   async execute(data: SearchGenresUseCaseRequest): SearchGenresUseCaseResponse {
-    const { genre, pagination } = data
+    const { name, pagination } = data
 
-    const result = await this.repository.searchGenres({ genre }, pagination)
+    const result = await this.repository.search({ name }, pagination)
 
     return {
       currentPage: result.currentPage,
-      genres: result.items,
+      genres: result.items.map(GenreDTOMapper.toDTO),
       size: result.size,
       total: result.total,
       totalPages: result.totalPages,

@@ -1,15 +1,17 @@
 import z from 'zod'
-import type {
-  ConflictError,
+import {
+  type ConflictError,
   InvalidArgumentError,
 } from '@/contexts/!common/errors'
-import { ok, type Result } from '@/contexts/!common/result'
+import { err, ok, type Result } from '@/contexts/!common/result'
+import { slugify } from '@/contexts/!common/slugify'
 import { Album, FORMATS } from '../domain/album'
 import type { AlbumRepository } from '../domain/album-repository'
+import type { Genre } from '../domain/genre'
+import type { GenreRepository } from '../domain/genre-repository'
 import type { DomainAlbumServices } from '../domain/services/is-unique-album'
 import { AlbumId } from '../domain/value-objects/album-id'
 import { Artist } from '../domain/value-objects/artist'
-import { Genre } from '../domain/value-objects/genre'
 import { ReleaseDate } from '../domain/value-objects/release-date'
 import { Title } from '../domain/value-objects/title'
 import { type AlbumDTO, AlbumDTOMapper } from './album-dto'
@@ -17,7 +19,7 @@ import { type AlbumDTO, AlbumDTOMapper } from './album-dto'
 export const zodCreateAlbumUseCaseRequest = z.object({
   artist: z.string(),
   format: z.enum(FORMATS),
-  genre: z.string(),
+  genres: z.array(z.string()).nonempty(),
   releaseDate: z.iso.date(),
   title: z.string(),
 })
@@ -32,7 +34,8 @@ export type CreateAlbumUserCaseResponse = Promise<
 export class CreateAlbumsUseCase {
   constructor(
     private readonly domainServices: DomainAlbumServices,
-    private readonly repository: AlbumRepository
+    private readonly albumRepository: AlbumRepository,
+    private readonly genreRepository: GenreRepository
   ) {}
 
   async execute(data: CreateAlbumUserCaseRequest): CreateAlbumUserCaseResponse {
@@ -46,21 +49,36 @@ export class CreateAlbumsUseCase {
       return artist
     }
 
-    const genre = Genre.create(data.genre)
-    if (!genre.ok) {
-      return genre
-    }
-
     const releaseDate = ReleaseDate.create(new Date(data.releaseDate))
     if (!releaseDate.ok) {
       return releaseDate
+    }
+
+    const genreResults = await Promise.all(
+      data.genres.map(async (genreName) => {
+        const slug = slugify(genreName)
+        const genre = await this.genreRepository.findBySlug(slug)
+        return { genre, genreName }
+      })
+    )
+
+    const genres: Genre[] = []
+    for (const { genre, genreName } of genreResults) {
+      if (!genre) {
+        return err(
+          new InvalidArgumentError(
+            `Gênero "${genreName}" não encontrado. Crie-o primeiro.`
+          )
+        )
+      }
+      genres.push(genre)
     }
 
     const id = AlbumId.create({ artist: artist.value, title: title.value })
 
     const album = Album.create({
       format: data.format,
-      genre: genre.value,
+      genres,
       id,
       releaseDate: releaseDate.value,
     })
@@ -70,7 +88,7 @@ export class CreateAlbumsUseCase {
       return isUnique
     }
 
-    const newAlbum = await this.repository.save(album)
+    const newAlbum = await this.albumRepository.save(album)
 
     return ok(AlbumDTOMapper.toDTO(newAlbum))
   }

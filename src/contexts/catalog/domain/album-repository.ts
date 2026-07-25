@@ -8,10 +8,6 @@ export type SearchAlbumParams = {
   artist?: string
 }
 
-export type SearchGenresParams = {
-  genre?: string
-}
-
 export interface AlbumRepository {
   find: (pagination?: Pagination) => Promise<PaginatedResult<Album>>
   findById: (id: AlbumId) => Promise<Album | null>
@@ -21,8 +17,4 @@ export interface AlbumRepository {
     params: SearchAlbumParams,
     pagination?: Pagination
   ) => Promise<PaginatedResult<Album>>
-  searchGenres: (
-    params: SearchGenresParams,
-    pagination?: Pagination
-  ) => Promise<PaginatedResult<string>>
 }

@@ -17,7 +17,7 @@ describe('Create Album', () => {
       const body = response.json<AlbumPayload>()
       expect(body).toHaveProperty('artist')
       expect(body).toHaveProperty('format')
-      expect(body).toHaveProperty('genre')
+      expect(body).toHaveProperty('genres')
       expect(body).toHaveProperty('publicId')
       expect(body).toHaveProperty('releaseDate')
       expect(body).toHaveProperty('title')
@@ -48,9 +48,22 @@ describe('Create Album', () => {
       expect(response.statusCode).toBe(HttpStatus.BAD_REQUEST)
     })
 
-    test('returns 400 for empty genre', async () => {
+    test('returns 400 for empty genres array', async () => {
       const { token } = await createUserAndLogin()
-      const { response } = await createAlbumViaHttp(token, { genre: '' })
+      const { response } = await createAlbumViaHttp(token, { genres: [] })
+
+      expect(response.statusCode).toBe(HttpStatus.BAD_REQUEST)
+    })
+
+    test('returns 400 for non-existent genre', async () => {
+      const { token } = await createUserAndLogin()
+      const payload = createAlbumPayload({ genres: ['NonExistentGenre'] })
+      const response = await app.inject({
+        headers: { authorization: `Bearer ${token}` },
+        method: 'POST',
+        payload,
+        url: '/api/catalog',
+      })
 
       expect(response.statusCode).toBe(HttpStatus.BAD_REQUEST)
     })

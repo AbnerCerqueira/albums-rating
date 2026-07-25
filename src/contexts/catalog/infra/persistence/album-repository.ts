@@ -1,4 +1,5 @@
-import type { PipelineStage } from 'mongoose'
+import { escapeRegExp } from 'lodash'
+import type { FilterQuery } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
@@ -6,133 +7,137 @@ import type { Album } from '@/contexts/catalog/domain/album'
 import type {
   AlbumRepository,
   SearchAlbumParams,
-  SearchGenresParams,
 } from '@/contexts/catalog/domain/album-repository'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { AlbumMapper } from './album-mapper'
 import { type AlbumData, AlbumModel } from './album-model'
+import { GenreMapper } from './genre-mapper'
+import type { GenreData } from './genre-model'
+import { GenreModel } from './genre-model'
 
 export class MongooseAlbumRepository implements AlbumRepository {
   private readonly model = AlbumModel
+  private readonly genreModel = GenreModel
 
   async save(album: Album): Promise<Album> {
     const data = AlbumMapper.toPersistence(album)
+    const genreDocs = await this.genreModel
+      .find({ slug: { $in: album.genres.map((g) => g.id.value) } })
+      .lean()
+
+    const genreIds = genreDocs.flatMap((g) => (g._id ? [g._id] : []))
+
+    const docToSave: AlbumData = {
+      ...data,
+      genres: genreIds,
+    }
+
     const filter = {
-      'domainId.artist': data.domainId.artist,
-      'domainId.title': data.domainId.title,
+      artist: data.artist,
+      title: data.title,
     }
     const updated = await this.model
-      .findOneAndUpdate(filter, data, {
+      .findOneAndUpdate(filter, docToSave, {
         new: true,
         upsert: true,
       })
+      .populate<{ genres: GenreData[] }>('genres')
       .lean()
 
-    return AlbumMapper.toDomain(updated)
+    if (!updated) {
+      throw new Error('Failed to save album')
+    }
+
+    const resolvedGenres = updated.genres.map(GenreMapper.toDomain)
+    return AlbumMapper.toDomain(updated, resolvedGenres)
   }
 
   async findById(id: AlbumId): Promise<Album | null> {
-    const foundAlbum = await this.model
-      .findOne(this.getFlattenObjOfDomainId(id))
+    const doc = await this.model
+      .findOne({
+        artist: id.artist.value,
+        title: id.title.value,
+      })
+      .populate<{ genres: GenreData[] }>('genres')
       .lean()
 
-    return foundAlbum ? AlbumMapper.toDomain(foundAlbum) : null
+    if (!doc) {
+      return null
+    }
+
+    const resolvedGenres = doc.genres.map(GenreMapper.toDomain)
+    return AlbumMapper.toDomain(doc, resolvedGenres)
   }
 
   async find(pagination?: Pagination): Promise<PaginatedResult<Album>> {
-    const result = await MongooseUtils.paginateFind(this.model, {}, pagination)
+    const result = await MongooseUtils.paginateFind<
+      AlbumData,
+      { genres: GenreData[] }
+    >(this.model, {}, pagination, undefined, [{ path: 'genres' }])
 
     return {
       ...result,
-      items: result.items.map((doc) => AlbumMapper.toDomain(doc)),
+      items: result.items.map((doc) => {
+        const resolvedGenres = doc.genres.map(GenreMapper.toDomain)
+        return AlbumMapper.toDomain(doc, resolvedGenres)
+      }),
     }
   }
 
   async findByPublicId(publicId: PublicId): Promise<Album | null> {
-    const doc = await this.model.findOne({ publicId: publicId.value }).lean()
+    const doc = await this.model
+      .findOne({ publicId: publicId.value })
+      .populate<{ genres: GenreData[] }>('genres')
+      .lean()
 
-    return doc ? AlbumMapper.toDomain(doc) : null
+    if (!doc) {
+      return null
+    }
+
+    const resolvedGenres = doc.genres.map(GenreMapper.toDomain)
+    return AlbumMapper.toDomain(doc, resolvedGenres)
   }
 
   async search(
     params: SearchAlbumParams,
     pagination?: Pagination
   ): Promise<PaginatedResult<Album>> {
-    const fieldsToSearch = AlbumMapper.toPersistenceSearchFields(params)
+    const filter: FilterQuery<AlbumData> = {}
+    const orConditions: FilterQuery<AlbumData>[] = []
 
-    const match = MongooseUtils.buildSearchPipeline(fieldsToSearch, {
-      combineWith: 'or',
-      matchType: 'startsWith',
-    })
-
-    let result: PaginatedResult<AlbumData>
-
-    if (match.length) {
-      result = await MongooseUtils.paginateAggregate(
-        this.model,
-        match,
-        pagination
-      )
-    } else {
-      result = await MongooseUtils.paginateFind(this.model, {}, pagination)
+    if (params.artist) {
+      orConditions.push({
+        artist: {
+          $options: 'i',
+          $regex: `^${escapeRegExp(params.artist)}`,
+        },
+      })
     }
+
+    if (params.title) {
+      orConditions.push({
+        title: {
+          $options: 'i',
+          $regex: `^${escapeRegExp(params.title)}`,
+        },
+      })
+    }
+
+    if (orConditions.length) {
+      filter.$or = orConditions
+    }
+
+    const result = await MongooseUtils.paginateFind<
+      AlbumData,
+      { genres: GenreData[] }
+    >(this.model, filter, pagination, undefined, [{ path: 'genres' }])
 
     return {
       ...result,
-      items: result.items.map((doc) => AlbumMapper.toDomain(doc)),
-    }
-  }
-
-  async searchGenres(
-    params: SearchGenresParams,
-    pagination?: Pagination
-  ): Promise<PaginatedResult<string>> {
-    const fields: Record<string, string> = {}
-    if (params.genre) {
-      fields.genre = params.genre
-    }
-
-    const match = MongooseUtils.buildSearchPipeline(fields, {
-      combineWith: 'and',
-      matchType: 'startsWith',
-    })
-
-    const groupAndSort: PipelineStage[] = [
-      { $group: { _id: '$genre' } },
-      { $sort: { _id: 1 } },
-    ]
-
-    const [countResult] = await this.model.aggregate<{ count: number }>([
-      ...match,
-      ...groupAndSort,
-      { $count: 'count' },
-    ])
-
-    const total = countResult?.count ?? 0
-
-    const dataPipeline: PipelineStage[] = [...match, ...groupAndSort]
-    if (pagination) {
-      dataPipeline.push(
-        { $skip: pagination.size * (pagination.page - 1) },
-        { $limit: pagination.size }
-      )
-    }
-
-    const items = await this.model.aggregate<{ _id: string }>(dataPipeline)
-
-    return {
-      currentPage: pagination?.page ?? 1,
-      items: items.map((r) => r._id),
-      size: pagination?.size ?? items.length,
-      total,
-      totalPages: pagination ? Math.ceil(total / pagination.size) : 1,
-    }
-  }
-
-  private getFlattenObjOfDomainId(id: AlbumId) {
-    return {
-      'domainId.artist': id.artist.value,
-      'domainId.title': id.title.value,
+      items: result.items.map((doc) => {
+        const resolvedGenres = doc.genres.map(GenreMapper.toDomain)
+        return AlbumMapper.toDomain(doc, resolvedGenres)
+      }),
     }
   }
 }

@@ -2,6 +2,7 @@ const BASE_URL = '/api/catalog'
 
 const POST = {
   CREATE_ALBUM: BASE_URL,
+  CREATE_GENRE: `${BASE_URL}/genres`,
 }
 
 const GET = {

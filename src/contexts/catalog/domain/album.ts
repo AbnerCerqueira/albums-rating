@@ -1,7 +1,7 @@
 import { PublicId } from '@/contexts/!common/public-id'
 import { slugify } from '@/contexts/!common/slugify'
+import type { Genre } from './genre'
 import type { AlbumId } from './value-objects/album-id'
-import type { Genre } from './value-objects/genre'
 import type { ReleaseDate } from './value-objects/release-date'
 
 export const FORMATS = ['LP', 'EP', 'Single', 'Compilation', 'Live'] as const
@@ -11,7 +11,7 @@ export type Format = (typeof FORMATS)[number]
 export type AlbumProps = {
   id: AlbumId
   format: Format
-  genre: Genre
+  genres: Genre[]
   releaseDate: ReleaseDate
 }
 
@@ -25,7 +25,7 @@ export class Album {
   private constructor(
     readonly id: AlbumId,
     readonly format: Format,
-    readonly genre: Genre,
+    readonly genres: Genre[],
     readonly releaseDate: ReleaseDate,
     readonly publicId: PublicId,
     private readonly createdAt: Date,
@@ -45,7 +45,7 @@ export class Album {
     return new Album(
       props.id,
       props.format,
-      props.genre,
+      props.genres,
       props.releaseDate,
       PublicId.create(slug),
       new Date(),
@@ -57,7 +57,7 @@ export class Album {
     return new Album(
       props.id,
       props.format,
-      props.genre,
+      props.genres,
       props.releaseDate,
       props.publicId,
       new Date(props.createdAt),

@@ -1,12 +1,13 @@
 import { PublicId } from '@/contexts/!common/public-id'
 import { Album, FORMATS } from '@/contexts/catalog/domain/album'
+import { Genre } from '@/contexts/catalog/domain/genre'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { Artist } from '@/contexts/catalog/domain/value-objects/artist'
-import { Genre } from '@/contexts/catalog/domain/value-objects/genre'
+import { GenreName } from '@/contexts/catalog/domain/value-objects/genre-name'
 import { ReleaseDate } from '@/contexts/catalog/domain/value-objects/release-date'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
 import { ARTIST, FORMAT, GENRE, RELEASE_DATE, TITLE } from '../fixtures'
-import { createAlbum } from '../helpers'
+import { createAlbum, createGenre } from '../helpers'
 
 describe('Album', () => {
   describe('create', () => {
@@ -32,7 +33,9 @@ describe('Album', () => {
       const album = createAlbum()
       expect(album.id).toBeInstanceOf(AlbumId)
       expect(album.format).toBe(FORMAT)
-      expect(album.genre).toBeInstanceOf(Genre)
+      expect(Array.isArray(album.genres)).toBeTruthy()
+      expect(album.genres[0]).toBeInstanceOf(Genre)
+      expect(album.genres[0].name).toBeInstanceOf(GenreName)
       expect(album.releaseDate).toBeInstanceOf(ReleaseDate)
     })
 
@@ -50,7 +53,7 @@ describe('Album', () => {
       const restored = Album.fromPersistence({
         createdAt: album.getCreationDate(),
         format: album.format,
-        genre: album.genre,
+        genres: album.genres,
         id: album.id,
         publicId: album.publicId,
         releaseDate: album.releaseDate,
@@ -60,7 +63,7 @@ describe('Album', () => {
       expect(restored.id.equals(album.id)).toBeTruthy()
       expect(restored.publicId.value).toBe(album.publicId.value)
       expect(restored.format).toBe(album.format)
-      expect(restored.genre.value).toBe(album.genre.value)
+      expect(restored.genres[0].name.value).toBe(album.genres[0].name.value)
       expect(restored.releaseDate.value.getTime()).toBe(
         album.releaseDate.value.getTime()
       )
@@ -76,7 +79,7 @@ describe('Album', () => {
       const title = Title.unsafe(TITLE)
       const artist = Artist.unsafe(ARTIST)
       const id = AlbumId.create({ artist, title })
-      const genre = Genre.unsafe(GENRE)
+      const genre = createGenre()
       const releaseDate = ReleaseDate.unsafe(RELEASE_DATE)
       const createdAt = new Date('2024-01-01')
       const updatedAt = new Date('2024-06-15')
@@ -84,7 +87,7 @@ describe('Album', () => {
       const restored = Album.fromPersistence({
         createdAt,
         format: FORMAT,
-        genre,
+        genres: [genre],
         id,
         publicId: PublicId.unsafe('fixed-public-id'),
         releaseDate,
@@ -103,14 +106,14 @@ describe('Album', () => {
       const title = Title.unsafe(TITLE)
       const artist = Artist.unsafe(ARTIST)
       const id = AlbumId.create({ artist, title })
-      const genre = Genre.unsafe(GENRE)
+      const genre = createGenre()
       const releaseDate = ReleaseDate.unsafe(RELEASE_DATE)
       const now = new Date()
 
       const restored = Album.fromPersistence({
         createdAt: now,
         format: FORMAT,
-        genre,
+        genres: [genre],
         id,
         publicId: PublicId.unsafe('fixed-public-id'),
         releaseDate,
@@ -147,9 +150,9 @@ describe('Album', () => {
       expect(album.getUpdateDate().getTime()).not.toBe(date.getTime())
     })
 
-    test('genre returns correct value', () => {
+    test('genres returns correct values', () => {
       const album = createAlbum()
-      expect(album.genre.value).toBe(GENRE)
+      expect(album.genres[0].name.value).toBe(GENRE)
     })
 
     test('releaseDate returns correct value', () => {
@@ -163,11 +166,21 @@ describe('Album', () => {
       const title = Title.unsafe(TITLE)
       const artist = Artist.unsafe(ARTIST)
       const id = AlbumId.create({ artist, title })
-      const genre = Genre.unsafe(GENRE)
+      const genre = createGenre()
       const releaseDate = ReleaseDate.unsafe(RELEASE_DATE)
 
-      const album1 = Album.create({ format: FORMAT, genre, id, releaseDate })
-      const album2 = Album.create({ format: FORMAT, genre, id, releaseDate })
+      const album1 = Album.create({
+        format: FORMAT,
+        genres: [genre],
+        id,
+        releaseDate,
+      })
+      const album2 = Album.create({
+        format: FORMAT,
+        genres: [genre],
+        id,
+        releaseDate,
+      })
 
       expect(album1.equals(album2)).toBeTruthy()
     })
@@ -196,13 +209,13 @@ describe('Album', () => {
 
       const album1 = Album.create({
         format: 'LP',
-        genre: Genre.unsafe('Rock'),
+        genres: [createGenre({ name: 'Rock', slug: 'rock' })],
         id,
         releaseDate: ReleaseDate.unsafe(new Date('2020-01-01')),
       })
       const album2 = Album.create({
         format: 'EP',
-        genre: Genre.unsafe('Pop'),
+        genres: [createGenre({ name: 'Pop', slug: 'pop' })],
         id,
         releaseDate: ReleaseDate.unsafe(new Date('2024-06-15')),
       })

@@ -1,6 +1,7 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import { requireAuth } from '@/infra/http/auth-middleware'
 import { createAlbumRoute } from './create-album-route'
+import { createGenreRoute } from './create-genre-route'
 import { getAlbumByPublicIdRoute } from './get-album-by-public-id'
 import { getAlbumsRoute } from './get-albums-route'
 import { searchAlbumRoute } from './search-album-route'
@@ -10,6 +11,7 @@ const authRoutes: FastifyPluginCallbackZod = (app) => {
   app.addHook('onRequest', requireAuth)
 
   app.register(createAlbumRoute)
+  app.register(createGenreRoute)
 }
 
 export const catalogRoutes: FastifyPluginCallbackZod = (app) => {

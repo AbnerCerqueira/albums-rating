@@ -7,7 +7,7 @@ import { CatalogRoutes } from './routes'
 export type AlbumPayload = {
   artist: string
   format: Format
-  genre: string
+  genres: string[]
   releaseDate: string
   title: string
 }
@@ -20,10 +20,19 @@ export function createAlbumPayload(
     artist: overrides?.artist ?? `Artist-${suffix}`,
     format:
       overrides?.format ?? FORMATS[Math.floor(Math.random() * FORMATS.length)],
-    genre: overrides?.genre ?? 'Rock',
+    genres: overrides?.genres ?? ['Rock'],
     releaseDate: overrides?.releaseDate ?? '2023-01-15',
     title: overrides?.title ?? `Album-${suffix}`,
   }
+}
+
+export async function createGenreViaHttp(token: string, name: string) {
+  return await app.inject({
+    headers: { authorization: `Bearer ${token}` },
+    method: 'POST',
+    payload: { name },
+    url: CatalogRoutes.POST.CREATE_GENRE,
+  })
 }
 
 export async function createAlbumViaHttp(
@@ -31,6 +40,11 @@ export async function createAlbumViaHttp(
   overrides?: Partial<AlbumPayload>
 ) {
   const payload = createAlbumPayload(overrides)
+
+  await Promise.all(
+    payload.genres.map((genreName) => createGenreViaHttp(token, genreName))
+  )
+
   const response = await app.inject({
     headers: { authorization: `Bearer ${token}` },
     method: 'POST',

@@ -5,9 +5,9 @@ import { CatalogRoutes } from './routes'
 
 describe('Genre Search', () => {
   describe('GET /api/catalog/search/available-genres', () => {
-    test('returns genres after album creation', async () => {
+    test('returns genres after genre creation', async () => {
       const { token } = await createUserAndLogin()
-      await createAlbumViaHttp(token, { genre: 'Metal' })
+      await createAlbumViaHttp(token, { genres: ['Metal'] })
 
       const response = await app.inject({
         method: 'GET',
@@ -17,28 +17,32 @@ describe('Genre Search', () => {
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json()
       expect(body.genres.length).toBeGreaterThanOrEqual(1)
-      expect(body.genres).toContain('Metal')
+      expect(body.genres.map((g: { name: string }) => g.name)).toContain(
+        'Metal'
+      )
     })
 
     test('filters genres by search term', async () => {
       const { token } = await createUserAndLogin()
-      await createAlbumViaHttp(token, { genre: 'Metal' })
-      await createAlbumViaHttp(token, { genre: 'Pop' })
+      await createAlbumViaHttp(token, { genres: ['Metal'] })
+      await createAlbumViaHttp(token, { genres: ['Pop'] })
 
       const response = await app.inject({
         method: 'GET',
-        url: `${CatalogRoutes.GET.AVAILABLE_GENRES}?genre=M`,
+        url: `${CatalogRoutes.GET.AVAILABLE_GENRES}?name=M`,
       })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json()
-      expect(body.genres).toContain('Metal')
+      expect(body.genres.map((g: { name: string }) => g.name)).toContain(
+        'Metal'
+      )
     })
 
     test('returns paginated genres', async () => {
       const { token } = await createUserAndLogin()
-      await createAlbumViaHttp(token, { genre: 'Metal' })
-      await createAlbumViaHttp(token, { genre: 'Pop' })
+      await createAlbumViaHttp(token, { genres: ['Metal'] })
+      await createAlbumViaHttp(token, { genres: ['Pop'] })
 
       const response = await app.inject({
         method: 'GET',
