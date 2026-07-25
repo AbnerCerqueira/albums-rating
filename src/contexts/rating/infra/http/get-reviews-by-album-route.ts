@@ -5,8 +5,8 @@ import { PublicId } from '@/contexts/!common/public-id'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
-import { ReviewDTOMapper, zodReviewDTO } from '../../application/review-dto'
-import { albumRepository, reviewRepository } from '../compose'
+import { zodReviewDTO } from '../../application/review-dto'
+import { getReviewsByAlbumUseCase } from '../compose'
 
 const params = z.object({
   publicId: z.string(),
@@ -42,27 +42,18 @@ export const getReviewsByAlbumRoute: FastifyPluginCallbackZod = (app) => {
           .send({ message: paginationResult.error.message })
       }
 
-      const album = await albumRepository.findByPublicId(
-        PublicId.unsafe(request.params.publicId)
-      )
-      if (!album) {
+      const result = await getReviewsByAlbumUseCase.execute({
+        albumPublicId: PublicId.unsafe(request.params.publicId),
+        pagination: paginationResult.value,
+      })
+
+      if (!result.ok) {
         return reply
           .status(HttpStatus.NOT_FOUND)
-          .send({ message: 'Album não encontrado' })
+          .send({ message: result.error.message })
       }
 
-      const result = await reviewRepository.findByAlbum(
-        album.id,
-        paginationResult.value
-      )
-
-      return reply.status(HttpStatus.OK).send({
-        currentPage: result.currentPage,
-        reviews: result.items.map((r) => ReviewDTOMapper.toDTO(r)),
-        size: result.size,
-        total: result.total,
-        totalPages: result.totalPages,
-      })
+      return reply.status(HttpStatus.OK).send(result.value)
     }
   )
 }

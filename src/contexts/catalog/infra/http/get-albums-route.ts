@@ -4,8 +4,8 @@ import { Pagination } from '@/contexts/!common/pagination'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
-import { AlbumDTOMapper, zodAlbumDTO } from '../../application/album-dto'
-import { albumRepository } from '../compose'
+import { zodAlbumDTO } from '../../application/album-dto'
+import { getAllAlbumsUseCase } from '../compose'
 
 const okResponse = z.object({
   albums: zodAlbumDTO.array(),
@@ -36,17 +36,11 @@ export const getAlbumsRoute: FastifyPluginCallbackZod = (app) => {
           .send({ message: paginationResult.error.message })
       }
 
-      const pagination = paginationResult.value
-
-      const result = await albumRepository.find(pagination)
-
-      return reply.status(HttpStatus.OK).send({
-        albums: result.items.map((a) => AlbumDTOMapper.toDTO(a)),
-        currentPage: result.currentPage,
-        size: result.size,
-        total: result.total,
-        totalPages: result.totalPages,
+      const result = await getAllAlbumsUseCase.execute({
+        pagination: paginationResult.value,
       })
+
+      return reply.status(HttpStatus.OK).send(result)
     }
   )
 }

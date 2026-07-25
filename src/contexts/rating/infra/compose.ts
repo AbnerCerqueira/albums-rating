@@ -5,6 +5,8 @@ import { MongooseUserRepository } from '@/contexts/user/infra/persistence/user-r
 import { CreateReviewUseCase } from '../application/create-review-use-case'
 import { DeleteReviewUseCase } from '../application/delete-review-use-case'
 import { EditReviewUseCase } from '../application/edit-review-use-case'
+import { GetReviewsByAlbumUseCase } from '../application/get-reviews-by-album-use-case'
+import { GetReviewsByUserUseCase } from '../application/get-reviews-by-user-use-case'
 import { DomainReviewServices } from '../domain/services/domain-review-services'
 import { MongooseReviewGateway } from './gateways/mongoose-review-gateway'
 import { MongooseReviewRepository } from './persistence/review-repository'
@@ -39,4 +41,14 @@ export const editReviewUseCase = new EditReviewUseCase(
   domainReviewServices
 )
 
-export { albumRepository, reviewGateway, reviewRepository }
+export const getReviewsByAlbumUseCase = new GetReviewsByAlbumUseCase(
+  reviewRepository,
+  reviewGateway
+)
+
+export const getReviewsByUserUseCase = new GetReviewsByUserUseCase(
+  reviewRepository,
+  reviewGateway
+)
+
+export { reviewGateway, reviewRepository }

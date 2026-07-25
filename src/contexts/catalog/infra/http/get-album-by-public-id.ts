@@ -4,8 +4,8 @@ import { PublicId } from '@/contexts/!common/public-id'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
-import { AlbumDTOMapper, zodAlbumDTO } from '../../application/album-dto'
-import { albumRepository } from '../compose'
+import { zodAlbumDTO } from '../../application/album-dto'
+import { getAlbumByPublicIdUseCase } from '../compose'
 
 const params = z.object({
   publicId: z.string(),
@@ -25,15 +25,17 @@ export const getAlbumByPublicIdRoute: FastifyPluginCallbackZod = (app) => {
       },
     },
     async (request, reply) => {
-      const foundAlbum = await albumRepository.findByPublicId(
-        PublicId.unsafe(request.params.publicId)
-      )
+      const result = await getAlbumByPublicIdUseCase.execute({
+        publicId: PublicId.unsafe(request.params.publicId),
+      })
 
-      return foundAlbum
-        ? reply.send(AlbumDTOMapper.toDTO(foundAlbum))
-        : reply
-            .status(HttpStatus.NOT_FOUND)
-            .send({ message: 'Album não encontrado' })
+      if (!result.ok) {
+        return reply
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: result.error.message })
+      }
+
+      return reply.send(result.value)
     }
   )
 }

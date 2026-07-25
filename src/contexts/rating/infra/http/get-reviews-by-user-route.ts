@@ -4,8 +4,8 @@ import { Pagination } from '@/contexts/!common/pagination'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
-import { ReviewDTOMapper, zodReviewDTO } from '../../application/review-dto'
-import { reviewGateway, reviewRepository } from '../compose'
+import { zodReviewDTO } from '../../application/review-dto'
+import { getReviewsByUserUseCase } from '../compose'
 
 const params = z.object({
   username: z.string(),
@@ -42,25 +42,18 @@ export const getReviewsByUserRoute: FastifyPluginCallbackZod = (app) => {
           .send({ message: paginationResult.error.message })
       }
 
-      const userResult = await reviewGateway.findUserByUsername(username)
-      if (!userResult.ok) {
+      const result = await getReviewsByUserUseCase.execute({
+        pagination: paginationResult.value,
+        username,
+      })
+
+      if (!result.ok) {
         return reply
           .status(HttpStatus.NOT_FOUND)
-          .send({ message: userResult.error.message })
+          .send({ message: result.error.message })
       }
 
-      const result = await reviewRepository.findByUser(
-        userResult.value.id,
-        paginationResult.value
-      )
-
-      return reply.status(HttpStatus.OK).send({
-        currentPage: result.currentPage,
-        reviews: result.items.map((r) => ReviewDTOMapper.toDTO(r)),
-        size: result.size,
-        total: result.total,
-        totalPages: result.totalPages,
-      })
+      return reply.status(HttpStatus.OK).send(result.value)
     }
   )
 }

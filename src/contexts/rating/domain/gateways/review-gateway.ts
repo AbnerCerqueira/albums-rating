@@ -16,6 +16,10 @@ export type UserAndReview = {
 }
 
 export interface ReviewGateway {
+  findAlbumByPublicId: (
+    albumPublicId: PublicId
+  ) => Promise<Result<Album, NotFoundError>>
+
   findUserAndAlbumForReview: (
     userPublicId: PublicId,
     albumPublicId: PublicId

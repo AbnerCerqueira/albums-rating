@@ -1,5 +1,7 @@
 import { CreateAlbumsUseCase } from '@/contexts/catalog/application/create-albums-use-case'
 import { CreateGenreUseCase } from '@/contexts/catalog/application/create-genre-use-case'
+import { GetAlbumByPublicIdUseCase } from '@/contexts/catalog/application/get-album-by-public-id-use-case'
+import { GetAllAlbumsUseCase } from '@/contexts/catalog/application/get-all-albums-use-case'
 import { SearchAlbumsUseCase } from '@/contexts/catalog/application/search-albums-use-case'
 import { SearchGenresUseCase } from '@/contexts/catalog/application/search-genres-use-case'
 import { DomainAlbumServices } from '@/contexts/catalog/domain/services/is-unique-album'
@@ -21,6 +23,12 @@ export const createAlbumUseCase = new CreateAlbumsUseCase(
 export const createGenreUseCase = new CreateGenreUseCase(
   domainGenreServices,
   genreRepository
+)
+
+export const getAllAlbumsUseCase = new GetAllAlbumsUseCase(albumRepository)
+
+export const getAlbumByPublicIdUseCase = new GetAlbumByPublicIdUseCase(
+  albumRepository
 )
 
 export const searchAlbumsUseCase = new SearchAlbumsUseCase(albumRepository)

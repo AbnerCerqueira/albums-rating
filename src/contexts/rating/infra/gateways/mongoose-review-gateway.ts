@@ -1,6 +1,7 @@
 import { NotFoundError } from '@/contexts/!common/errors'
 import type { PublicId } from '@/contexts/!common/public-id'
 import { err, ok, type Result } from '@/contexts/!common/result'
+import type { Album } from '@/contexts/catalog/domain/album'
 import type { AlbumRepository } from '@/contexts/catalog/domain/album-repository'
 import type {
   ReviewGateway,
@@ -18,6 +19,17 @@ export class MongooseReviewGateway implements ReviewGateway {
     private readonly userRepository: UserRepository,
     private readonly albumRepository: AlbumRepository
   ) {}
+
+  async findAlbumByPublicId(
+    albumPublicId: PublicId
+  ): Promise<Result<Album, NotFoundError>> {
+    const album = await this.albumRepository.findByPublicId(albumPublicId)
+    if (!album) {
+      return err(new NotFoundError('Álbum'))
+    }
+    return ok(album)
+  }
+
   async findUserAndReviewForEdit(
     userPublicId: PublicId,
     reviewPublicId: PublicId
