@@ -92,11 +92,11 @@ async function paginateFind<T, P = object>(
   return toPaginatedResult(items, total, pagination)
 }
 
-async function paginateAggregate<T>(
+async function paginateAggregate<T, R = T>(
   model: Model<T>,
   pipeline: PipelineStage[] = [],
   pagination?: Pagination
-): Promise<PaginatedResult<T>> {
+): Promise<PaginatedResult<R>> {
   if (!pagination) {
     const items = await model.aggregate(pipeline)
     return {

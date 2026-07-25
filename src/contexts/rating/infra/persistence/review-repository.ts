@@ -188,16 +188,12 @@ export class MongooseReviewRepository implements ReviewRepository {
   ): Promise<PaginatedResult<ChartAlbumRaw>> {
     const globalAverageRating = await getGlobalAverageRating(this.model)
     const pipeline = buildTopRatedPipeline(filters, globalAverageRating)
-    const result = await MongooseUtils.paginateAggregate(
-      this.model,
-      pipeline,
-      pagination
-    )
+    const result = await MongooseUtils.paginateAggregate<
+      ReviewData,
+      ChartAlbumRaw
+    >(this.model, pipeline, pagination)
 
-    return {
-      ...result,
-      items: result.items as unknown as ChartAlbumRaw[],
-    }
+    return result
   }
 
   async findMostReviewed(
@@ -205,16 +201,12 @@ export class MongooseReviewRepository implements ReviewRepository {
     pagination?: Pagination
   ): Promise<PaginatedResult<ChartAlbumRaw>> {
     const pipeline = buildPopularPipeline(filters)
-    const result = await MongooseUtils.paginateAggregate(
-      this.model,
-      pipeline,
-      pagination
-    )
+    const result = await MongooseUtils.paginateAggregate<
+      ReviewData,
+      ChartAlbumRaw
+    >(this.model, pipeline, pagination)
 
-    return {
-      ...result,
-      items: result.items as unknown as ChartAlbumRaw[],
-    }
+    return result
   }
 
   async delete(id: ReviewId): Promise<boolean> {
