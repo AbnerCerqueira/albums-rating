@@ -1,11 +1,11 @@
 import { InvalidArgumentError } from '@/contexts/!common/errors'
 import { err, ok, type Result } from '@/contexts/!common/result'
 
-export class Genre {
+export class GenreName {
   private constructor(readonly value: string) {}
 
-  static create(genre: string): Result<Genre, InvalidArgumentError> {
-    const trimmed = genre.trim()
+  static create(name: string): Result<GenreName, InvalidArgumentError> {
+    const trimmed = name.trim()
     if (!trimmed) {
       return err(new InvalidArgumentError('Gênero não pode ser vazio'))
     }
@@ -16,14 +16,14 @@ export class Genre {
       )
     }
 
-    return ok(new Genre(trimmed))
+    return ok(new GenreName(trimmed))
   }
 
-  static unsafe(genre: string) {
-    return new Genre(genre)
+  static unsafe(name: string): GenreName {
+    return new GenreName(name)
   }
 
-  equals(other: Genre) {
+  equals(other: GenreName): boolean {
     return this.value === other.value
   }
 }
