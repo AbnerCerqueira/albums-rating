@@ -1,5 +1,10 @@
 import { escapeRegExp } from 'lodash'
-import type { FilterQuery, Model, PipelineStage } from 'mongoose'
+import type {
+  FilterQuery,
+  Model,
+  PipelineStage,
+  PopulateOptions,
+} from 'mongoose'
 import type { PaginatedResult, Pagination } from './pagination'
 import { toPaginatedResult } from './pagination'
 import { defaultSearchOptions, type SearchOptions } from './search-options'
@@ -47,19 +52,26 @@ function buildSearchPipeline(
   return [matchStage]
 }
 
-async function paginateFind<T>(
+async function paginateFind<T, P = object>(
   model: Model<T>,
   filter: FilterQuery<T> = {},
   pagination?: Pagination,
-  sort?: Record<string, 1 | -1 | 'asc' | 'desc'>
-): Promise<PaginatedResult<T>> {
+  sort?: Record<string, 1 | -1 | 'asc' | 'desc'>,
+  populate?: PopulateOptions | (PopulateOptions | string)[]
+): Promise<PaginatedResult<T & P>> {
   const buildQuery = () => {
-    const q = model.find(filter)
-    return sort ? q.sort(sort) : q
+    let q = model.find(filter)
+    if (sort) {
+      q = q.sort(sort)
+    }
+    if (populate) {
+      q = q.populate(populate as Parameters<typeof q.populate>[0])
+    }
+    return q
   }
 
   if (!pagination) {
-    const items = (await buildQuery().lean()) as T[]
+    const items = (await buildQuery().lean()) as (T & P)[]
     return {
       currentPage: 1,
       items,
@@ -73,7 +85,7 @@ async function paginateFind<T>(
     buildQuery()
       .skip(pagination.size * (pagination.page - 1))
       .limit(pagination.size)
-      .lean() as Promise<T[]>,
+      .lean() as Promise<(T & P)[]>,
     model.countDocuments(filter),
   ])
 

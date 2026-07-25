@@ -50,3 +50,7 @@ export function toPaginatedResult<T>(
     totalPages: Math.ceil(total / pagination.size),
   }
 }
+
+export function emptyPaginatedResult<T>(): PaginatedResult<T> {
+  return { currentPage: 1, items: [], size: 0, total: 0, totalPages: 1 }
+}
