@@ -1,15 +1,15 @@
 import type { Pagination } from '@/contexts/!common/pagination'
 import type {
+  PopularFilters,
   ReviewRepository,
-  TopRatedFilters,
 } from '../domain/review-repository'
 import { type ChartAlbumDTO, ChartAlbumDTOMapper } from './chart-album-dto'
 
-export type GetTopAlbumsUseCaseRequest = TopRatedFilters & {
+export type GetPopularAlbumsUseCaseRequest = PopularFilters & {
   pagination?: Pagination
 }
 
-export type GetTopAlbumsUseCaseResponse = {
+export type GetPopularAlbumsUseCaseResponse = {
   albums: ChartAlbumDTO[]
   currentPage?: number
   size?: number
@@ -17,15 +17,15 @@ export type GetTopAlbumsUseCaseResponse = {
   totalPages?: number
 }
 
-export class GetTopAlbumsUseCase {
+export class GetPopularAlbumsUseCase {
   constructor(private readonly reviewRepository: ReviewRepository) {}
 
   async execute(
-    data: GetTopAlbumsUseCaseRequest
-  ): Promise<GetTopAlbumsUseCaseResponse> {
+    data: GetPopularAlbumsUseCaseRequest
+  ): Promise<GetPopularAlbumsUseCaseResponse> {
     const { from, to, genre, format, pagination } = data
 
-    const result = await this.reviewRepository.findTopRated(
+    const result = await this.reviewRepository.findMostReviewed(
       { format, from, genre, to },
       pagination
     )

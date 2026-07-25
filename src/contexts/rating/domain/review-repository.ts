@@ -13,7 +13,7 @@ export type TopRatedFilters = {
   format?: Format
 }
 
-export type TopRatedAlbumRaw = {
+export type ChartAlbumRaw = {
   averageRating: number
   reviewCount: number
   artist: string
@@ -23,6 +23,8 @@ export type TopRatedAlbumRaw = {
   format: string
   genres: string[]
 }
+
+export type PopularFilters = TopRatedFilters
 
 export interface ReviewRepository {
   delete: (id: ReviewId) => Promise<boolean>
@@ -36,10 +38,14 @@ export interface ReviewRepository {
     userId: UserId,
     pagination?: Pagination
   ) => Promise<PaginatedResult<Review>>
+  findMostReviewed: (
+    filters: PopularFilters,
+    pagination?: Pagination
+  ) => Promise<PaginatedResult<ChartAlbumRaw>>
   findRecent: (pagination?: Pagination) => Promise<PaginatedResult<Review>>
   findTopRated: (
     filters: TopRatedFilters,
     pagination?: Pagination
-  ) => Promise<PaginatedResult<TopRatedAlbumRaw>>
+  ) => Promise<PaginatedResult<ChartAlbumRaw>>
   save: (review: Review) => Promise<Review>
 }

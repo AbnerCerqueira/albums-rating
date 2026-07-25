@@ -12,8 +12,9 @@ import type { AlbumData } from '@/contexts/catalog/infra/persistence/album-model
 import { GenreMapper } from '@/contexts/catalog/infra/persistence/genre-mapper'
 import type { Review } from '@/contexts/rating/domain/review'
 import type {
+  ChartAlbumRaw,
+  PopularFilters,
   ReviewRepository,
-  TopRatedAlbumRaw,
   TopRatedFilters,
 } from '@/contexts/rating/domain/review-repository'
 import type { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
@@ -26,6 +27,7 @@ import {
   ReviewModel,
   type ReviewPopulated,
 } from './review-model'
+import { buildPopularPipeline } from './review-popular.pipeline'
 import { POPULATE_OPTIONS, resolveObjectIds } from './review-repository.helpers'
 import {
   buildTopRatedPipeline,
@@ -183,7 +185,7 @@ export class MongooseReviewRepository implements ReviewRepository {
   async findTopRated(
     filters: TopRatedFilters,
     pagination?: Pagination
-  ): Promise<PaginatedResult<TopRatedAlbumRaw>> {
+  ): Promise<PaginatedResult<ChartAlbumRaw>> {
     const globalAverageRating = await getGlobalAverageRating(this.model)
     const pipeline = buildTopRatedPipeline(filters, globalAverageRating)
     const result = await MongooseUtils.paginateAggregate(
@@ -194,7 +196,24 @@ export class MongooseReviewRepository implements ReviewRepository {
 
     return {
       ...result,
-      items: result.items as unknown as TopRatedAlbumRaw[],
+      items: result.items as unknown as ChartAlbumRaw[],
+    }
+  }
+
+  async findMostReviewed(
+    filters: PopularFilters,
+    pagination?: Pagination
+  ): Promise<PaginatedResult<ChartAlbumRaw>> {
+    const pipeline = buildPopularPipeline(filters)
+    const result = await MongooseUtils.paginateAggregate(
+      this.model,
+      pipeline,
+      pagination
+    )
+
+    return {
+      ...result,
+      items: result.items as unknown as ChartAlbumRaw[],
     }
   }
 

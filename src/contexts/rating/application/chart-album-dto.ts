@@ -1,8 +1,8 @@
 import z from 'zod'
 import { FORMATS } from '@/contexts/catalog/domain/album'
-import type { TopRatedAlbumRaw } from '../domain/review-repository'
+import type { ChartAlbumRaw } from '../domain/review-repository'
 
-export const zodTopAlbumDTO = z.object({
+export const zodChartAlbumDTO = z.object({
   artist: z.string(),
   averageRating: z.number(),
   format: z.enum(FORMATS),
@@ -13,13 +13,13 @@ export const zodTopAlbumDTO = z.object({
   title: z.string(),
 })
 
-export type TopAlbumDTO = z.infer<typeof zodTopAlbumDTO>
+export type ChartAlbumDTO = z.infer<typeof zodChartAlbumDTO>
 
-function toDTO(raw: TopRatedAlbumRaw): TopAlbumDTO {
+function toDTO(raw: ChartAlbumRaw): ChartAlbumDTO {
   return {
     artist: raw.artist,
     averageRating: raw.averageRating,
-    format: raw.format as TopAlbumDTO['format'],
+    format: raw.format as ChartAlbumDTO['format'],
     genres: raw.genres,
     publicId: raw.publicId,
     releaseDate: raw.releaseDate.toISOString().split('T')[0],
@@ -28,4 +28,4 @@ function toDTO(raw: TopRatedAlbumRaw): TopAlbumDTO {
   }
 }
 
-export const TopAlbumDTOMapper = { toDTO }
+export const ChartAlbumDTOMapper = { toDTO }

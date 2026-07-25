@@ -5,6 +5,7 @@ import { MongooseUserRepository } from '@/contexts/user/infra/persistence/user-r
 import { CreateReviewUseCase } from '../application/create-review-use-case'
 import { DeleteReviewUseCase } from '../application/delete-review-use-case'
 import { EditReviewUseCase } from '../application/edit-review-use-case'
+import { GetPopularAlbumsUseCase } from '../application/get-popular-albums-use-case'
 import { GetReviewsByAlbumUseCase } from '../application/get-reviews-by-album-use-case'
 import { GetReviewsByUserUseCase } from '../application/get-reviews-by-user-use-case'
 import { GetTopAlbumsUseCase } from '../application/get-top-albums-use-case'
@@ -52,6 +53,9 @@ export const getReviewsByUserUseCase = new GetReviewsByUserUseCase(
   reviewGateway
 )
 
+export const getPopularAlbumsUseCase = new GetPopularAlbumsUseCase(
+  reviewRepository
+)
 export const getTopAlbumsUseCase = new GetTopAlbumsUseCase(reviewRepository)
 
 export { reviewGateway, reviewRepository }

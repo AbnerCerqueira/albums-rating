@@ -6,7 +6,7 @@ import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'
 import { zodChartAlbumDTO } from '../../application/chart-album-dto'
-import { getTopAlbumsUseCase } from '../compose'
+import { getPopularAlbumsUseCase } from '../compose'
 
 const querystring = z.object({
   format: z.enum(FORMATS).optional(),
@@ -22,9 +22,9 @@ const okResponse = z.object({
   ...InfraSchemaUtils.paginatedRoutesResponse.shape,
 })
 
-export const getTopAlbumsRoute: FastifyPluginCallbackZod = (app) => {
+export const getPopularAlbumsRoute: FastifyPluginCallbackZod = (app) => {
   app.get(
-    '/top',
+    '/popular',
     {
       schema: {
         querystring,
@@ -45,7 +45,7 @@ export const getTopAlbumsRoute: FastifyPluginCallbackZod = (app) => {
           .send({ message: paginationResult.error.message })
       }
 
-      const result = await getTopAlbumsUseCase.execute({
+      const result = await getPopularAlbumsUseCase.execute({
         format: query.format,
         from: query.from,
         genre: query.genre,
