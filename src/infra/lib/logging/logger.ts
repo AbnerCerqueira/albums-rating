@@ -1,4 +1,5 @@
 import pino from 'pino'
+import { env } from '@/infra/config/envs'
 import { createFileTransport } from './transports/file'
 
 export type LogSeverity = 'debug' | 'info' | 'warn' | 'error'
@@ -62,7 +63,7 @@ logger.addTransport(
 )
 
 function createConsoleTransport(): Transport {
-  const p = pino({ transport: { target: 'pino-pretty' } })
+  const p = pino({ level: env.LOG_LEVEL, transport: { target: 'pino-pretty' } })
 
   return {
     log(severity, message, context) {
