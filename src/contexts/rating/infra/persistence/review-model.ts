@@ -1,14 +1,10 @@
-import { model, Schema } from 'mongoose'
-
-export type ReviewDataDomainId = {
-  userEmail: string
-  username: string
-  albumTitle: string
-  albumArtist: string
-}
+import { model, Schema, type Types } from 'mongoose'
+import type { AlbumPopulated } from '@/contexts/catalog/infra/persistence/album-model'
+import type { UserData } from '@/contexts/user/infra/persistence/user-model'
 
 export type ReviewData = {
-  domainId: ReviewDataDomainId
+  userId: Types.ObjectId
+  albumId: Types.ObjectId
   publicId: string
   isFavorite: boolean
   isEdited: boolean
@@ -19,14 +15,19 @@ export type ReviewData = {
   updatedAt: Date
 }
 
+export type ReviewPopulated = Omit<ReviewData, 'userId' | 'albumId'> & {
+  userId: UserData
+  albumId: AlbumPopulated
+}
+
+export type ReviewPersistenceData = Omit<ReviewData, 'userId' | 'albumId'> & {
+  userId: string
+  albumId: string
+}
+
 const reviewSchema = new Schema<ReviewData>(
   {
-    domainId: {
-      albumArtist: String,
-      albumTitle: String,
-      userEmail: String,
-      username: String,
-    },
+    albumId: { ref: 'albums', required: true, type: Schema.Types.ObjectId },
     isEdited: {
       default: false,
       required: true,
@@ -57,6 +58,7 @@ const reviewSchema = new Schema<ReviewData>(
       required: false,
       type: String,
     },
+    userId: { ref: 'users', required: true, type: Schema.Types.ObjectId },
   },
   {
     timestamps: true,
@@ -64,14 +66,6 @@ const reviewSchema = new Schema<ReviewData>(
   }
 )
 
-reviewSchema.index(
-  {
-    'domainId.albumArtist': 1,
-    'domainId.albumTitle': 1,
-    'domainId.userEmail': 1,
-    'domainId.username': 1,
-  },
-  { unique: true }
-)
+reviewSchema.index({ albumId: 1, userId: 1 }, { unique: true })
 
 export const ReviewModel = model('reviews', reviewSchema)

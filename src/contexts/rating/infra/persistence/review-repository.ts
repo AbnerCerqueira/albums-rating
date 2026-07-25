@@ -1,63 +1,179 @@
+import type { Model } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
-import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
+import {
+  emptyPaginatedResult,
+  type PaginatedResult,
+  type Pagination,
+} from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
+import { AlbumMapper } from '@/contexts/catalog/infra/persistence/album-mapper'
+import type { AlbumData } from '@/contexts/catalog/infra/persistence/album-model'
+import { GenreMapper } from '@/contexts/catalog/infra/persistence/genre-mapper'
 import type { Review } from '@/contexts/rating/domain/review'
 import type { ReviewRepository } from '@/contexts/rating/domain/review-repository'
 import type { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
+import { UserMapper } from '@/contexts/user/infra/persistence/user-mapper'
+import type { UserData } from '@/contexts/user/infra/persistence/user-model'
 import { ReviewMapper } from './review-mapper'
-import { ReviewModel } from './review-model'
+import {
+  type ReviewData,
+  ReviewModel,
+  type ReviewPopulated,
+} from './review-model'
 
 export class MongooseReviewRepository implements ReviewRepository {
   private readonly model = ReviewModel
 
+  constructor(
+    private readonly userModel: Model<UserData>,
+    private readonly albumModel: Model<AlbumData>
+  ) {}
+
   async save(review: Review): Promise<Review> {
     const data = ReviewMapper.toPersistence(review)
-    const filter = this.getFlattenObjOfDomainId(review.id)
+
+    const email = review.id.userId.email.value
+    const username = review.id.userId.username.value
+    const artist = review.id.albumId.artist.value
+    const title = review.id.albumId.title.value
+
+    const [user, album] = await Promise.all([
+      this.userModel.findOne({ email, username }).lean(),
+      this.albumModel.findOne({ artist, title }).lean(),
+    ])
+
+    if (!(user && album)) {
+      throw new Error('User or album not found')
+    }
+
+    const userId = user._id
+    if (!userId) {
+      throw new Error('User _id is missing')
+    }
+
+    const albumId = album._id
+    if (!albumId) {
+      throw new Error('Album _id is missing')
+    }
+
+    const docToSave: ReviewData = {
+      ...data,
+      albumId,
+      userId,
+    }
+
     const updated = await this.model
-      .findOneAndUpdate(filter, data, {
+      .findOneAndUpdate({ albumId, userId }, docToSave, {
         new: true,
         upsert: true,
       })
+      .populate<ReviewPopulated>([
+        { path: 'albumId', populate: { path: 'genres' } },
+        'userId',
+      ])
       .lean()
 
-    return ReviewMapper.toDomain(updated)
+    if (!updated) {
+      throw new Error('Failed to save review')
+    }
+
+    return this.toDomainFromPopulated(updated)
   }
 
   async findById(id: ReviewId): Promise<Review | null> {
-    const foundReview = await this.model
-      .findOne(this.getFlattenObjOfDomainId(id))
+    const [user, album] = await Promise.all([
+      this.userModel
+        .findOne({
+          email: id.userId.email.value,
+          username: id.userId.username.value,
+        })
+        .lean(),
+      this.albumModel
+        .findOne({
+          artist: id.albumId.artist.value,
+          title: id.albumId.title.value,
+        })
+        .lean(),
+    ])
+
+    if (!(user && album)) {
+      return null
+    }
+
+    const userId = user._id
+    if (!userId) {
+      throw new Error('User _id is missing')
+    }
+
+    const albumId = album._id
+    if (!albumId) {
+      throw new Error('Album _id is missing')
+    }
+
+    const doc = await this.model
+      .findOne({ albumId, userId })
+      .populate<ReviewPopulated>([
+        { path: 'albumId', populate: { path: 'genres' } },
+        'userId',
+      ])
       .lean()
 
-    return foundReview ? ReviewMapper.toDomain(foundReview) : null
+    if (!doc) {
+      return null
+    }
+
+    return this.toDomainFromPopulated(doc)
   }
 
   async findByPublicId(publicId: PublicId): Promise<Review | null> {
-    const doc = await this.model.findOne({ publicId: publicId.value }).lean()
+    const doc = await this.model
+      .findOne({ publicId: publicId.value })
+      .populate<ReviewPopulated>([
+        { path: 'albumId', populate: { path: 'genres' } },
+        'userId',
+      ])
+      .lean()
 
-    return doc ? ReviewMapper.toDomain(doc) : null
+    if (!doc) {
+      return null
+    }
+
+    return this.toDomainFromPopulated(doc)
   }
 
   async findByUser(
     userId: UserId,
     pagination?: Pagination
   ): Promise<PaginatedResult<Review>> {
-    const filter = {
-      'domainId.userEmail': userId.email.value,
-      'domainId.username': userId.username.value,
+    const user = await this.userModel
+      .findOne({
+        email: userId.email.value,
+        username: userId.username.value,
+      })
+      .lean()
+
+    if (!user) {
+      return emptyPaginatedResult()
     }
 
-    const result = await MongooseUtils.paginateFind(
-      this.model,
-      filter,
-      pagination,
-      { reviewedAt: -1 }
-    )
+    const userIdObj = user._id
+    if (!userIdObj) {
+      throw new Error('User _id is missing')
+    }
+
+    const result = await MongooseUtils.paginateFind<
+      ReviewData,
+      ReviewPopulated
+    >(this.model, { userId: userIdObj }, pagination, { reviewedAt: -1 }, [
+      { path: 'albumId', populate: { path: 'genres' } },
+      'userId',
+    ])
 
     return {
       ...result,
-      items: result.items.map((doc) => ReviewMapper.toDomain(doc)),
+      items: result.items.map((doc) => this.toDomainFromPopulated(doc)),
     }
   }
 
@@ -65,49 +181,90 @@ export class MongooseReviewRepository implements ReviewRepository {
     albumId: AlbumId,
     pagination?: Pagination
   ): Promise<PaginatedResult<Review>> {
-    const filter = {
-      'domainId.albumArtist': albumId.artist.value,
-      'domainId.albumTitle': albumId.title.value,
+    const album = await this.albumModel
+      .findOne({
+        artist: albumId.artist.value,
+        title: albumId.title.value,
+      })
+      .lean()
+
+    if (!album) {
+      return emptyPaginatedResult()
     }
 
-    const result = await MongooseUtils.paginateFind(
-      this.model,
-      filter,
-      pagination,
-      { reviewedAt: -1 }
-    )
+    const albumIdObj = album._id
+    if (!albumIdObj) {
+      throw new Error('Album _id is missing')
+    }
+
+    const result = await MongooseUtils.paginateFind<
+      ReviewData,
+      ReviewPopulated
+    >(this.model, { albumId: albumIdObj }, pagination, { reviewedAt: -1 }, [
+      { path: 'albumId', populate: { path: 'genres' } },
+      'userId',
+    ])
 
     return {
       ...result,
-      items: result.items.map((doc) => ReviewMapper.toDomain(doc)),
+      items: result.items.map((doc) => this.toDomainFromPopulated(doc)),
     }
   }
 
   async findRecent(pagination?: Pagination): Promise<PaginatedResult<Review>> {
-    const result = await MongooseUtils.paginateFind(
-      this.model,
-      {},
-      pagination,
-      { reviewedAt: -1 }
-    )
+    const result = await MongooseUtils.paginateFind<
+      ReviewData,
+      ReviewPopulated
+    >(this.model, {}, pagination, { reviewedAt: -1 }, [
+      { path: 'albumId', populate: { path: 'genres' } },
+      'userId',
+    ])
 
     return {
       ...result,
-      items: result.items.map((doc) => ReviewMapper.toDomain(doc)),
+      items: result.items.map((doc) => this.toDomainFromPopulated(doc)),
     }
   }
 
   async delete(id: ReviewId): Promise<boolean> {
-    const result = await this.model.deleteOne(this.getFlattenObjOfDomainId(id))
+    const [user, album] = await Promise.all([
+      this.userModel
+        .findOne({
+          email: id.userId.email.value,
+          username: id.userId.username.value,
+        })
+        .lean(),
+      this.albumModel
+        .findOne({
+          artist: id.albumId.artist.value,
+          title: id.albumId.title.value,
+        })
+        .lean(),
+    ])
+
+    if (!(user && album)) {
+      return false
+    }
+
+    const userId = user._id
+    if (!userId) {
+      throw new Error('User _id is missing')
+    }
+
+    const albumId = album._id
+    if (!albumId) {
+      throw new Error('Album _id is missing')
+    }
+
+    const result = await this.model.deleteOne({ albumId, userId })
+
     return result.deletedCount > 0
   }
 
-  private getFlattenObjOfDomainId(id: ReviewId) {
-    return {
-      'domainId.albumArtist': id.albumId.artist.value,
-      'domainId.albumTitle': id.albumId.title.value,
-      'domainId.userEmail': id.userId.email.value,
-      'domainId.username': id.userId.username.value,
-    }
+  private toDomainFromPopulated(doc: ReviewPopulated): Review {
+    const user = UserMapper.toDomain(doc.userId)
+    const genres = doc.albumId.genres.map(GenreMapper.toDomain)
+    const album = AlbumMapper.toDomain(doc.albumId, genres)
+    return ReviewMapper.toDomain(doc, user, album)
   }
 }

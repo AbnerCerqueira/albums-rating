@@ -9,13 +9,11 @@ import type { UserData } from '@/contexts/user/infra/persistence/user-model'
 function toPersistence(user: User): UserData {
   return {
     createdAt: user.getCreationDate(),
-    domainId: {
-      email: user.id.email.value,
-      username: user.id.username.value,
-    },
+    email: user.id.email.value,
     password: user.password.value,
     publicId: user.publicId.value,
     updatedAt: user.getUpdateDate(),
+    username: user.id.username.value,
   }
 }
 
@@ -23,8 +21,8 @@ function toDomain(data: UserData): User {
   return User.fromPersistence({
     createdAt: new Date(data.createdAt),
     id: UserId.create({
-      email: Email.unsafe(data.domainId.email),
-      username: Username.unsafe(data.domainId.username),
+      email: Email.unsafe(data.email),
+      username: Username.unsafe(data.username),
     }),
     password: Password.fromHash(data.password),
     publicId: PublicId.unsafe(data.publicId),

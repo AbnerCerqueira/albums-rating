@@ -1,26 +1,19 @@
 import { PublicId } from '@/contexts/!common/public-id'
+import type { Album } from '@/contexts/catalog/domain/album'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
-import { Artist } from '@/contexts/catalog/domain/value-objects/artist'
-import { Title } from '@/contexts/catalog/domain/value-objects/title'
 import { Review } from '@/contexts/rating/domain/review'
 import { Rating } from '@/contexts/rating/domain/value-objects/rating'
 import { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
 import { ReviewText } from '@/contexts/rating/domain/value-objects/review-text'
 import { ReviewedAt } from '@/contexts/rating/domain/value-objects/reviewed-at'
-import { Email } from '@/contexts/user/domain/value-objects/email'
+import type { User } from '@/contexts/user/domain/user'
 import { UserId } from '@/contexts/user/domain/value-objects/user-id'
-import { Username } from '@/contexts/user/domain/value-objects/username'
-import type { ReviewData } from './review-model'
+import type { ReviewData, ReviewPersistenceData } from './review-model'
 
-function toPersistence(review: Review): ReviewData {
+function toPersistence(review: Review): ReviewPersistenceData {
   return {
+    albumId: review.id.albumId.artist.value,
     createdAt: review.getCreationDate(),
-    domainId: {
-      albumArtist: review.id.albumId.artist.value,
-      albumTitle: review.id.albumId.title.value,
-      userEmail: review.id.userId.email.value,
-      username: review.id.userId.username.value,
-    },
     isEdited: review.isEdited,
     isFavorite: review.isFavorite,
     publicId: review.publicId.value,
@@ -28,13 +21,17 @@ function toPersistence(review: Review): ReviewData {
     reviewedAt: review.reviewedAt.value,
     reviewText: review.reviewText ? review.reviewText.value : null,
     updatedAt: review.getUpdateDate(),
+    userId: review.id.userId.email.value,
   }
 }
 
-function toDomain(data: ReviewData): Review {
+function toDomain(
+  data: Omit<ReviewData, 'userId' | 'albumId'>,
+  user: User,
+  album: Album
+): Review {
   const {
     createdAt,
-    domainId,
     isEdited,
     isFavorite,
     publicId,
@@ -46,12 +43,12 @@ function toDomain(data: ReviewData): Review {
 
   const reviewId = ReviewId.create({
     albumId: AlbumId.create({
-      artist: Artist.unsafe(domainId.albumArtist),
-      title: Title.unsafe(domainId.albumTitle),
+      artist: album.id.artist,
+      title: album.id.title,
     }),
     userId: UserId.create({
-      email: Email.unsafe(domainId.userEmail),
-      username: Username.unsafe(domainId.username),
+      email: user.id.email,
+      username: user.id.username,
     }),
   })
 
