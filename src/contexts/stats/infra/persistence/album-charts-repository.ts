@@ -1,13 +1,16 @@
-import type { FilterQuery, PipelineStage } from 'mongoose'
+import mongoose, { type FilterQuery, type PipelineStage } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
-import { ReviewModel } from '@/contexts/rating/infra/persistence/review-model'
 import type {
   AlbumChartEntry,
   AlbumChartFilters,
   AlbumChartsRepository,
 } from '../../domain/album-charts-repository'
 import { type AlbumChartData, AlbumChartModel } from './album-charts-model'
+import {
+  type AlbumChartSourceReview,
+  REVIEWS_COLLECTION,
+} from './album-charts-source'
 
 const BAYESIAN_MIN_REVIEWS = 5
 
@@ -130,7 +133,10 @@ export class MongooseAlbumChartsRepository implements AlbumChartsRepository {
 
   async refreshAll(): Promise<void> {
     const pipeline = buildRefreshPipeline()
-    await ReviewModel.aggregate(pipeline)
+    await mongoose.connection
+      .collection<AlbumChartSourceReview>(REVIEWS_COLLECTION)
+      .aggregate(pipeline)
+      .toArray()
   }
 
   findTopRated(
