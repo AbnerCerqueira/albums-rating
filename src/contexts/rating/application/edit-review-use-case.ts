@@ -1,13 +1,13 @@
 import z from 'zod'
-import type {
-  ForbiddenError,
-  InvalidArgumentError,
+import {
+  type ForbiddenError,
+  type InvalidArgumentError,
   NotFoundError,
 } from '@/contexts/!common/errors'
 import { PublicId } from '@/contexts/!common/public-id'
-import { ok, type Result } from '@/contexts/!common/result'
+import { err, ok, type Result } from '@/contexts/!common/result'
+import type { UserGateway } from '../domain/gateways/user-gateway'
 import type { ReviewRepository } from '../domain/review-repository'
-import type { DomainReviewServices } from '../domain/services/domain-review-services'
 import { Rating } from '../domain/value-objects/rating'
 import { ReviewText } from '../domain/value-objects/review-text'
 import { type ReviewDTO, ReviewDTOMapper } from './review-dto'
@@ -29,7 +29,7 @@ export type EditReviewUseCaseResponse = Promise<
 export class EditReviewUseCase {
   constructor(
     private readonly reviewRepository: ReviewRepository,
-    private readonly domainServices: DomainReviewServices
+    private readonly userGateway: UserGateway
   ) {}
 
   async execute(
@@ -37,18 +37,21 @@ export class EditReviewUseCase {
     reviewPublicId: string,
     userPublicId: string
   ): EditReviewUseCaseResponse {
-    const entitiesResult =
-      await this.domainServices.gateway.findUserAndReviewForEdit(
-        PublicId.unsafe(userPublicId),
-        PublicId.unsafe(reviewPublicId)
-      )
-    if (!entitiesResult.ok) {
-      return entitiesResult
+    const userResult = await this.userGateway.findUserByPublicId(
+      PublicId.unsafe(userPublicId)
+    )
+    if (!userResult.ok) {
+      return userResult
     }
 
-    const { review, user } = entitiesResult.value
+    const review = await this.reviewRepository.findByPublicId(
+      PublicId.unsafe(reviewPublicId)
+    )
+    if (!review) {
+      return err(new NotFoundError('Review'))
+    }
 
-    const ownershipResult = review.ensureOwnership(review, user.id)
+    const ownershipResult = review.ensureOwnership(userResult.value.id)
     if (!ownershipResult.ok) {
       return ownershipResult
     }

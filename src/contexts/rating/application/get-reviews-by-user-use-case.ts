@@ -1,7 +1,7 @@
 import type { NotFoundError } from '@/contexts/!common/errors'
 import type { Pagination } from '@/contexts/!common/pagination'
 import { ok, type Result } from '@/contexts/!common/result'
-import type { ReviewGateway } from '../domain/gateways/review-gateway'
+import type { UserGateway } from '../domain/gateways/user-gateway'
 import type { ReviewRepository } from '../domain/review-repository'
 import { type ReviewDTO, ReviewDTOMapper } from './review-dto'
 
@@ -26,7 +26,7 @@ export type GetReviewsByUserUseCaseResponse = Promise<
 export class GetReviewsByUserUseCase {
   constructor(
     private readonly reviewRepository: ReviewRepository,
-    private readonly reviewGateway: ReviewGateway
+    private readonly userGateway: UserGateway
   ) {}
 
   async execute(
@@ -34,7 +34,7 @@ export class GetReviewsByUserUseCase {
   ): GetReviewsByUserUseCaseResponse {
     const { username, pagination } = data
 
-    const userResult = await this.reviewGateway.findUserByUsername(username)
+    const userResult = await this.userGateway.findUserByUsername(username)
     if (!userResult.ok) {
       return userResult
     }

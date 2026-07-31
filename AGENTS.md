@@ -87,6 +87,16 @@ Regra de dependência: a dependência aponta para dentro.
   - `warn`: situações inesperadas mas recuperáveis.
   - `error`: falhas reais.
 
+### Gateways
+
+Gateway é a ponte entre contextos: permite que um contexto consuma dados de outro sem conhecer o repositório ou as entidades do provedor.
+
+- A interface (porta) vive no `domain` do **contexto consumidor** (`{consumidor}/domain/gateways/*-gateway.ts`) e usa apenas tipos do próprio contexto + `common` (`PublicId`, `Result`, erros).
+- A implementação (adapter) vive no `infra` do **contexto provedor** (`{provedor}/infra/gateways/*-gateway.ts`), recebendo somente repositórios do próprio provedor.
+- O contrato retorna DTOs mínimos do consumidor — nunca entidades do provedor. Se o consumidor só precisa do ID, retorne `Result<{ id }>, NotFoundError`.
+- O provedor expõe o adapter pelo seu `compose.ts`; o consumidor injeta nos use-cases (nunca importa o repositório do provedor).
+- Um gateway por contexto estrangeiro: se o consumidor depende de dois contextos, crie dois gateways.
+
 ### Código
 
 - Evite duplicação, mas não crie abstrações prematuras.

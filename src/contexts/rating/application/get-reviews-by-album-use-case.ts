@@ -2,7 +2,7 @@ import type { NotFoundError } from '@/contexts/!common/errors'
 import type { Pagination } from '@/contexts/!common/pagination'
 import type { PublicId } from '@/contexts/!common/public-id'
 import { ok, type Result } from '@/contexts/!common/result'
-import type { ReviewGateway } from '../domain/gateways/review-gateway'
+import type { AlbumGateway } from '../domain/gateways/album-gateway'
 import type { ReviewRepository } from '../domain/review-repository'
 import { type ReviewDTO, ReviewDTOMapper } from './review-dto'
 
@@ -27,7 +27,7 @@ export type GetReviewsByAlbumUseCaseResponse = Promise<
 export class GetReviewsByAlbumUseCase {
   constructor(
     private readonly reviewRepository: ReviewRepository,
-    private readonly reviewGateway: ReviewGateway
+    private readonly albumGateway: AlbumGateway
   ) {}
 
   async execute(
@@ -36,7 +36,7 @@ export class GetReviewsByAlbumUseCase {
     const { albumPublicId, pagination } = data
 
     const albumResult =
-      await this.reviewGateway.findAlbumByPublicId(albumPublicId)
+      await this.albumGateway.findAlbumByPublicId(albumPublicId)
     if (!albumResult.ok) {
       return albumResult
     }

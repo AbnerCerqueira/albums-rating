@@ -2,10 +2,13 @@ import { AuthUserUseCase } from '@/contexts/user/application/use-cases/auth-user
 import { CreateUserUseCase } from '@/contexts/user/application/use-cases/create-user-use-case'
 import { DomainUserServices } from '@/contexts/user/domain/services/domain-user-services'
 import { bcryptPasswordEncoder } from '@/infra/lib/hash/bcrypt'
+import { MongooseUserGateway } from './gateways/user-gateway'
 import { MongooseUserRepository } from './persistence/user-repository'
 
 const userRepository = new MongooseUserRepository()
 const domainUserServices = new DomainUserServices(userRepository)
+
+export const userGateway = new MongooseUserGateway(userRepository)
 
 export const createUserUseCase = new CreateUserUseCase(
   domainUserServices,

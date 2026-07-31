@@ -1,7 +1,7 @@
 import { ForbiddenError } from '@/contexts/!common/errors'
 import { PublicId } from '@/contexts/!common/public-id'
 import { err, ok, type Result } from '@/contexts/!common/result'
-import type { User } from '@/contexts/user/domain/user'
+import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import type { Rating } from './value-objects/rating'
 import type { ReviewId } from './value-objects/review-id'
 import type { ReviewText } from './value-objects/review-text'
@@ -105,11 +105,8 @@ export class Review {
     )
   }
 
-  ensureOwnership(
-    review: Review,
-    userId: User['id']
-  ): Result<void, ForbiddenError> {
-    if (!review.id.userId.equals(userId)) {
+  ensureOwnership(userId: UserId): Result<void, ForbiddenError> {
+    if (!this.id.userId.equals(userId)) {
       return err(
         new ForbiddenError('Você só pode editar suas próprias reviews')
       )

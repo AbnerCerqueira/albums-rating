@@ -6,6 +6,8 @@ import type {
 } from '@/contexts/!common/errors'
 import { PublicId } from '@/contexts/!common/public-id'
 import { ok, type Result } from '@/contexts/!common/result'
+import type { AlbumGateway } from '../domain/gateways/album-gateway'
+import type { UserGateway } from '../domain/gateways/user-gateway'
 import { Review } from '../domain/review'
 import type { ReviewRepository } from '../domain/review-repository'
 import type { DomainReviewServices } from '../domain/services/domain-review-services'
@@ -33,27 +35,32 @@ export type CreateReviewUseCaseResponse = Promise<
 export class CreateReviewUseCase {
   constructor(
     private readonly reviewRepository: ReviewRepository,
-    private readonly domainServices: DomainReviewServices
+    private readonly domainServices: DomainReviewServices,
+    private readonly albumGateway: AlbumGateway,
+    private readonly userGateway: UserGateway
   ) {}
 
   async execute(
     data: CreateReviewUseCaseRequest,
     userPublicId: string
   ): CreateReviewUseCaseResponse {
-    const entitiesResult =
-      await this.domainServices.gateway.findUserAndAlbumForReview(
-        PublicId.unsafe(userPublicId),
-        PublicId.unsafe(data.albumPublicId)
-      )
-    if (!entitiesResult.ok) {
-      return entitiesResult
+    const userResult = await this.userGateway.findUserByPublicId(
+      PublicId.unsafe(userPublicId)
+    )
+    if (!userResult.ok) {
+      return userResult
     }
 
-    const { album, user } = entitiesResult.value
+    const albumResult = await this.albumGateway.findAlbumByPublicId(
+      PublicId.unsafe(data.albumPublicId)
+    )
+    if (!albumResult.ok) {
+      return albumResult
+    }
 
     const reviewId = ReviewId.create({
-      albumId: album.id,
-      userId: user.id,
+      albumId: albumResult.value.id,
+      userId: userResult.value.id,
     })
 
     const notExistsResult =

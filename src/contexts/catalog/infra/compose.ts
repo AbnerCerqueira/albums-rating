@@ -6,11 +6,13 @@ import { SearchAlbumsUseCase } from '@/contexts/catalog/application/search-album
 import { SearchGenresUseCase } from '@/contexts/catalog/application/search-genres-use-case'
 import { DomainAlbumServices } from '@/contexts/catalog/domain/services/is-unique-album'
 import { DomainGenreServices } from '@/contexts/catalog/domain/services/is-unique-genre'
+import { MongooseAlbumGateway } from './gateways/album-gateway'
 import { MongooseAlbumRepository } from './persistence/album-repository'
 import { MongooseGenreRepository } from './persistence/genre-repository'
 
 export const albumRepository = new MongooseAlbumRepository()
 export const genreRepository = new MongooseGenreRepository()
+export const albumGateway = new MongooseAlbumGateway(albumRepository)
 export const domainAlbumServices = new DomainAlbumServices(albumRepository)
 export const domainGenreServices = new DomainGenreServices(genreRepository)
 
