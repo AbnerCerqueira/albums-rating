@@ -1,6 +1,7 @@
 const BASE_URL = '/api/rating'
 
 const GET = {
+  POPULAR_ALBUMS: `${BASE_URL}/popular`,
   REVIEWS_BY_ALBUM: (publicId: string) => `${BASE_URL}/album/${publicId}`,
   REVIEWS_BY_USER: (username: string) => `${BASE_URL}/user/${username}`,
   TOP_ALBUMS: `${BASE_URL}/top`,

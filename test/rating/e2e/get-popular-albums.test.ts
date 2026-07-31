@@ -4,33 +4,34 @@ import { createAlbumViaHttp } from '../../catalog/e2e/helpers'
 import { createAndLogin } from '../../user/e2e/helpers'
 import {
   createReviewViaHttp,
-  getTopAlbumsViaHttp,
+  getPopularAlbumsViaHttp,
   refreshCharts,
   setupUserAndAlbum,
 } from './helpers'
 
-describe('Get Top Albums', () => {
-  describe('GET /api/rating/top', () => {
-    test('returns albums sorted by average rating', async () => {
+describe('Get Popular Albums', () => {
+  describe('GET /api/rating/popular', () => {
+    test('returns albums sorted by review count', async () => {
       const { token, albumPublicId: album1 } = await setupUserAndAlbum()
       await createReviewViaHttp(token, album1, { rating: 3 })
 
       const { token: token2, albumPublicId: album2 } = await setupUserAndAlbum()
       await createReviewViaHttp(token2, album2, { rating: 5 })
+      await createReviewViaHttp(token2, album2, { rating: 4 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp()
+      const { response } = await getPopularAlbumsViaHttp()
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{
-        albums: { averageRating: number; publicId: string }[]
+        albums: { reviewCount: number; publicId: string }[]
       }>()
       const ourAlbums = body.albums.filter(
         (a) => a.publicId === album1 || a.publicId === album2
       )
       expect(ourAlbums.length).toBe(2)
-      expect(ourAlbums[0].averageRating).toBeGreaterThanOrEqual(
-        ourAlbums[1].averageRating
+      expect(ourAlbums[0].reviewCount).toBeGreaterThanOrEqual(
+        ourAlbums[1].reviewCount
       )
     })
 
@@ -39,7 +40,7 @@ describe('Get Top Albums', () => {
       await createReviewViaHttp(token, albumPublicId, { rating: 4.5 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp()
+      const { response } = await getPopularAlbumsViaHttp()
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{
@@ -64,7 +65,10 @@ describe('Get Top Albums', () => {
       await createReviewViaHttp(token, albumPublicId, { rating: 4 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp({ page: 1, size: 10 })
+      const { response } = await getPopularAlbumsViaHttp({
+        page: 1,
+        size: 10,
+      })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{
@@ -99,7 +103,10 @@ describe('Get Top Albums', () => {
       await createReviewViaHttp(token, albumPublicId2021, { rating: 5 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp({ from: 2020, to: 2020 })
+      const { response } = await getPopularAlbumsViaHttp({
+        from: 2020,
+        to: 2020,
+      })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{ albums: { releaseDate: string }[] }>()
@@ -127,7 +134,7 @@ describe('Get Top Albums', () => {
       await createReviewViaHttp(token, albumPublicId2021, { rating: 5 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp({ from: 2021 })
+      const { response } = await getPopularAlbumsViaHttp({ from: 2021 })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{ albums: { releaseDate: string }[] }>()
@@ -147,7 +154,7 @@ describe('Get Top Albums', () => {
       await createReviewViaHttp(token, metalPublicId, { rating: 4 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp({ genre: 'metal' })
+      const { response } = await getPopularAlbumsViaHttp({ genre: 'metal' })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{ albums: { genres: string[] }[] }>()
@@ -167,7 +174,7 @@ describe('Get Top Albums', () => {
       await createReviewViaHttp(token, albumPublicId, { rating: 4 })
       await refreshCharts()
 
-      const { response } = await getTopAlbumsViaHttp({ format: 'LP' })
+      const { response } = await getPopularAlbumsViaHttp({ format: 'LP' })
 
       expect(response.statusCode).toBe(HttpStatus.OK)
       const body = response.json<{ albums: { format: string }[] }>()
@@ -180,7 +187,7 @@ describe('Get Top Albums', () => {
     test('returns 400 for invalid pagination', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/rating/top?page=-1&size=-1',
+        url: '/api/rating/popular?page=-1&size=-1',
       })
 
       expect(response.statusCode).toBe(HttpStatus.BAD_REQUEST)
@@ -189,13 +196,13 @@ describe('Get Top Albums', () => {
     test('returns 400 for invalid year range', async () => {
       const fromResponse = await app.inject({
         method: 'GET',
-        url: '/api/rating/top?from=1899',
+        url: '/api/rating/popular?from=1899',
       })
       expect(fromResponse.statusCode).toBe(HttpStatus.BAD_REQUEST)
 
       const toResponse = await app.inject({
         method: 'GET',
-        url: '/api/rating/top?to=1899',
+        url: '/api/rating/popular?to=1899',
       })
       expect(toResponse.statusCode).toBe(HttpStatus.BAD_REQUEST)
     })
@@ -203,7 +210,7 @@ describe('Get Top Albums', () => {
     test('returns 400 for invalid format', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/rating/top?format=INVALID',
+        url: '/api/rating/popular?format=INVALID',
       })
 
       expect(response.statusCode).toBe(HttpStatus.BAD_REQUEST)

@@ -1,6 +1,6 @@
 import z from 'zod'
 import { FORMATS } from '@/contexts/catalog/domain/album'
-import type { ChartAlbumRaw } from '../domain/review-repository'
+import type { ChartAlbumRaw } from '../domain/types/chart-types'
 
 export const zodChartAlbumDTO = z.object({
   artist: z.string(),

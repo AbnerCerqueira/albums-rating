@@ -1,4 +1,4 @@
-import type { Model } from 'mongoose'
+import type { Model, PopulateOptions, Types } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import {
   emptyPaginatedResult,
@@ -11,12 +11,7 @@ import { AlbumMapper } from '@/contexts/catalog/infra/persistence/album-mapper'
 import type { AlbumData } from '@/contexts/catalog/infra/persistence/album-model'
 import { GenreMapper } from '@/contexts/catalog/infra/persistence/genre-mapper'
 import type { Review } from '@/contexts/rating/domain/review'
-import type {
-  ChartAlbumRaw,
-  PopularFilters,
-  ReviewRepository,
-  TopRatedFilters,
-} from '@/contexts/rating/domain/review-repository'
+import type { ReviewRepository } from '@/contexts/rating/domain/review-repository'
 import type { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import { UserMapper } from '@/contexts/user/infra/persistence/user-mapper'
@@ -27,12 +22,55 @@ import {
   ReviewModel,
   type ReviewPopulated,
 } from './review-model'
-import { buildPopularPipeline } from './review-popular.pipeline'
-import { POPULATE_OPTIONS, resolveObjectIds } from './review-repository.helpers'
-import {
-  buildTopRatedPipeline,
-  getGlobalAverageRating,
-} from './review-top-rated.pipeline'
+
+const POPULATE_OPTIONS: (PopulateOptions | string)[] = [
+  { path: 'albumId', populate: { path: 'genres' } },
+  'userId',
+]
+
+function toDomainFromPopulated(doc: ReviewPopulated): Review {
+  const user = UserMapper.toDomain(doc.userId)
+  const genres = doc.albumId.genres.map(GenreMapper.toDomain)
+  const album = AlbumMapper.toDomain(doc.albumId, genres)
+  return ReviewMapper.toDomain(doc, user, album)
+}
+
+async function resolveObjectIds(
+  userModel: Model<UserData>,
+  albumModel: Model<AlbumData>,
+  reviewId: ReviewId
+): Promise<{ userId: Types.ObjectId; albumId: Types.ObjectId } | null> {
+  const [user, album] = await Promise.all([
+    userModel
+      .findOne({
+        email: reviewId.userId.email.value,
+        username: reviewId.userId.username.value,
+      })
+      .lean(),
+    albumModel
+      .findOne({
+        artist: reviewId.albumId.artist.value,
+        title: reviewId.albumId.title.value,
+      })
+      .lean(),
+  ])
+
+  if (!(user && album)) {
+    return null
+  }
+
+  const userId = user._id
+  if (!userId) {
+    throw new Error('User _id is missing')
+  }
+
+  const albumId = album._id
+  if (!albumId) {
+    throw new Error('Album _id is missing')
+  }
+
+  return { albumId, userId }
+}
 
 export class MongooseReviewRepository implements ReviewRepository {
   private readonly model = ReviewModel
@@ -77,7 +115,7 @@ export class MongooseReviewRepository implements ReviewRepository {
       throw new Error('Failed to save review')
     }
 
-    return this.toDomainFromPopulated(updated)
+    return toDomainFromPopulated(updated)
   }
 
   async findById(id: ReviewId): Promise<Review | null> {
@@ -92,7 +130,7 @@ export class MongooseReviewRepository implements ReviewRepository {
       .populate<ReviewPopulated>(POPULATE_OPTIONS)
       .lean()
 
-    return doc ? this.toDomainFromPopulated(doc) : null
+    return doc ? toDomainFromPopulated(doc) : null
   }
 
   async findByPublicId(publicId: PublicId): Promise<Review | null> {
@@ -101,7 +139,7 @@ export class MongooseReviewRepository implements ReviewRepository {
       .populate<ReviewPopulated>(POPULATE_OPTIONS)
       .lean()
 
-    return doc ? this.toDomainFromPopulated(doc) : null
+    return doc ? toDomainFromPopulated(doc) : null
   }
 
   async findByUser(
@@ -133,7 +171,7 @@ export class MongooseReviewRepository implements ReviewRepository {
 
     return {
       ...result,
-      items: result.items.map((doc) => this.toDomainFromPopulated(doc)),
+      items: result.items.map((doc) => toDomainFromPopulated(doc)),
     }
   }
 
@@ -166,7 +204,7 @@ export class MongooseReviewRepository implements ReviewRepository {
 
     return {
       ...result,
-      items: result.items.map((doc) => this.toDomainFromPopulated(doc)),
+      items: result.items.map((doc) => toDomainFromPopulated(doc)),
     }
   }
 
@@ -178,35 +216,8 @@ export class MongooseReviewRepository implements ReviewRepository {
 
     return {
       ...result,
-      items: result.items.map((doc) => this.toDomainFromPopulated(doc)),
+      items: result.items.map((doc) => toDomainFromPopulated(doc)),
     }
-  }
-
-  async findTopRated(
-    filters: TopRatedFilters,
-    pagination?: Pagination
-  ): Promise<PaginatedResult<ChartAlbumRaw>> {
-    const globalAverageRating = await getGlobalAverageRating(this.model)
-    const pipeline = buildTopRatedPipeline(filters, globalAverageRating)
-    const result = await MongooseUtils.paginateAggregate<
-      ReviewData,
-      ChartAlbumRaw
-    >(this.model, pipeline, pagination)
-
-    return result
-  }
-
-  async findMostReviewed(
-    filters: PopularFilters,
-    pagination?: Pagination
-  ): Promise<PaginatedResult<ChartAlbumRaw>> {
-    const pipeline = buildPopularPipeline(filters)
-    const result = await MongooseUtils.paginateAggregate<
-      ReviewData,
-      ChartAlbumRaw
-    >(this.model, pipeline, pagination)
-
-    return result
   }
 
   async delete(id: ReviewId): Promise<boolean> {
@@ -222,12 +233,5 @@ export class MongooseReviewRepository implements ReviewRepository {
     })
 
     return result.deletedCount > 0
-  }
-
-  private toDomainFromPopulated(doc: ReviewPopulated): Review {
-    const user = UserMapper.toDomain(doc.userId)
-    const genres = doc.albumId.genres.map(GenreMapper.toDomain)
-    const album = AlbumMapper.toDomain(doc.albumId, genres)
-    return ReviewMapper.toDomain(doc, user, album)
   }
 }

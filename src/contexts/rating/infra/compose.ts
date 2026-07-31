@@ -1,5 +1,7 @@
+import { eventBus } from '@/contexts/!common/event-bus'
 import { AlbumModel } from '@/contexts/catalog/infra/persistence/album-model'
 import { MongooseAlbumRepository } from '@/contexts/catalog/infra/persistence/album-repository'
+import { chartCacheGateway } from '@/contexts/stats/infra/compose'
 import { UserModel } from '@/contexts/user/infra/persistence/user-model'
 import { MongooseUserRepository } from '@/contexts/user/infra/persistence/user-repository'
 import { CreateReviewUseCase } from '../application/create-review-use-case'
@@ -54,8 +56,12 @@ export const getReviewsByUserUseCase = new GetReviewsByUserUseCase(
 )
 
 export const getPopularAlbumsUseCase = new GetPopularAlbumsUseCase(
-  reviewRepository
+  chartCacheGateway,
+  eventBus
 )
-export const getTopAlbumsUseCase = new GetTopAlbumsUseCase(reviewRepository)
+export const getTopAlbumsUseCase = new GetTopAlbumsUseCase(
+  chartCacheGateway,
+  eventBus
+)
 
 export { reviewGateway, reviewRepository }
