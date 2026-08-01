@@ -14,13 +14,18 @@ describe('Create Album', () => {
       const { response } = await createAlbumViaHttp(token)
 
       expect(response.statusCode).toBe(HttpStatus.CREATED)
-      const body = response.json<AlbumPayload>()
+      const body = response.json<
+        AlbumPayload & { reviewCount: number; agerageRating: number }
+      >()
       expect(body).toHaveProperty('artist')
       expect(body).toHaveProperty('coverUrl')
       expect(body).toHaveProperty('format')
       expect(body).toHaveProperty('genres')
       expect(body).toHaveProperty('publicId')
       expect(body).toHaveProperty('releaseDate')
+      expect(body).toHaveProperty('reviewCount')
+      expect(body).toHaveProperty('averageRating')
+      expect(body.reviewCount).toBe(0)
       expect(body).toHaveProperty('title')
     })
 

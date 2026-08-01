@@ -5,6 +5,7 @@ describe('RefreshChartsUseCase', () => {
   test('calls refreshAll on repository', async () => {
     const albumChartsRepository = {
       findMostReviewed: vi.fn(),
+      findReviewCountsByPublicIds: vi.fn(),
       findTopRated: vi.fn(),
       refreshAll: vi.fn(),
     }

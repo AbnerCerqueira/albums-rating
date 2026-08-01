@@ -2,6 +2,7 @@ import { NotFoundError } from '@/contexts/!common/errors'
 import type { PublicId } from '@/contexts/!common/public-id'
 import { err, ok, type Result } from '@/contexts/!common/result'
 import type { AlbumRepository } from '../domain/album-repository'
+import type { AlbumReviewCountGateway } from '../domain/gateways/album-review-count-gateway'
 import type { ImageProvider } from '../domain/image-provider'
 import { CoverUrl } from '../domain/value-objects/cover-url'
 import { type AlbumDTO, AlbumDTOMapper } from './album-dto'
@@ -19,7 +20,8 @@ export type UploadAlbumCoverUseCaseResponse = Promise<
 export class UploadAlbumCoverUseCase {
   constructor(
     private readonly albumRepository: AlbumRepository,
-    private readonly imageProvider: ImageProvider
+    private readonly imageProvider: ImageProvider,
+    private readonly reviewCountGateway: AlbumReviewCountGateway
   ) {}
 
   async execute(
@@ -45,6 +47,18 @@ export class UploadAlbumCoverUseCase {
       await this.imageProvider.delete(album.coverUrl.value)
     }
 
-    return ok(AlbumDTOMapper.toDTO(updated))
+    const reviewCounts = await this.reviewCountGateway.findCountsByPublicIds([
+      data.publicId,
+    ])
+
+    return ok(
+      AlbumDTOMapper.toDTO(
+        updated,
+        reviewCounts[data.publicId.value] ?? {
+          averageRating: 0,
+          reviewCount: 0,
+        }
+      )
+    )
   }
 }

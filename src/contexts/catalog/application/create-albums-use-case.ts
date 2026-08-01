@@ -94,6 +94,8 @@ export class CreateAlbumsUseCase {
 
     const newAlbum = await this.albumRepository.save(album)
 
-    return ok(AlbumDTOMapper.toDTO(newAlbum))
+    return ok(
+      AlbumDTOMapper.toDTO(newAlbum, { averageRating: 0, reviewCount: 0 })
+    )
   }
 }

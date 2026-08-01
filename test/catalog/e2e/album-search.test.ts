@@ -29,6 +29,8 @@ describe('Album Search', () => {
       const body = response.json()
       expect(body.albums.length).toBeGreaterThanOrEqual(1)
       expect(body.albums[0].title).toBe(payload.title)
+      expect(body.albums[0]).toHaveProperty('reviewCount')
+      expect(body.albums[0]).toHaveProperty('averageRating')
     })
 
     test('searches by artist', async () => {

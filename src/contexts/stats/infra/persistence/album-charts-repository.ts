@@ -5,6 +5,7 @@ import type {
   AlbumChartEntry,
   AlbumChartFilters,
   AlbumChartsRepository,
+  AlbumReviewCountByPublicId,
 } from '../../domain/album-charts-repository'
 import { type AlbumChartData, AlbumChartModel } from './album-charts-model'
 import {
@@ -25,7 +26,7 @@ function buildRefreshPipeline(): PipelineStage[] {
     },
     {
       $addFields: {
-        averageRating: { $round: ['$averageRating', 1] },
+        averageRating: '$averageRating',
       },
     },
     {
@@ -106,7 +107,7 @@ function buildQuery(filters: AlbumChartFilters): FilterQuery<AlbumChartData> {
   }
 
   if (filters.genre) {
-    query.genreSlugs = filters.genre
+    query.genreSlugs = { $in: [filters.genre] }
   }
 
   return query
@@ -155,6 +156,27 @@ export class MongooseAlbumChartsRepository implements AlbumChartsRepository {
     const query = buildQuery(filters)
     const sort = { reviewCount: -1 } as const
     return this.findWithPagination(query, sort, pagination)
+  }
+
+  async findReviewCountsByPublicIds(
+    publicIds: string[]
+  ): Promise<AlbumReviewCountByPublicId[]> {
+    if (publicIds.length === 0) {
+      return []
+    }
+
+    const docs = await this.model
+      .find(
+        { publicId: { $in: publicIds } },
+        { _id: 0, averageRating: 1, publicId: 1, reviewCount: 1 }
+      )
+      .lean()
+
+    return docs.map((doc) => ({
+      averageRating: doc.averageRating,
+      publicId: doc.publicId,
+      reviewCount: doc.reviewCount,
+    }))
   }
 
   private async findWithPagination(

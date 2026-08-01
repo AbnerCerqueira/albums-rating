@@ -19,6 +19,8 @@ describe('Get Albums', () => {
       expect(body.albums.length).toBeGreaterThanOrEqual(1)
       expect(body.albums[0]).toHaveProperty('title')
       expect(body.albums[0]).toHaveProperty('artist')
+      expect(body.albums[0]).toHaveProperty('reviewCount')
+      expect(body.albums[0]).toHaveProperty('averageRating')
     })
 
     test('returns paginated results', async () => {

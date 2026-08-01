@@ -7,6 +7,7 @@ import { SearchGenresUseCase } from '@/contexts/catalog/application/search-genre
 import { UploadAlbumCoverUseCase } from '@/contexts/catalog/application/upload-album-cover-use-case'
 import { DomainAlbumServices } from '@/contexts/catalog/domain/services/is-unique-album'
 import { DomainGenreServices } from '@/contexts/catalog/domain/services/is-unique-genre'
+import { albumReviewCountGateway } from '@/contexts/stats/infra/compose'
 import { MongooseAlbumGateway } from './gateways/album-gateway'
 import { MongooseAlbumRepository } from './persistence/album-repository'
 import { MongooseGenreRepository } from './persistence/genre-repository'
@@ -30,17 +31,25 @@ export const createGenreUseCase = new CreateGenreUseCase(
   genreRepository
 )
 
-export const getAllAlbumsUseCase = new GetAllAlbumsUseCase(albumRepository)
-
-export const getAlbumByPublicIdUseCase = new GetAlbumByPublicIdUseCase(
-  albumRepository
+export const getAllAlbumsUseCase = new GetAllAlbumsUseCase(
+  albumRepository,
+  albumReviewCountGateway
 )
 
-export const searchAlbumsUseCase = new SearchAlbumsUseCase(albumRepository)
+export const getAlbumByPublicIdUseCase = new GetAlbumByPublicIdUseCase(
+  albumRepository,
+  albumReviewCountGateway
+)
+
+export const searchAlbumsUseCase = new SearchAlbumsUseCase(
+  albumRepository,
+  albumReviewCountGateway
+)
 
 export const searchGenresUseCase = new SearchGenresUseCase(genreRepository)
 
 export const uploadAlbumCoverUseCase = new UploadAlbumCoverUseCase(
   albumRepository,
-  imageProvider
+  imageProvider,
+  albumReviewCountGateway
 )

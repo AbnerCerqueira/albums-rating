@@ -18,7 +18,7 @@ export type ChartAlbumDTO = z.infer<typeof zodChartAlbumDTO>
 function toDTO(raw: ChartAlbumRaw): ChartAlbumDTO {
   return {
     artist: raw.artist,
-    averageRating: raw.averageRating,
+    averageRating: Number.parseFloat(raw.averageRating.toFixed(2)),
     format: raw.format as ChartAlbumDTO['format'],
     genres: raw.genres,
     publicId: raw.publicId,

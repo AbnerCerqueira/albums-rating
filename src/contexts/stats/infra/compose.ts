@@ -1,5 +1,6 @@
 import { DomainEvents, eventBus } from '@/contexts/!common/event-bus'
 import { RefreshChartsUseCase } from '../application/refresh-charts-use-case'
+import { MongooseAlbumReviewCountGateway } from './gateways/album-review-count-gateway'
 import { MongooseChartCacheGateway } from './gateways/chart-cache-gateway'
 import { MongooseAlbumChartsRepository } from './persistence/album-charts-repository'
 
@@ -10,6 +11,10 @@ export const refreshChartsUseCase = new RefreshChartsUseCase(
 )
 
 export const chartCacheGateway = new MongooseChartCacheGateway(
+  albumChartsRepository
+)
+
+export const albumReviewCountGateway = new MongooseAlbumReviewCountGateway(
   albumChartsRepository
 )
 

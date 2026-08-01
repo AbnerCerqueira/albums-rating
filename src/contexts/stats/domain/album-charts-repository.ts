@@ -14,6 +14,12 @@ export type AlbumChartEntry = {
   weightedScore: number
 }
 
+export type AlbumReviewCountByPublicId = {
+  publicId: string
+  reviewCount: number
+  averageRating: number
+}
+
 export type AlbumChartFilters = {
   from?: number
   to?: number
@@ -26,6 +32,9 @@ export interface AlbumChartsRepository {
     filters: AlbumChartFilters,
     pagination?: Pagination
   ) => Promise<PaginatedResult<AlbumChartEntry>>
+  findReviewCountsByPublicIds: (
+    publicIds: string[]
+  ) => Promise<AlbumReviewCountByPublicId[]>
   findTopRated: (
     filters: AlbumChartFilters,
     pagination?: Pagination

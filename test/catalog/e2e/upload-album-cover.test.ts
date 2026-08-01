@@ -24,6 +24,8 @@ describe('Upload Album Cover', () => {
       expect(body.coverUrl).toMatch(
         new RegExp(`^${env.PUBLIC_BASE_URL}/covers/${publicId}-[^/]+\\.jpg$`)
       )
+      expect(body).toHaveProperty('reviewCount')
+      expect(body).toHaveProperty('averageRating')
     })
 
     test('persists the cover and serves the file statically', async () => {
