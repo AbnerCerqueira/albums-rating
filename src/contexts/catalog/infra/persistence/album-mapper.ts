@@ -4,6 +4,7 @@ import type { SearchAlbumParams } from '@/contexts/catalog/domain/album-reposito
 import type { Genre } from '@/contexts/catalog/domain/genre'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { Artist } from '@/contexts/catalog/domain/value-objects/artist'
+import { CoverUrl } from '@/contexts/catalog/domain/value-objects/cover-url'
 import { ReleaseDate } from '@/contexts/catalog/domain/value-objects/release-date'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
 import type { AlbumData } from './album-model'
@@ -13,6 +14,7 @@ type AlbumDataFields = Omit<AlbumData, 'genres'>
 function toPersistence(album: Album): AlbumData {
   return {
     artist: album.id.artist.value,
+    coverUrl: album.coverUrl.value,
     createdAt: album.getCreationDate(),
     format: album.format,
     genres: [],
@@ -24,8 +26,16 @@ function toPersistence(album: Album): AlbumData {
 }
 
 function toDomain(data: AlbumDataFields, genres: Genre[]): Album {
-  const { artist, title, createdAt, format, publicId, releaseDate, updatedAt } =
-    data
+  const {
+    artist,
+    title,
+    createdAt,
+    coverUrl,
+    format,
+    publicId,
+    releaseDate,
+    updatedAt,
+  } = data
 
   const albumId = AlbumId.create({
     artist: Artist.unsafe(artist),
@@ -33,6 +43,7 @@ function toDomain(data: AlbumDataFields, genres: Genre[]): Album {
   })
 
   return Album.fromPersistence({
+    coverUrl: CoverUrl.create(coverUrl),
     createdAt: new Date(createdAt),
     format,
     genres,

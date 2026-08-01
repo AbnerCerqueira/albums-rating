@@ -12,6 +12,7 @@ import type { GenreRepository } from '../domain/genre-repository'
 import type { DomainAlbumServices } from '../domain/services/is-unique-album'
 import { AlbumId } from '../domain/value-objects/album-id'
 import { Artist } from '../domain/value-objects/artist'
+import { CoverUrl } from '../domain/value-objects/cover-url'
 import { ReleaseDate } from '../domain/value-objects/release-date'
 import { Title } from '../domain/value-objects/title'
 import { type AlbumDTO, AlbumDTOMapper } from './album-dto'
@@ -76,7 +77,10 @@ export class CreateAlbumsUseCase {
 
     const id = AlbumId.create({ artist: artist.value, title: title.value })
 
+    const coverUrl = CoverUrl.create()
+
     const album = Album.create({
+      coverUrl,
       format: data.format,
       genres,
       id,

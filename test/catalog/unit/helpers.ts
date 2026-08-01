@@ -2,12 +2,14 @@ import { Album, type AlbumProps } from '@/contexts/catalog/domain/album'
 import { Genre } from '@/contexts/catalog/domain/genre'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { Artist } from '@/contexts/catalog/domain/value-objects/artist'
+import { CoverUrl } from '@/contexts/catalog/domain/value-objects/cover-url'
 import { GenreId } from '@/contexts/catalog/domain/value-objects/genre-id'
 import { GenreName } from '@/contexts/catalog/domain/value-objects/genre-name'
 import { ReleaseDate } from '@/contexts/catalog/domain/value-objects/release-date'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
 import {
   ARTIST,
+  COVER_URL,
   FORMAT,
   GENRE,
   GENRE_SLUG,
@@ -33,6 +35,7 @@ export function createAlbum(overrides?: Partial<AlbumProps>): Album {
   const genres = overrides?.genres ?? [createGenre()]
   const releaseDate =
     overrides?.releaseDate ?? ReleaseDate.unsafe(new Date(RELEASE_DATE))
+  const coverUrl = overrides?.coverUrl ?? CoverUrl.create(COVER_URL)
 
-  return Album.create({ format, genres, id, releaseDate })
+  return Album.create({ coverUrl, format, genres, id, releaseDate })
 }

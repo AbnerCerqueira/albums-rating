@@ -55,3 +55,45 @@ export async function createAlbumViaHttp(
 }
 
 export const createUserAndLogin = createAndLogin
+
+export type CoverUploadOptions = {
+  contentType?: string
+  data?: Buffer
+  filename?: string
+}
+
+export function buildCoverMultipartBody(options: CoverUploadOptions = {}): {
+  body: Buffer
+  boundary: string
+} {
+  const boundary = '----albumsRatingTestBoundary'
+  const filename = options.filename ?? 'cover.jpg'
+  const contentType = options.contentType ?? 'image/jpeg'
+  const data = options.data ?? Buffer.from('fake-jpeg-bytes')
+
+  const header = Buffer.from(
+    `--${boundary}\r\nContent-Disposition: form-data; name="cover"; filename="${filename}"\r\nContent-Type: ${contentType}\r\n\r\n`
+  )
+  const footer = Buffer.from(`\r\n--${boundary}--\r\n`)
+
+  return { body: Buffer.concat([header, data, footer]), boundary }
+}
+
+export async function uploadCoverViaHttp(
+  token: string,
+  publicId: string,
+  options?: CoverUploadOptions
+) {
+  const { body, boundary } = buildCoverMultipartBody(options)
+
+  const response = await app.inject({
+    headers: {
+      authorization: `Bearer ${token}`,
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+    },
+    method: 'PATCH',
+    payload: body,
+    url: CatalogRoutes.PATCH.ALBUM_COVER(publicId),
+  })
+  return { response }
+}

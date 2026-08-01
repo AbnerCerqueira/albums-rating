@@ -3,6 +3,7 @@ import { type Album, FORMATS } from '../domain/album'
 
 export const zodAlbumDTO = z.object({
   artist: z.string(),
+  coverUrl: z.string(),
   format: z.enum(FORMATS),
   genres: z.array(z.string()),
   publicId: z.string(),
@@ -15,6 +16,7 @@ export type AlbumDTO = z.infer<typeof zodAlbumDTO>
 function toDTO(album: Album): AlbumDTO {
   return {
     artist: album.id.artist.value,
+    coverUrl: album.coverUrl.value,
     format: album.format,
     genres: album.genres.map((g) => g.name.value),
     publicId: album.publicId.value,

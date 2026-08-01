@@ -4,17 +4,20 @@ import { GetAlbumByPublicIdUseCase } from '@/contexts/catalog/application/get-al
 import { GetAllAlbumsUseCase } from '@/contexts/catalog/application/get-all-albums-use-case'
 import { SearchAlbumsUseCase } from '@/contexts/catalog/application/search-albums-use-case'
 import { SearchGenresUseCase } from '@/contexts/catalog/application/search-genres-use-case'
+import { UploadAlbumCoverUseCase } from '@/contexts/catalog/application/upload-album-cover-use-case'
 import { DomainAlbumServices } from '@/contexts/catalog/domain/services/is-unique-album'
 import { DomainGenreServices } from '@/contexts/catalog/domain/services/is-unique-genre'
 import { MongooseAlbumGateway } from './gateways/album-gateway'
 import { MongooseAlbumRepository } from './persistence/album-repository'
 import { MongooseGenreRepository } from './persistence/genre-repository'
+import { LocalImageProvider } from './providers/local-image-provider'
 
 export const albumRepository = new MongooseAlbumRepository()
 export const genreRepository = new MongooseGenreRepository()
 export const albumGateway = new MongooseAlbumGateway(albumRepository)
 export const domainAlbumServices = new DomainAlbumServices(albumRepository)
 export const domainGenreServices = new DomainGenreServices(genreRepository)
+export const imageProvider = new LocalImageProvider()
 
 export const createAlbumUseCase = new CreateAlbumsUseCase(
   domainAlbumServices,
@@ -36,3 +39,8 @@ export const getAlbumByPublicIdUseCase = new GetAlbumByPublicIdUseCase(
 export const searchAlbumsUseCase = new SearchAlbumsUseCase(albumRepository)
 
 export const searchGenresUseCase = new SearchGenresUseCase(genreRepository)
+
+export const uploadAlbumCoverUseCase = new UploadAlbumCoverUseCase(
+  albumRepository,
+  imageProvider
+)

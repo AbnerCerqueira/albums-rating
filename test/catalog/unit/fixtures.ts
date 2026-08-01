@@ -7,3 +7,4 @@ export const GENRE_SLUG = 'genero'
 export const GENRE_ID = GenreId.unsafe(GENRE_SLUG)
 export const FORMAT = 'LP' as const
 export const RELEASE_DATE = new Date('2026-07-13')
+export const COVER_URL = '/covers/default-cover.jpg'

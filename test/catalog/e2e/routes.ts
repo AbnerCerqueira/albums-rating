@@ -5,6 +5,11 @@ const POST = {
   CREATE_GENRE: `${BASE_URL}/genres`,
 }
 
+const PATCH = {
+  ALBUM_COVER: (publicId: string) =>
+    `${BASE_URL}/${encodeURIComponent(publicId)}/cover`,
+}
+
 const GET = {
   ALBUM_BY_PUBLIC_ID: (publicId: string) =>
     `${BASE_URL}/${encodeURIComponent(publicId)}`,
@@ -13,4 +18,4 @@ const GET = {
   SEARCH: `${BASE_URL}/search`,
 }
 
-export const CatalogRoutes = { GET, POST }
+export const CatalogRoutes = { GET, PATCH, POST }

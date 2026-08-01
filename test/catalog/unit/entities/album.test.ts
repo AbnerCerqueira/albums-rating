@@ -3,6 +3,7 @@ import { Album, FORMATS } from '@/contexts/catalog/domain/album'
 import { Genre } from '@/contexts/catalog/domain/genre'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { Artist } from '@/contexts/catalog/domain/value-objects/artist'
+import { CoverUrl } from '@/contexts/catalog/domain/value-objects/cover-url'
 import { GenreName } from '@/contexts/catalog/domain/value-objects/genre-name'
 import { ReleaseDate } from '@/contexts/catalog/domain/value-objects/release-date'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
@@ -51,6 +52,7 @@ describe('Album', () => {
     test('rebuilds from persistence props', () => {
       const album = createAlbum()
       const restored = Album.fromPersistence({
+        coverUrl: album.coverUrl,
         createdAt: album.getCreationDate(),
         format: album.format,
         genres: album.genres,
@@ -64,6 +66,7 @@ describe('Album', () => {
       expect(restored.publicId.value).toBe(album.publicId.value)
       expect(restored.format).toBe(album.format)
       expect(restored.genres[0].name.value).toBe(album.genres[0].name.value)
+      expect(restored.coverUrl.value).toBe(album.coverUrl.value)
       expect(restored.releaseDate.value.getTime()).toBe(
         album.releaseDate.value.getTime()
       )
@@ -85,6 +88,7 @@ describe('Album', () => {
       const updatedAt = new Date('2024-06-15')
 
       const restored = Album.fromPersistence({
+        coverUrl: CoverUrl.create('/covers/other.jpg'),
         createdAt,
         format: FORMAT,
         genres: [genre],
@@ -111,6 +115,7 @@ describe('Album', () => {
       const now = new Date()
 
       const restored = Album.fromPersistence({
+        coverUrl: CoverUrl.create('/covers/other.jpg'),
         createdAt: now,
         format: FORMAT,
         genres: [genre],
@@ -121,6 +126,44 @@ describe('Album', () => {
       })
 
       expect(restored.publicId.value).toBe('fixed-public-id')
+    })
+  })
+
+  describe('setCover', () => {
+    test('returns a new album with the new coverUrl', () => {
+      const album = createAlbum()
+      const updated = album.setCover(CoverUrl.create('/covers/new.jpg'))
+
+      expect(updated.coverUrl.value).toBe('/covers/new.jpg')
+      expect(album.coverUrl.value).not.toBe('/covers/new.jpg')
+    })
+
+    test('keeps the original album unchanged', () => {
+      const album = createAlbum()
+      const originalCover = album.coverUrl.value
+      album.setCover(CoverUrl.create('/covers/new.jpg'))
+
+      expect(album.coverUrl.value).toBe(originalCover)
+    })
+
+    test('updates updatedAt', () => {
+      const album = createAlbum()
+      const updated = album.setCover(CoverUrl.create('/covers/new.jpg'))
+
+      expect(updated.getUpdateDate().getTime()).toBeGreaterThanOrEqual(
+        album.getUpdateDate().getTime()
+      )
+      expect(updated.getCreationDate().getTime()).toBe(
+        album.getCreationDate().getTime()
+      )
+    })
+
+    test('keeps the same publicId and id', () => {
+      const album = createAlbum()
+      const updated = album.setCover(CoverUrl.create('/covers/new.jpg'))
+
+      expect(updated.publicId.value).toBe(album.publicId.value)
+      expect(updated.id.equals(album.id)).toBeTruthy()
     })
   })
 
@@ -170,12 +213,14 @@ describe('Album', () => {
       const releaseDate = ReleaseDate.unsafe(RELEASE_DATE)
 
       const album1 = Album.create({
+        coverUrl: CoverUrl.create('/covers/a.jpg'),
         format: FORMAT,
         genres: [genre],
         id,
         releaseDate,
       })
       const album2 = Album.create({
+        coverUrl: CoverUrl.create('/covers/b.jpg'),
         format: FORMAT,
         genres: [genre],
         id,
@@ -208,12 +253,14 @@ describe('Album', () => {
       const id = AlbumId.create({ artist, title })
 
       const album1 = Album.create({
+        coverUrl: CoverUrl.create('/covers/a.jpg'),
         format: 'LP',
         genres: [createGenre({ name: 'Rock', slug: 'rock' })],
         id,
         releaseDate: ReleaseDate.unsafe(new Date('2020-01-01')),
       })
       const album2 = Album.create({
+        coverUrl: CoverUrl.create('/covers/b.jpg'),
         format: 'EP',
         genres: [createGenre({ name: 'Pop', slug: 'pop' })],
         id,

@@ -2,6 +2,7 @@ import { PublicId } from '@/contexts/!common/public-id'
 import { slugify } from '@/contexts/!common/slugify'
 import type { Genre } from './genre'
 import type { AlbumId } from './value-objects/album-id'
+import type { CoverUrl } from './value-objects/cover-url'
 import type { ReleaseDate } from './value-objects/release-date'
 
 export const FORMATS = ['LP', 'EP', 'Single', 'Compilation', 'Live'] as const
@@ -13,6 +14,7 @@ export type AlbumProps = {
   format: Format
   genres: Genre[]
   releaseDate: ReleaseDate
+  coverUrl: CoverUrl
 }
 
 export type AlbumPersistenceProps = AlbumProps & {
@@ -27,6 +29,7 @@ export class Album {
     readonly format: Format,
     readonly genres: Genre[],
     readonly releaseDate: ReleaseDate,
+    readonly coverUrl: CoverUrl,
     readonly publicId: PublicId,
     private readonly createdAt: Date,
     private readonly updatedAt: Date
@@ -47,8 +50,22 @@ export class Album {
       props.format,
       props.genres,
       props.releaseDate,
+      props.coverUrl,
       PublicId.create(slug),
       new Date(),
+      new Date()
+    )
+  }
+
+  setCover(coverUrl: CoverUrl) {
+    return new Album(
+      this.id,
+      this.format,
+      this.genres,
+      this.releaseDate,
+      coverUrl,
+      this.publicId,
+      new Date(this.createdAt.getTime()),
       new Date()
     )
   }
@@ -59,6 +76,7 @@ export class Album {
       props.format,
       props.genres,
       props.releaseDate,
+      props.coverUrl,
       props.publicId,
       new Date(props.createdAt),
       new Date(props.updatedAt)

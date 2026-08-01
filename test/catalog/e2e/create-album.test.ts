@@ -16,6 +16,7 @@ describe('Create Album', () => {
       expect(response.statusCode).toBe(HttpStatus.CREATED)
       const body = response.json<AlbumPayload>()
       expect(body).toHaveProperty('artist')
+      expect(body).toHaveProperty('coverUrl')
       expect(body).toHaveProperty('format')
       expect(body).toHaveProperty('genres')
       expect(body).toHaveProperty('publicId')

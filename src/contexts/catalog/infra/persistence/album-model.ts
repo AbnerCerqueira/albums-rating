@@ -9,6 +9,7 @@ export type AlbumData = {
   releaseDate: Date
   genres: Types.ObjectId[]
   format: Format
+  coverUrl: string
   createdAt: Date
   updatedAt: Date
 }
@@ -24,6 +25,7 @@ export type AlbumPersistenceData = Omit<AlbumData, 'genres'> & {
 const albumSchema = new Schema<AlbumData>(
   {
     artist: { required: true, type: String },
+    coverUrl: { required: true, type: String },
     format: {
       enum: FORMATS,
       required: true,

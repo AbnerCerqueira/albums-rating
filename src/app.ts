@@ -1,5 +1,8 @@
+import { mkdirSync } from 'node:fs'
 import fastifyCors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
+import fastifyMultipart from '@fastify/multipart'
+import fastifyStatic from '@fastify/static'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import fastify from 'fastify'
@@ -13,6 +16,7 @@ import {
 } from 'fastify-type-provider-zod'
 import { DomainError } from './contexts/!common/errors'
 import { env } from './infra/config/envs'
+import { uploadsDir } from './infra/config/uploads'
 import { routes } from './infra/http'
 import { HttpStatus } from './infra/http/http-status'
 import { tags } from './infra/http/tags'
@@ -65,6 +69,21 @@ app.setSerializerCompiler(serializerCompiler)
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
   sign: { expiresIn: '1d' },
+})
+
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1,
+  },
+})
+
+mkdirSync(uploadsDir, { recursive: true })
+
+logger.debug(uploadsDir)
+app.register(fastifyStatic, {
+  prefix: '/covers/',
+  root: uploadsDir,
 })
 
 if (env.PROFILE === 'development') {
