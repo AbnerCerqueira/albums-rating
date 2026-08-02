@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+.env.*
+logs
+uploads/*
+!uploads/default-cover.png
+.git
+.github
+.vscode
+.zed

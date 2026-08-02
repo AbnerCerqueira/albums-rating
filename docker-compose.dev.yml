@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    environment:
+      PROFILE: development
+      LOG_LEVEL: debug
+      MONGODB_URI: mongodb://mongo:27017/albums-rating-dev
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    healthcheck:
+      disable: true
+
+  seed:
+    build:
+      context: .
+      target: development
+    command: ["npm", "run", "seed"]
+    restart: "no"
+    environment:
+      PROFILE: development
+      MONGODB_URI: mongodb://mongo:27017/albums-rating-dev
+    volumes:
+      - ./scripts:/app/scripts
+    depends_on:
+      mongo:
+        condition: service_healthy

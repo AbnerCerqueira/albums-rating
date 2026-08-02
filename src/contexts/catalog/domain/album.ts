@@ -5,7 +5,14 @@ import type { AlbumId } from './value-objects/album-id'
 import type { CoverUrl } from './value-objects/cover-url'
 import type { ReleaseDate } from './value-objects/release-date'
 
-export const FORMATS = ['LP', 'EP', 'Single', 'Compilation', 'Live'] as const
+export const FORMATS = [
+  'LP',
+  'EP',
+  'Single',
+  'Compilation',
+  'Live',
+  'Mixtape',
+] as const
 
 export type Format = (typeof FORMATS)[number]
 
