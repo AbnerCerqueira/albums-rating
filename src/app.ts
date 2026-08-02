@@ -99,9 +99,9 @@ if (env.PROFILE === 'development') {
         },
       },
       info: {
-        description: 'API for music review',
-        title: 'My albums',
-        version: '1.0.0',
+        description: 'API for music reviews',
+        title: 'Album Rating',
+        version: '0.0.0',
       },
       servers: [],
       tags: [
