@@ -52,6 +52,7 @@ describe('Get Popular Albums', () => {
       expect(ourAlbum).toBeDefined()
       expect(ourAlbum).toHaveProperty('artist')
       expect(ourAlbum).toHaveProperty('title')
+      expect(ourAlbum).toHaveProperty('coverUrl')
       expect(ourAlbum).toHaveProperty('publicId')
       expect(ourAlbum).toHaveProperty('averageRating')
       expect(ourAlbum).toHaveProperty('reviewCount')

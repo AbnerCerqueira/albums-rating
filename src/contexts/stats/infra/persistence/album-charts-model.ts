@@ -4,6 +4,7 @@ export type AlbumChartData = {
   albumId: string
   artist: string
   averageRating: number
+  coverUrl: string
   format: string
   genres: string[]
   genreSlugs: string[]
@@ -19,6 +20,7 @@ const albumChartSchema = new Schema<AlbumChartData>(
     albumId: { index: true, required: true, type: String, unique: true },
     artist: { required: true, type: String },
     averageRating: { required: true, type: Number },
+    coverUrl: { required: true, type: String },
     format: { required: true, type: String },
     genreSlugs: [{ type: String }],
     genres: [{ type: String }],

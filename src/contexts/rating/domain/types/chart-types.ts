@@ -14,6 +14,7 @@ export type ChartAlbumRaw = {
   reviewCount: number
   artist: string
   title: string
+  coverUrl: string
   publicId: string
   releaseDate: Date
   format: string

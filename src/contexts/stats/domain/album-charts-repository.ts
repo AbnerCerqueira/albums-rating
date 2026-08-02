@@ -4,6 +4,7 @@ export type AlbumChartEntry = {
   albumId: string
   artist: string
   averageRating: number
+  coverUrl: string
   format: string
   genres: string[]
   genreSlugs: string[]

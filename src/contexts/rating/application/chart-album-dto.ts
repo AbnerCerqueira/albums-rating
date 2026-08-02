@@ -5,6 +5,7 @@ import type { ChartAlbumRaw } from '../domain/types/chart-types'
 export const zodChartAlbumDTO = z.object({
   artist: z.string(),
   averageRating: z.number(),
+  coverUrl: z.string(),
   format: z.enum(FORMATS),
   genres: z.array(z.string()),
   publicId: z.string(),
@@ -19,6 +20,7 @@ function toDTO(raw: ChartAlbumRaw): ChartAlbumDTO {
   return {
     artist: raw.artist,
     averageRating: Number.parseFloat(raw.averageRating.toFixed(2)),
+    coverUrl: raw.coverUrl,
     format: raw.format as ChartAlbumDTO['format'],
     genres: raw.genres,
     publicId: raw.publicId,

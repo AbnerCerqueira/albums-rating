@@ -14,6 +14,7 @@ function toChartAlbumRaw(entry: AlbumChartEntry): ChartAlbumRaw {
   return {
     artist: entry.artist,
     averageRating: entry.averageRating,
+    coverUrl: entry.coverUrl,
     format: entry.format,
     genres: entry.genres,
     publicId: entry.publicId,
