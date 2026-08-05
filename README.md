@@ -320,6 +320,13 @@ O projeto cobre um fluxo completo de ponta a ponta, mas não é uma plataforma p
 | **Auth** | JWT sem refresh/revogação | Refresh token com rotação no contexto `user` |
 | **Observabilidade** | Logs estruturados (Pino) | Métricas (Prometheus) + tracing (OpenTelemetry) |
 | **Deploy** | Docker multi-stage + healthcheck pronto | Orquestração em nuvem (ECS, Cloud Run, etc.) |
+| **Descoberta de artistas** | Nenhuma | Chart de artistas com nota alta mas poucas avaliações |
+| **Árvore de gêneros** | Gêneros como tags planas | Hierarquia de gêneros (derivação, influência) para filtros como "top albums de metalcore com influência em sludge metal" |
+| **Página do artista** | Nenhuma | Bio, localização, discografia e métricas agregadas |
+| **Estatísticas avançadas** | Rankings gerais | Países com mais artistas avaliados por usuário, relatórios mensais de atividade na plataforma |
+| **Comentários** | Apenas reviews (nota + texto) | Seção de comentários em álbuns, conversa leve sem rigidez de review |
+| **Listas** | Nenhuma | Criação e compartilhamento de listas curadas ("top 10 do ano", "essenciais de metal") |
+| **Chat** | Nenhum | Chat em tempo real entre amigos dentro da plataforma |
 
 ---
 
