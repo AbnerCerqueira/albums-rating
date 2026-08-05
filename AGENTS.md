@@ -49,13 +49,17 @@ Contextos existentes:
 - `user`: usuários
 - `catalog`: álbuns
 - `rating`: reviews
-- `common`: utilitários compartilhados
+- `stats`: rankings (cache materializado + job)
+- `shared`: conceitos de domínio compartilhados entre contextos (`PublicId`, projeções de chart, contadores de review)
+- `!common`: apenas utilitários (`result`, `errors`, `pagination`, `slugify`, `event-bus`...)
 
 Estrutura de cada contexto:
 
 - domain/
 - application/
 - infra/
+
+`shared` e `!common` não seguem essa estrutura de camadas: são bibliotecas sem dependência de outros contextos, consumíveis por qualquer um deles.
 
 Regra de dependência: a dependência aponta para dentro.
 
@@ -91,7 +95,7 @@ Regra de dependência: a dependência aponta para dentro.
 
 Gateway é a ponte entre contextos: permite que um contexto consuma dados de outro sem conhecer o repositório ou as entidades do provedor.
 
-- A interface (porta) vive no `domain` do **contexto consumidor** (`{consumidor}/domain/gateways/*-gateway.ts`) e usa apenas tipos do próprio contexto + `common` (`PublicId`, `Result`, erros).
+- A interface (porta) vive no `domain` do **contexto consumidor** (`{consumidor}/domain/gateways/*-gateway.ts`) e usa apenas tipos do próprio contexto + `shared`/`!common` (`PublicId`, `Result`, erros, projeções compartilhadas).
 - A implementação (adapter) vive no `infra` do **contexto provedor** (`{provedor}/infra/gateways/*-gateway.ts`), recebendo somente repositórios do próprio provedor.
 - O contrato retorna DTOs mínimos do consumidor — nunca entidades do provedor. Se o consumidor só precisa do ID, retorne `Result<{ id }>, NotFoundError`.
 - O provedor expõe o adapter pelo seu `compose.ts`; o consumidor injeta nos use-cases (nunca importa o repositório do provedor).

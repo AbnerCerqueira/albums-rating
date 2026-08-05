@@ -232,7 +232,8 @@ Organizada em **contextos de negócio**, cada um com as camadas `domain` → `ap
 ```text
 src/
 ├── contexts/
-│   ├── !common/            # Result, erros, paginação, event bus, value objects
+│   ├── !common/            # apenas utilitários: Result, erros, paginação, event bus, slugify
+│   ├── shared/             # conceitos de domínio compartilhados: PublicId, projeções de chart, contadores de review
 │   ├── user/               # usuários e autenticação
 │   ├── catalog/            # álbuns, gêneros e capas
 │   ├── rating/             # reviews
@@ -249,6 +250,7 @@ src/
 Principais decisões de design:
 
 - **Ports & adapters entre contextos**: o contexto `rating` consome `user`, `catalog` e `stats` somente através de *gateways*: interfaces definidas no domain do consumidor, implementadas no infra do provedor, retornando apenas DTOs mínimos (IDs). Nenhum contexto importa repositório ou entidade de outro.
+- **Conceitos de domínio compartilhados em `shared`**: projeções de ranking (`ChartAlbumProjection`) e contadores de reviews (`AlbumReviewCounts`) não são duplicados entre `stats` e `rating`/`catalog`; vivem num único lugar consumível por todos os contextos, enquanto `!common` guarda apenas utilitários (Result, erros, paginação).
 - **Entidades imutáveis**: métodos como `Review.edit()` retornam uma nova instância em vez de mutar o estado, tornando o comportamento previsível e testável.
 - **Value objects com regras próprias**: `Rating` só aceita 0 a 5 em passos de 0.5; IDs compostos (`UserId` = email + username, `AlbumId` = artista + título) eliminam consultas de verificação duplicadas.
 - **Erros previsíveis retornam `Result`**: validação, 404, 409, 403 nunca lançam exceção. Além de deixar o fluxo de erro explícito e tipado, essa escolha tem um ganho direto de performance: exceções no Node.js quebram as otimizações da V8, então o `Result` evita o custo de lançar exceções em fluxos que são esperados e frequentes. Erros imprevisíveis passam por error handler global com log estruturado.
