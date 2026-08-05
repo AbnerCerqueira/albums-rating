@@ -1,44 +1,21 @@
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
-
-export type AlbumChartEntry = {
-  albumId: string
-  artist: string
-  averageRating: number
-  coverUrl: string
-  format: string
-  genres: string[]
-  genreSlugs: string[]
-  publicId: string
-  releaseDate: Date
-  reviewCount: number
-  title: string
-  weightedScore: number
-}
-
-export type AlbumReviewCountByPublicId = {
-  publicId: string
-  reviewCount: number
-  averageRating: number
-}
-
-export type AlbumChartFilters = {
-  from?: number
-  to?: number
-  genre?: string
-  format?: string
-}
+import type { AlbumReviewCounts } from '@/contexts/shared/album-review-counts'
+import type {
+  ChartAlbumProjection,
+  ChartFilters,
+} from '@/contexts/shared/chart-types'
 
 export interface AlbumChartsRepository {
   findMostReviewed: (
-    filters: AlbumChartFilters,
+    filters: ChartFilters,
     pagination?: Pagination
-  ) => Promise<PaginatedResult<AlbumChartEntry>>
+  ) => Promise<PaginatedResult<ChartAlbumProjection>>
   findReviewCountsByPublicIds: (
     publicIds: string[]
-  ) => Promise<AlbumReviewCountByPublicId[]>
+  ) => Promise<AlbumReviewCounts>
   findTopRated: (
-    filters: AlbumChartFilters,
+    filters: ChartFilters,
     pagination?: Pagination
-  ) => Promise<PaginatedResult<AlbumChartEntry>>
+  ) => Promise<PaginatedResult<ChartAlbumProjection>>
   refreshAll: () => Promise<void>
 }

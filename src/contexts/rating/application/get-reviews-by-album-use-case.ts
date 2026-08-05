@@ -1,7 +1,7 @@
 import type { NotFoundError } from '@/contexts/!common/errors'
 import type { Pagination } from '@/contexts/!common/pagination'
-import type { PublicId } from '@/contexts/!common/public-id'
 import { ok, type Result } from '@/contexts/!common/result'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { AlbumGateway } from '../domain/gateways/album-gateway'
 import type { ReviewRepository } from '../domain/review-repository'
 import { type ReviewDTO, ReviewDTOMapper } from './review-dto'

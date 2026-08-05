@@ -1,6 +1,6 @@
 import type { NotFoundError } from '@/contexts/!common/errors'
-import type { PublicId } from '@/contexts/!common/public-id'
 import type { Result } from '@/contexts/!common/result'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 
 export type UserRef = {

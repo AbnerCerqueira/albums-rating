@@ -2,13 +2,13 @@ import { escapeRegExp } from 'lodash'
 import type { FilterQuery } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
-import type { PublicId } from '@/contexts/!common/public-id'
 import type { Album } from '@/contexts/catalog/domain/album'
 import type {
   AlbumRepository,
   SearchAlbumParams,
 } from '@/contexts/catalog/domain/album-repository'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
+import type { PublicId } from '@/contexts/shared/public-id'
 import { AlbumMapper } from './album-mapper'
 import { type AlbumData, AlbumModel } from './album-model'
 import { GenreMapper } from './genre-mapper'

@@ -1,4 +1,4 @@
-import { PublicId } from '@/contexts/!common/public-id'
+import { PublicId } from '@/contexts/shared/public-id'
 import type { GenreId } from './value-objects/genre-id'
 import type { GenreName } from './value-objects/genre-name'
 

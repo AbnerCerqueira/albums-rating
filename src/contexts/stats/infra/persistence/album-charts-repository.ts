@@ -1,12 +1,12 @@
 import mongoose, { type FilterQuery, type PipelineStage } from 'mongoose'
 import { MongooseUtils } from '@/contexts/!common/mongoose-utils'
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
+import { AlbumReviewCounts } from '@/contexts/shared/album-review-counts'
 import type {
-  AlbumChartEntry,
-  AlbumChartFilters,
-  AlbumChartsRepository,
-  AlbumReviewCountByPublicId,
-} from '../../domain/album-charts-repository'
+  ChartAlbumProjection,
+  ChartFilters,
+} from '@/contexts/shared/chart-types'
+import type { AlbumChartsRepository } from '../../domain/album-charts-repository'
 import { type AlbumChartData, AlbumChartModel } from './album-charts-model'
 import {
   type AlbumChartSourceReview,
@@ -90,7 +90,7 @@ function buildRefreshPipeline(): PipelineStage[] {
   ]
 }
 
-function buildQuery(filters: AlbumChartFilters): FilterQuery<AlbumChartData> {
+function buildQuery(filters: ChartFilters): FilterQuery<AlbumChartData> {
   const query: FilterQuery<AlbumChartData> = {}
 
   if (filters.format) {
@@ -114,7 +114,7 @@ function buildQuery(filters: AlbumChartFilters): FilterQuery<AlbumChartData> {
   return query
 }
 
-function toEntry(data: AlbumChartData): AlbumChartEntry {
+function toEntry(data: AlbumChartData): ChartAlbumProjection {
   return {
     albumId: data.albumId,
     artist: data.artist,
@@ -143,18 +143,18 @@ export class MongooseAlbumChartsRepository implements AlbumChartsRepository {
   }
 
   findTopRated(
-    filters: AlbumChartFilters,
+    filters: ChartFilters,
     pagination?: Pagination
-  ): Promise<PaginatedResult<AlbumChartEntry>> {
+  ): Promise<PaginatedResult<ChartAlbumProjection>> {
     const query = buildQuery(filters)
     const sort = { weightedScore: -1 } as const
     return this.findWithPagination(query, sort, pagination)
   }
 
   findMostReviewed(
-    filters: AlbumChartFilters,
+    filters: ChartFilters,
     pagination?: Pagination
-  ): Promise<PaginatedResult<AlbumChartEntry>> {
+  ): Promise<PaginatedResult<ChartAlbumProjection>> {
     const query = buildQuery(filters)
     const sort = { reviewCount: -1 } as const
     return this.findWithPagination(query, sort, pagination)
@@ -162,9 +162,9 @@ export class MongooseAlbumChartsRepository implements AlbumChartsRepository {
 
   async findReviewCountsByPublicIds(
     publicIds: string[]
-  ): Promise<AlbumReviewCountByPublicId[]> {
+  ): Promise<AlbumReviewCounts> {
     if (publicIds.length === 0) {
-      return []
+      return AlbumReviewCounts.fromRecord({})
     }
 
     const docs = await this.model
@@ -174,18 +174,21 @@ export class MongooseAlbumChartsRepository implements AlbumChartsRepository {
       )
       .lean()
 
-    return docs.map((doc) => ({
-      averageRating: doc.averageRating,
-      publicId: doc.publicId,
-      reviewCount: doc.reviewCount,
-    }))
+    const record = Object.fromEntries(
+      docs.map((doc) => [
+        doc.publicId,
+        { averageRating: doc.averageRating, reviewCount: doc.reviewCount },
+      ])
+    )
+
+    return AlbumReviewCounts.fromRecord(record)
   }
 
   private async findWithPagination(
     query: FilterQuery<AlbumChartData>,
     sort: Record<string, 1 | -1>,
     pagination?: Pagination
-  ): Promise<PaginatedResult<AlbumChartEntry>> {
+  ): Promise<PaginatedResult<ChartAlbumProjection>> {
     const result = await MongooseUtils.paginateFind<AlbumChartData>(
       this.model,
       query,

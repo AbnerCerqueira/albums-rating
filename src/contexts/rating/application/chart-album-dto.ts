@@ -1,6 +1,6 @@
 import z from 'zod'
 import { FORMATS } from '@/contexts/catalog/domain/album'
-import type { ChartAlbumRaw } from '../domain/types/chart-types'
+import type { ChartAlbumProjection } from '@/contexts/shared/chart-types'
 
 export const zodChartAlbumDTO = z.object({
   artist: z.string(),
@@ -16,7 +16,7 @@ export const zodChartAlbumDTO = z.object({
 
 export type ChartAlbumDTO = z.infer<typeof zodChartAlbumDTO>
 
-function toDTO(raw: ChartAlbumRaw): ChartAlbumDTO {
+function toDTO(raw: ChartAlbumProjection): ChartAlbumDTO {
   return {
     artist: raw.artist,
     averageRating: Number.parseFloat(raw.averageRating.toFixed(2)),

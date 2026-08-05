@@ -1,4 +1,3 @@
-import { PublicId } from '@/contexts/!common/public-id'
 import { Album } from '@/contexts/catalog/domain/album'
 import type { SearchAlbumParams } from '@/contexts/catalog/domain/album-repository'
 import type { Genre } from '@/contexts/catalog/domain/genre'
@@ -7,6 +6,7 @@ import { Artist } from '@/contexts/catalog/domain/value-objects/artist'
 import { CoverUrl } from '@/contexts/catalog/domain/value-objects/cover-url'
 import { ReleaseDate } from '@/contexts/catalog/domain/value-objects/release-date'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
+import { PublicId } from '@/contexts/shared/public-id'
 import type { AlbumData } from './album-model'
 
 type AlbumDataFields = Omit<AlbumData, 'genres'>

@@ -1,6 +1,6 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import { PublicId } from '@/contexts/!common/public-id'
+import { PublicId } from '@/contexts/shared/public-id'
 import { HttpStatus } from '@/infra/http/http-status'
 import { InfraSchemaUtils } from '@/infra/http/schemas'
 import { tags } from '@/infra/http/tags'

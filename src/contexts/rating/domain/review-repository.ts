@@ -1,6 +1,6 @@
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
-import type { PublicId } from '@/contexts/!common/public-id'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import type { Review } from './review'
 import type { ReviewId } from './value-objects/review-id'

@@ -1,9 +1,9 @@
-import { PublicId } from '@/contexts/!common/public-id'
 import { Review } from '@/contexts/rating/domain/review'
 import { Rating } from '@/contexts/rating/domain/value-objects/rating'
 import { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
 import { ReviewText } from '@/contexts/rating/domain/value-objects/review-text'
 import { ReviewedAt } from '@/contexts/rating/domain/value-objects/reviewed-at'
+import { PublicId } from '@/contexts/shared/public-id'
 import {
   createTestAlbumId,
   createTestUserId,

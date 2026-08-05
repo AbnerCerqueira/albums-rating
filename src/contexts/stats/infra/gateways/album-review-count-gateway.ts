@@ -1,8 +1,6 @@
-import type { PublicId } from '@/contexts/!common/public-id'
-import type {
-  AlbumReviewCountGateway,
-  AlbumReviewCounts,
-} from '@/contexts/catalog/domain/gateways/album-review-count-gateway'
+import type { AlbumReviewCountGateway } from '@/contexts/catalog/domain/gateways/album-review-count-gateway'
+import type { AlbumReviewCounts } from '@/contexts/shared/album-review-counts'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { AlbumChartsRepository } from '../../domain/album-charts-repository'
 
 export class MongooseAlbumReviewCountGateway
@@ -10,19 +8,9 @@ export class MongooseAlbumReviewCountGateway
 {
   constructor(private readonly albumChartsRepository: AlbumChartsRepository) {}
 
-  async findCountsByPublicIds(
-    publicIds: PublicId[]
-  ): Promise<AlbumReviewCounts> {
-    const entries =
-      await this.albumChartsRepository.findReviewCountsByPublicIds(
-        publicIds.map((publicId) => publicId.value)
-      )
-
-    return Object.fromEntries(
-      entries.map((entry) => [
-        entry.publicId,
-        { averageRating: entry.averageRating, reviewCount: entry.reviewCount },
-      ])
+  findCountsByPublicIds(publicIds: PublicId[]): Promise<AlbumReviewCounts> {
+    return this.albumChartsRepository.findReviewCountsByPublicIds(
+      publicIds.map((publicId) => publicId.value)
     )
   }
 }

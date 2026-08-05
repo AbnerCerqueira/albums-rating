@@ -1,10 +1,10 @@
 import { NotFoundError } from '@/contexts/!common/errors'
-import type { PublicId } from '@/contexts/!common/public-id'
 import { err, ok, type Result } from '@/contexts/!common/result'
 import type {
   UserGateway,
   UserRef,
 } from '@/contexts/rating/domain/gateways/user-gateway'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { UserRepository } from '../../domain/user-repository'
 import { Username } from '../../domain/value-objects/username'
 

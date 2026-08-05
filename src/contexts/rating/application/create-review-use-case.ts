@@ -4,8 +4,8 @@ import type {
   InvalidArgumentError,
   NotFoundError,
 } from '@/contexts/!common/errors'
-import { PublicId } from '@/contexts/!common/public-id'
 import { ok, type Result } from '@/contexts/!common/result'
+import { PublicId } from '@/contexts/shared/public-id'
 import type { AlbumGateway } from '../domain/gateways/album-gateway'
 import type { UserGateway } from '../domain/gateways/user-gateway'
 import { Review } from '../domain/review'

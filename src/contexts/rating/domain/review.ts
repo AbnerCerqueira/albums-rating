@@ -1,6 +1,6 @@
 import { ForbiddenError } from '@/contexts/!common/errors'
-import { PublicId } from '@/contexts/!common/public-id'
 import { err, ok, type Result } from '@/contexts/!common/result'
+import { PublicId } from '@/contexts/shared/public-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import type { Rating } from './value-objects/rating'
 import type { ReviewId } from './value-objects/review-id'

@@ -1,4 +1,4 @@
-import type { PublicId } from '@/contexts/!common/public-id'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { User } from '@/contexts/user/domain/user'
 import type { Email } from '@/contexts/user/domain/value-objects/email'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'

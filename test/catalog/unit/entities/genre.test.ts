@@ -1,8 +1,8 @@
-import { PublicId } from '@/contexts/!common/public-id'
 import { unwrap } from '@/contexts/!common/result'
 import { Genre } from '@/contexts/catalog/domain/genre'
 import { GenreId } from '@/contexts/catalog/domain/value-objects/genre-id'
 import { GenreName } from '@/contexts/catalog/domain/value-objects/genre-name'
+import { PublicId } from '@/contexts/shared/public-id'
 import { GENRE, GENRE_SLUG } from '../fixtures'
 
 describe('Genre', () => {

@@ -5,7 +5,6 @@ import {
   type PaginatedResult,
   type Pagination,
 } from '@/contexts/!common/pagination'
-import type { PublicId } from '@/contexts/!common/public-id'
 import type { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
 import { AlbumMapper } from '@/contexts/catalog/infra/persistence/album-mapper'
 import type { AlbumData } from '@/contexts/catalog/infra/persistence/album-model'
@@ -13,6 +12,7 @@ import { GenreMapper } from '@/contexts/catalog/infra/persistence/genre-mapper'
 import type { Review } from '@/contexts/rating/domain/review'
 import type { ReviewRepository } from '@/contexts/rating/domain/review-repository'
 import type { ReviewId } from '@/contexts/rating/domain/value-objects/review-id'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { UserId } from '@/contexts/user/domain/value-objects/user-id'
 import { UserMapper } from '@/contexts/user/infra/persistence/user-mapper'
 import type { UserData } from '@/contexts/user/infra/persistence/user-model'

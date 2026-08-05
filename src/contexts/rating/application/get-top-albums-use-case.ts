@@ -1,11 +1,11 @@
 import type { EventBus } from '@/contexts/!common/event-bus'
 import { DomainEvents } from '@/contexts/!common/event-bus'
 import type { Pagination } from '@/contexts/!common/pagination'
+import type { ChartFilters } from '@/contexts/shared/chart-types'
 import type { ChartCacheGateway } from '../domain/gateways/chart-cache-gateway'
-import type { TopRatedFilters } from '../domain/types/chart-types'
 import { type ChartAlbumDTO, ChartAlbumDTOMapper } from './chart-album-dto'
 
-export type GetTopAlbumsUseCaseRequest = TopRatedFilters & {
+export type GetTopAlbumsUseCaseRequest = ChartFilters & {
   pagination?: Pagination
 }
 

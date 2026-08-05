@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs'
 import mongoose from 'mongoose'
-import { PublicId } from '../src/contexts/!common/public-id'
 import { slugify } from '../src/contexts/!common/slugify'
 import { Album } from '../src/contexts/catalog/domain/album'
 import { Genre } from '../src/contexts/catalog/domain/genre'
@@ -19,6 +18,7 @@ import { Rating } from '../src/contexts/rating/domain/value-objects/rating'
 import { ReviewId } from '../src/contexts/rating/domain/value-objects/review-id'
 import { ReviewedAt } from '../src/contexts/rating/domain/value-objects/reviewed-at'
 import { MongooseReviewRepository } from '../src/contexts/rating/infra/persistence/review-repository'
+import { PublicId } from '../src/contexts/shared/public-id'
 import { Email } from '../src/contexts/user/domain/value-objects/email'
 import { UserId } from '../src/contexts/user/domain/value-objects/user-id'
 import { Username } from '../src/contexts/user/domain/value-objects/username'
@@ -221,7 +221,7 @@ async function seedAlbumsAndReviews(
 }
 
 function randomRating(): number {
-  const mean = 3.6
+  const mean = 3.7
   const stdDev = 0.7
 
   const u1 = Math.random()

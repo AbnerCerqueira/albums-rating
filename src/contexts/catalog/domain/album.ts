@@ -1,5 +1,5 @@
-import { PublicId } from '@/contexts/!common/public-id'
 import { slugify } from '@/contexts/!common/slugify'
+import { PublicId } from '@/contexts/shared/public-id'
 import type { Genre } from './genre'
 import type { AlbumId } from './value-objects/album-id'
 import type { CoverUrl } from './value-objects/cover-url'

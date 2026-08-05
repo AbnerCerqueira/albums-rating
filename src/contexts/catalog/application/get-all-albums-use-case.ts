@@ -31,10 +31,7 @@ export class GetAllAlbumsUseCase {
 
     return {
       albums: result.items.map((a) =>
-        AlbumDTOMapper.toDTO(
-          a,
-          reviewCounts[a.publicId.value] ?? { averageRating: 0, reviewCount: 0 }
-        )
+        AlbumDTOMapper.toDTO(a, reviewCounts.forPublicId(a.publicId))
       ),
       currentPage: result.currentPage,
       size: result.size,

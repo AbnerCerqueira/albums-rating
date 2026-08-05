@@ -1,5 +1,5 @@
 import type { PaginatedResult, Pagination } from '@/contexts/!common/pagination'
-import type { PublicId } from '@/contexts/!common/public-id'
+import type { PublicId } from '@/contexts/shared/public-id'
 import type { Album } from './album'
 import type { AlbumId } from './value-objects/album-id'
 

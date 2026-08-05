@@ -1,4 +1,3 @@
-import { PublicId } from '@/contexts/!common/public-id'
 import { Album, FORMATS } from '@/contexts/catalog/domain/album'
 import { Genre } from '@/contexts/catalog/domain/genre'
 import { AlbumId } from '@/contexts/catalog/domain/value-objects/album-id'
@@ -7,6 +6,7 @@ import { CoverUrl } from '@/contexts/catalog/domain/value-objects/cover-url'
 import { GenreName } from '@/contexts/catalog/domain/value-objects/genre-name'
 import { ReleaseDate } from '@/contexts/catalog/domain/value-objects/release-date'
 import { Title } from '@/contexts/catalog/domain/value-objects/title'
+import { PublicId } from '@/contexts/shared/public-id'
 import { ARTIST, FORMAT, GENRE, RELEASE_DATE, TITLE } from '../fixtures'
 import { createAlbum, createGenre } from '../helpers'
 
